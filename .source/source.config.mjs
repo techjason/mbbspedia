@@ -156,7 +156,12 @@ function remarkCitations() {
 
 // source.config.ts
 var docs = defineDocs({
-  dir: "content/docs"
+  dir: "content/docs",
+  docs: {
+    postprocess: {
+      includeProcessedMarkdown: true
+    }
+  }
 });
 var source_config_default = defineConfig({
   mdxOptions: {
