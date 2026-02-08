@@ -5,6 +5,7 @@ import { Mermaid } from "./components/mdx/mermaid";
 import { ActiveRecallQuiz } from "./components/mdx/active-recall-quiz";
 import { Cite, References } from "./components/mdx/citations";
 import { ImageZoom } from "./components/image-zoom";
+import { DiagramCard, DiagramGallery } from "./components/mdx/diagram-card";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -15,6 +16,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ActiveRecallQuiz,
     Cite,
     References,
+    DiagramCard,
+    DiagramGallery,
     ...TabsComponents,
     ...components,
   };
