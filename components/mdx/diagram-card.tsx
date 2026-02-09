@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Zoom from "react-medium-image-zoom";
 import "../../styles/image-zoom.css";
 
@@ -15,19 +16,15 @@ type DiagramCardProps = {
 export function DiagramCard({ src, alt, caption }: DiagramCardProps) {
   return (
     <figure className="not-prose my-4 inline-block">
-      <Zoom
-        zoomMargin={20}
-        wrapElement="span"
-        zoomImg={{ src }}
-      >
+      <Zoom zoomMargin={20} wrapElement="span" zoomImg={{ src }}>
         <div className="group w-[140px] cursor-zoom-in overflow-hidden rounded-lg border border-fd-border bg-fd-card shadow-sm transition-shadow hover:shadow-md">
           <div className="flex items-center justify-center bg-fd-muted/40 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt={alt ?? caption ?? "Diagram"}
+              width={560}
+              height={400}
               className="h-[100px] w-auto object-contain"
-              loading="lazy"
             />
           </div>
           {caption && (
@@ -48,9 +45,5 @@ type DiagramGalleryProps = {
 };
 
 export function DiagramGallery({ children }: DiagramGalleryProps) {
-  return (
-    <div className="not-prose my-4 flex flex-wrap gap-3">
-      {children}
-    </div>
-  );
+  return <div className="not-prose my-4 flex flex-wrap gap-3">{children}</div>;
 }
