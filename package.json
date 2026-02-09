@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "npm run search:sync:cloud:if-configured",
     "start": "next start",
     "lint": "eslint",
+    "search:sync:cloud": "node scripts/sync-content.mjs",
+    "search:sync:cloud:if-configured": "node scripts/sync-content.mjs --if-configured",
     "index:rag": "node scripts/index-rag.mjs",
     "index:rag:psychiatry": "node scripts/index-rag.mjs --psychiatry",
     "generate:notes": "node scripts/generate-notes.mjs",
@@ -15,6 +18,8 @@
   },
   "dependencies": {
     "@ai-sdk/devtools": "^0.0.12",
+    "@orama/core": "^1.2.17",
+    "@oramacloud/client": "^2.1.4",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-presence": "^1.1.5",

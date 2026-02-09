@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
-import { RootProvider } from "fumadocs-ui/provider/next";
 import { source } from "@/lib/source";
 import { DocsLayout } from "fumadocs-ui/layouts/notebook";
 import { baseOptions } from "@/lib/layout.shared";
-import { SearchWarmup } from "@/components/layout/search-warmup";
+import { Provider } from "@/components/provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,15 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <RootProvider
-          search={{
-            options: {
-              api: "/api/search",
-              delayMs: 180,
-            },
-          }}
-        >
-          <SearchWarmup />
+        <Provider>
           <DocsLayout
             {...base}
             nav={{ ...nav, mode: "top" }}
@@ -51,7 +42,7 @@ export default function RootLayout({
           >
             {children}
           </DocsLayout>
-        </RootProvider>
+        </Provider>
       </body>
     </html>
   );
