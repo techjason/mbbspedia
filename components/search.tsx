@@ -14,37 +14,40 @@ import {
 } from "fumadocs-ui/components/dialog/search";
 import { useDocsSearch } from "fumadocs-core/search/client";
 import { useI18n } from "fumadocs-ui/contexts/i18n";
-import { OramaClient } from "@oramacloud/client";
+import Mixedbread from "@mixedbread/sdk";
 import { useMemo, useState } from "react";
 
-const oramaEndpoint =
-  process.env.NEXT_PUBLIC_ORAMA_ENDPOINT ??
-  process.env.NEXT_PUBLIC_ORAMA_API_ENDPOINT;
-const oramaPublicApiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
-const cloudConfigured = Boolean(oramaEndpoint && oramaPublicApiKey);
+const mixedbreadApiKey = process.env.NEXT_PUBLIC_MIXEDBREAD_API_KEY;
+const mixedbreadStoreIdentifier =
+  process.env.NEXT_PUBLIC_MIXEDBREAD_STORE_IDENTIFIER;
+const mixedbreadBaseUrl = process.env.NEXT_PUBLIC_MIXEDBREAD_BASE_URL;
+const mixedbreadConfigured = Boolean(
+  mixedbreadApiKey && mixedbreadStoreIdentifier,
+);
 
 export default function DocsSearchDialog(props: SharedProps) {
-  if (!cloudConfigured) {
+  if (!mixedbreadConfigured) {
     return <MissingConfigSearchDialog {...props} />;
   }
 
-  return <OramaCloudSearchDialog {...props} />;
+  return <MixedbreadSearchDialog {...props} />;
 }
 
-function OramaCloudSearchDialog(props: SharedProps) {
+function MixedbreadSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
   const client = useMemo(
     () =>
-      new OramaClient({
-        endpoint: oramaEndpoint!,
-        api_key: oramaPublicApiKey!,
+      new Mixedbread({
+        apiKey: mixedbreadApiKey!,
+        ...(mixedbreadBaseUrl ? { baseURL: mixedbreadBaseUrl } : {}),
       }),
     [],
   );
 
   const { search, setSearch, query } = useDocsSearch({
-    type: "orama-cloud-legacy",
+    type: "mixedbread",
     client,
+    storeIdentifier: mixedbreadStoreIdentifier!,
     locale,
   });
 
@@ -65,16 +68,17 @@ function OramaCloudSearchDialog(props: SharedProps) {
         <SearchDialogList items={query.data !== "empty" ? query.data : null} />
         {query.error && (
           <div className="px-3 pb-2 text-xs text-red-400">
-            Search request failed. Verify Orama endpoint and public API key.
+            Search request failed. Verify Mixedbread API key and store
+            identifier.
           </div>
         )}
         <SearchDialogFooter>
           <a
-            href="https://orama.com"
+            href="https://mixedbread.com"
             rel="noreferrer noopener"
             className="ms-auto text-xs text-fd-muted-foreground"
           >
-            Search powered by Orama
+            Search powered by Mixedbread
           </a>
         </SearchDialogFooter>
       </SearchDialogContent>
@@ -100,9 +104,9 @@ function MissingConfigSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <div className="p-3 text-sm text-fd-muted-foreground">
-          Search is not configured. Set <code>NEXT_PUBLIC_ORAMA_ENDPOINT</code>{" "}
-          (or <code>NEXT_PUBLIC_ORAMA_API_ENDPOINT</code>) and{" "}
-          <code>NEXT_PUBLIC_ORAMA_API_KEY</code>.
+          Search is not configured. Set{" "}
+          <code>NEXT_PUBLIC_MIXEDBREAD_API_KEY</code> and{" "}
+          <code>NEXT_PUBLIC_MIXEDBREAD_STORE_IDENTIFIER</code>.
         </div>
       </SearchDialogContent>
     </SearchDialog>

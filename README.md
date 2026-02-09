@@ -55,15 +55,20 @@ npm run build
 npm run start
 ```
 
-### Orama Cloud Search
+### Mixedbread Search
 
-Search is configured to use Orama Cloud when the following environment
+Search is configured to use Mixedbread when the following environment
 variables are available:
 
-- `NEXT_PUBLIC_ORAMA_ENDPOINT` (or `NEXT_PUBLIC_ORAMA_API_ENDPOINT`)
-- `NEXT_PUBLIC_ORAMA_API_KEY`
+- `NEXT_PUBLIC_MIXEDBREAD_API_KEY`
+- `NEXT_PUBLIC_MIXEDBREAD_STORE_IDENTIFIER`
+- `NEXT_PUBLIC_MIXEDBREAD_BASE_URL` (optional)
 
-Indexing/import is managed from the Orama Cloud dashboard (website importer).
+To upload docs and fragments from repo root:
+
+```bash
+mxbai store upload "mbbspedia" "content/**/*.mdx" --strategy high_quality
+```
 
 ### Lint
 
