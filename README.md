@@ -60,9 +60,12 @@ npm run start
 Search is configured to use Mixedbread when the following environment
 variables are available:
 
-- `NEXT_PUBLIC_MIXEDBREAD_API_KEY`
-- `NEXT_PUBLIC_MIXEDBREAD_STORE_IDENTIFIER`
-- `NEXT_PUBLIC_MIXEDBREAD_BASE_URL` (optional)
+- `MIXEDBREAD_API_KEY`
+- `MIXEDBREAD_STORE_IDENTIFIER`
+- `MIXEDBREAD_BASE_URL` (optional)
+
+The UI calls `/api/search`, and the server route queries Mixedbread to avoid
+browser CORS issues and keep API keys server-side.
 
 To upload docs and fragments from repo root:
 

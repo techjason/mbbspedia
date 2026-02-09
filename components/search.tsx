@@ -13,17 +13,14 @@ import {
   type SharedProps,
 } from "fumadocs-ui/components/dialog/search";
 import { useDocsSearch } from "fumadocs-core/search/client";
-import Mixedbread from "@mixedbread/sdk";
+import { useI18n } from "fumadocs-ui/contexts/i18n";
 
-const client = new Mixedbread({
-  apiKey: "mxb_1vpIdtFtGs5QlERPO2lE5pRmEKhU",
-});
-
-export default function CustomSearchDialog(props: SharedProps) {
+export default function DocsSearchDialog(props: SharedProps) {
+  const { locale } = useI18n();
   const { search, setSearch, query } = useDocsSearch({
-    type: "mixedbread",
-    client,
-    storeIdentifier: "14886eaf-04e9-4bdd-a2c4-1ec2a099735e",
+    type: "fetch",
+    api: "/api/search",
+    locale,
   });
 
   return (
@@ -41,13 +38,19 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList items={query.data !== "empty" ? query.data : null} />
+        {query.error && (
+          <div className="px-3 pb-2 text-xs text-red-400">
+            Search request failed. Verify <code>MIXEDBREAD_API_KEY</code> and{" "}
+            <code>MIXEDBREAD_STORE_IDENTIFIER</code> on the server.
+          </div>
+        )}
         <SearchDialogFooter>
           <a
             href="https://mixedbread.com"
             rel="noreferrer noopener"
             className="ms-auto text-xs text-fd-muted-foreground"
           >
-            Search powered by Mixedbread AI
+            Search powered by Mixedbread
           </a>
         </SearchDialogFooter>
       </SearchDialogContent>
