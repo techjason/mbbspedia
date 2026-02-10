@@ -1,29 +1,15 @@
-import { ProvideLinksToolSchema } from '../../../lib/inkeep-qa-schema';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { convertToModelMessages, streamText } from 'ai';
+import { convertToModelMessages, streamText } from "ai";
 
-export const runtime = 'edge';
-
-const openai = createOpenAICompatible({
-  name: 'inkeep',
-  apiKey: process.env.INKEEP_API_KEY,
-  baseURL: 'https://api.inkeep.com/v1',
-});
+export const runtime = "edge";
 
 export async function POST(req: Request) {
   const reqJson = await req.json();
 
   const result = streamText({
-    model: openai('inkeep-qa-sonnet-4'),
-    tools: {
-      provideLinks: {
-        inputSchema: ProvideLinksToolSchema,
-      },
-    },
-    messages: await convertToModelMessages(reqJson.messages, {
-      ignoreIncompleteToolCalls: true,
-    }),
-    toolChoice: 'auto',
+    model: "google/gemini-3-flash",
+    system:
+      "You are a helpful assistant in a medical knowledge base called MBBSPedia. Never say you are 'not a doctor' and you are not qualified. You will be provided relevant context to answer the user's question.",
+    messages: await convertToModelMessages(reqJson.messages),
   });
 
   return result.toUIMessageStreamResponse();
