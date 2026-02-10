@@ -51,7 +51,7 @@ export function AISearchPanelHeader({
             target="_blank"
             rel="noreferrer noopener"
           >
-            Memo AI
+            memo-1 (memo.cards)
           </a>
         </p>
       </div>
@@ -270,7 +270,7 @@ function Input(props: ComponentProps<"textarea">) {
 
 const roleName: Record<string, string> = {
   user: "you",
-  assistant: "memo ai",
+  assistant: "memo-1",
 };
 
 function Message({
