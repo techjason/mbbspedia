@@ -1,5 +1,12 @@
 import { source } from "@/lib/source";
-import Mixedbread from "@mixedbread/sdk";
+import {
+  asRecord,
+  firstString,
+  humanizeFilename,
+  normalizeFsPath,
+  stripDocExt,
+} from "@/lib/mixedbread/chunk-utils";
+import { getMixedbreadClient } from "@/lib/mixedbread/client";
 import type { SortedResult } from "fumadocs-core/search/server";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -41,16 +48,7 @@ for (const page of pageInfos) {
   docsBasenameToPages.set(basename, list);
 }
 
-let cachedClient: Mixedbread | null = null;
 let fragmentToPageUrlMapPromise: Promise<Map<string, string>> | null = null;
-
-function normalizeFsPath(value: string): string {
-  return value.replace(/\\/g, "/");
-}
-
-function stripDocExt(value: string): string {
-  return value.replace(/\.(md|mdx)$/i, "");
-}
 
 function docStemFromPagePath(pagePath: string): string {
   let stem = stripDocExt(normalizeFsPath(pagePath));
@@ -59,41 +57,6 @@ function docStemFromPagePath(pagePath: string): string {
   return stem;
 }
 
-function getRequiredEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing required environment variable: ${name}`);
-  return value;
-}
-
-function getClient(): Mixedbread {
-  if (cachedClient) return cachedClient;
-
-  const apiKey = getRequiredEnv("MIXEDBREAD_API_KEY");
-  const baseURL = process.env.MIXEDBREAD_BASE_URL;
-
-  cachedClient = new Mixedbread({
-    apiKey,
-    ...(baseURL ? { baseURL } : {}),
-  });
-
-  return cachedClient;
-}
-
-function asRecord(value: unknown): Record<string, unknown> {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-
-  return {};
-}
-
-function firstString(...values: unknown[]): string | undefined {
-  for (const value of values) {
-    if (typeof value === "string" && value.trim().length > 0) return value;
-  }
-
-  return undefined;
-}
 
 function toHeadingId(value: string): string {
   return value
@@ -141,20 +104,6 @@ function snippetFromText(text?: string, heading?: string): string {
   return `${withoutHeading.slice(0, 240).trimEnd()}...`;
 }
 
-function humanizeFilename(filename?: string): string {
-  if (!filename) return "Untitled";
-  const base = filename
-    .split(/[\\/]/)
-    .pop()
-    ?.replace(/\.(md|mdx)$/i, "");
-  if (!base) return "Untitled";
-
-  return base
-    .split(/[-_]/g)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
 
 function extractDocStemFromAnyPath(path: string): string | null {
   const normalized = normalizeFsPath(path).replace(/^\.\//, "");
@@ -444,7 +393,7 @@ export async function GET(request: Request): Promise<Response> {
 
   try {
     const [client, fragmentToPageUrl] = await Promise.all([
-      Promise.resolve(getClient()),
+      Promise.resolve(getMixedbreadClient()),
       getFragmentToPageUrlMap(),
     ]);
 

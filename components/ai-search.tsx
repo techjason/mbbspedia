@@ -124,7 +124,22 @@ export function AISearchInput(props: ComponentProps<"form">) {
   const isLoading = status === "streaming" || status === "submitted";
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
-    void sendMessage({ text: input });
+    const pageContext =
+      typeof window === "undefined"
+        ? undefined
+        : {
+            pathname: window.location.pathname || undefined,
+            title: document.title || undefined,
+          };
+
+    void sendMessage(
+      { text: input },
+      {
+        body: {
+          pageContext,
+        },
+      },
+    );
     setInput("");
   };
 
