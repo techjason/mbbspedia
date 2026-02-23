@@ -41,8 +41,8 @@ const DEFAULT_OCR_POLICY = "smart";
 const SUMMARY_MAX_CHARS = 7000;
 
 const DEFAULT_SENIOR_NOTES = [
-  { id: "felix", path: "scripts/felixlai.md", label: "Felix Lai" },
-  { id: "maxim", path: "scripts/maxim.md", label: "Maxim" },
+  { id: "felix", path: "scripts/SeniorNotes/felixlai.md", label: "Felix Lai" },
+  { id: "maxim", path: "scripts/SeniorNotes/maxim.md", label: "Maxim" },
 ];
 const DEFAULT_PSYCHIATRY_SENIOR_NOTES = [
   {
@@ -60,8 +60,12 @@ Options:
   --specialty "<name>"         Default: ${DEFAULT_SPECIALTY}
   --senior-note "<path>"       Add a senior note (repeatable).
                                Format: "<label>=<path>" or "<path>".
+                               Supports .md/.mdx/.txt/.pdf.
+  --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory
+                               as senior notes (repeatable).
   --felix-note "<path>"        Backward-compatible alias for senior note slot #1.
   --maxim-note "<path>"        Backward-compatible alias for senior note slot #2.
+  --notes-only                 Skip slides and index only senior notes.
   --psychiatry                 Shortcut preset:
                                specialty=psychiatry
                                slides-dir=${DEFAULT_PSYCHIATRY_SLIDES_DIR}
@@ -75,6 +79,7 @@ Options:
 
 Examples:
   npm run index:rag -- --slides-dir "/Users/jason/Documents/BlockBSlides"
+  npm run index:rag -- --notes-only --senior-notes-dir "/Users/jason/Documents/SeniorNotes"
   npm run index:rag -- --psychiatry
   npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides"
   npm run index:rag -- --force --ocr-policy always
@@ -114,6 +119,10 @@ function parseSeniorNoteSpec(rawValue, fallbackIndex) {
   return { id, path: notePath, label: fallbackLabel };
 }
 
+function isPdfFilePath(filePath) {
+  return path.extname(String(filePath ?? "")).toLowerCase() === ".pdf";
+}
+
 function upsertSeniorNote(notes, entry) {
   const next = Array.isArray(notes) ? notes.slice() : [];
   const index = next.findIndex((note) => note.id === entry.id);
@@ -125,6 +134,21 @@ function upsertSeniorNote(notes, entry) {
   return next;
 }
 
+function upsertSeniorNoteByPath(notes, entry) {
+  const next = Array.isArray(notes) ? notes.slice() : [];
+  const absolutePath = path.resolve(process.cwd(), entry.path);
+  const existingIndex = next.findIndex(
+    (note) => path.resolve(process.cwd(), note.path) === absolutePath,
+  );
+
+  if (existingIndex >= 0) {
+    next[existingIndex] = entry;
+    return next;
+  }
+
+  return upsertSeniorNote(next, entry);
+}
+
 function parseArgs(argv) {
   const options = {
     specialty: DEFAULT_SPECIALTY,
@@ -134,7 +158,9 @@ function parseArgs(argv) {
     cacheDirExplicit: false,
     slidesDirExplicit: false,
     seniorNotesExplicit: false,
+    seniorNotesDirs: [],
     seniorNotes: DEFAULT_SENIOR_NOTES.slice(),
+    indexSlides: true,
     ocrPolicy: DEFAULT_OCR_POLICY,
     force: false,
     help: false,
@@ -179,6 +205,20 @@ function parseArgs(argv) {
       }
       const note = parseSeniorNoteSpec(argv[i + 1], options.seniorNotes.length);
       options.seniorNotes = upsertSeniorNote(options.seniorNotes, note);
+      i += 1;
+      continue;
+    }
+
+    if (arg === "--senior-notes-dir") {
+      const rawDir = String(argv[i + 1] ?? "").trim();
+      if (!rawDir) {
+        throw new Error("--senior-notes-dir requires a directory path");
+      }
+      if (!options.seniorNotesExplicit) {
+        options.seniorNotes = [];
+        options.seniorNotesExplicit = true;
+      }
+      options.seniorNotesDirs.push(rawDir);
       i += 1;
       continue;
     }
@@ -240,6 +280,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--notes-only") {
+      options.indexSlides = false;
+      continue;
+    }
+
     throw new Error(`Unknown argument: ${arg}`);
   }
 
@@ -266,17 +311,17 @@ function parseArgs(argv) {
     }
   }
 
-  if (options.seniorNotes.length === 0) {
-    throw new Error("At least one senior note is required. Use --senior-note.");
-  }
-
   if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
     if (normalizedSpecialty !== "psychiatry" && !options.seniorNotesExplicit) {
       throw new Error(
         `Specialty "${normalizedSpecialty}" requires explicit senior notes. Use --senior-note "<path>".`,
       );
     }
-    if (normalizedSpecialty !== "psychiatry" && !options.slidesDirExplicit) {
+    if (
+      options.indexSlides &&
+      normalizedSpecialty !== "psychiatry" &&
+      !options.slidesDirExplicit
+    ) {
       throw new Error(
         `Specialty "${normalizedSpecialty}" requires an explicit slides directory. Use --slides-dir "<path>".`,
       );
@@ -345,6 +390,43 @@ async function listSlidePdfs(slidesDir) {
       error.code === "ENOENT"
     ) {
       console.warn(`[Slides] Directory not found: ${absoluteSlidesDir}`);
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+async function listSeniorNoteFiles(notesDir) {
+  const absoluteNotesDir = path.resolve(process.cwd(), notesDir);
+
+  try {
+    const entries = await readdir(absoluteNotesDir, { withFileTypes: true });
+    return entries
+      .filter((entry) => {
+        if (!entry.isFile()) return false;
+        const ext = path.extname(entry.name).toLowerCase();
+        return ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf";
+      })
+      .map((entry) => {
+        const absolutePath = path.join(absoluteNotesDir, entry.name);
+        const relativePath = path.relative(process.cwd(), absolutePath);
+        const label = path.basename(entry.name, path.extname(entry.name));
+        return {
+          id: slugify(relativePath) || slugify(entry.name) || "note",
+          path: absolutePath,
+          label: label || path.basename(entry.name),
+        };
+      })
+      .sort((a, b) => a.path.localeCompare(b.path));
+  } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      console.warn(`[SeniorNotes] Directory not found: ${absoluteNotesDir}`);
       return [];
     }
 
@@ -737,21 +819,45 @@ async function main() {
     return;
   }
 
+  for (const notesDir of options.seniorNotesDirs) {
+    const discoveredNotes = await listSeniorNoteFiles(notesDir);
+    for (const note of discoveredNotes) {
+      options.seniorNotes = upsertSeniorNoteByPath(options.seniorNotes, note);
+    }
+  }
+
+  if (options.seniorNotes.length === 0) {
+    throw new Error(
+      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
+    );
+  }
+
   console.log(`[Index] Specialty: ${options.specialty}`);
   console.log(`[Index] Slides dir: ${options.slidesDir}`);
+  console.log(`[Index] Index slides: ${options.indexSlides ? "yes" : "no"}`);
+  if (options.seniorNotesDirs.length > 0) {
+    console.log(`[Index] Senior note dirs: ${options.seniorNotesDirs.join(", ")}`);
+  }
   console.log(`[Index] Cache dir: ${options.cacheDir}`);
   console.log(
     `[Index] Senior notes: ${options.seniorNotes.map((note) => `${note.id}=${note.path}`).join(", ")}`,
   );
 
-  const mutoolAvailable = await commandExists("mutool", ["-v"]);
-  if (!mutoolAvailable) {
-    throw new Error("mutool is required but not found on PATH");
-  }
+  let tesseractAvailable = false;
+  const hasPdfSeniorNotes = options.seniorNotes.some((note) =>
+    isPdfFilePath(note.path),
+  );
 
-  const tesseractAvailable = await commandExists("tesseract", ["--version"]);
-  if (!tesseractAvailable && options.ocrPolicy !== "off") {
-    console.warn("[OCR] tesseract not found on PATH. OCR fallback will be skipped.");
+  if (options.indexSlides || hasPdfSeniorNotes) {
+    const mutoolAvailable = await commandExists("mutool", ["-v"]);
+    if (!mutoolAvailable) {
+      throw new Error("mutool is required but not found on PATH");
+    }
+
+    tesseractAvailable = await commandExists("tesseract", ["--version"]);
+    if (!tesseractAvailable && options.ocrPolicy !== "off") {
+      console.warn("[OCR] tesseract not found on PATH. OCR fallback will be skipped.");
+    }
   }
 
   const { baseDir: cacheBaseDir, manifestPath } = resolveCachePaths(options.cacheDir);
@@ -761,7 +867,7 @@ async function main() {
   manifest.chunkingVersion = CHUNKING_VERSION;
   manifest.embeddingModel = options.embeddingModel;
 
-  const slides = await listSlidePdfs(options.slidesDir);
+  const slides = options.indexSlides ? await listSlidePdfs(options.slidesDir) : [];
 
   const report = {
     pdf: { indexed: 0, skipped: 0, chunks: 0 },
@@ -822,19 +928,32 @@ async function main() {
     const noteName = note.id;
     const notePath = note.path;
     const absolutePath = path.resolve(process.cwd(), notePath);
+    const noteIsPdf = isPdfFilePath(notePath);
     const fingerprint = await fingerprintFile(absolutePath);
     const existing = manifest.sources[absolutePath];
 
-    const artifactDir = path.join(cacheBaseDir, "notes", noteName);
-    const artifactFiles = [
-      path.join(artifactDir, "chunks.json"),
-      path.join(artifactDir, "chunks.embedding.json"),
-    ];
+    const artifactDir = noteIsPdf
+      ? existing?.artifactDir
+        ? absFromCache(cacheBaseDir, existing.artifactDir)
+        : path.join(cacheBaseDir, "pdf", fingerprint.sha256)
+      : path.join(cacheBaseDir, "notes", noteName);
+    const artifactFiles = noteIsPdf
+      ? [
+          path.join(artifactDir, "pages.json"),
+          path.join(artifactDir, "summary.json"),
+          path.join(artifactDir, "summary.embedding.json"),
+          path.join(artifactDir, "chunks.json"),
+          path.join(artifactDir, "chunks.embedding.json"),
+        ]
+      : [
+          path.join(artifactDir, "chunks.json"),
+          path.join(artifactDir, "chunks.embedding.json"),
+        ];
 
     const fresh =
       !options.force &&
       existing &&
-      existing.type === "note" &&
+      existing.type === (noteIsPdf ? "pdf" : "note") &&
       existing.specialty === options.specialty &&
       existing.modelId === options.embeddingModel &&
       existing.chunkingVersion === CHUNKING_VERSION &&
@@ -842,27 +961,56 @@ async function main() {
       (await hasAllArtifactFiles(artifactFiles));
 
     if (fresh) {
-      report.notes.skipped += 1;
+      if (noteIsPdf) {
+        report.pdf.skipped += 1;
+      } else {
+        report.notes.skipped += 1;
+      }
       continue;
     }
 
-    console.log(`[Index][NOTE] ${noteName}`);
-    const result = await indexNote({
-      noteName,
-      notePath,
-      options,
-      cacheBaseDir,
-    });
+    if (noteIsPdf) {
+      console.log(`[Index][NOTE_PDF] ${path.basename(notePath)}`);
+      const result = await indexPdf({
+        pdf: {
+          fileName: path.basename(notePath),
+          absolutePath,
+        },
+        fingerprint,
+        options,
+        cacheBaseDir,
+        tesseractAvailable,
+      });
 
-    manifest.sources[absolutePath] = {
-      ...buildManifestEntryBase({ fingerprint, options, type: "note" }),
-      noteName,
-      noteLabel: note.label,
-      artifactDir: result.artifactDir,
-    };
+      manifest.sources[absolutePath] = {
+        ...buildManifestEntryBase({ fingerprint, options, type: "pdf" }),
+        fileName: path.basename(notePath),
+        noteName,
+        noteLabel: note.label,
+        artifactDir: result.artifactDir,
+      };
 
-    report.notes.indexed += 1;
-    report.notes.chunks += result.chunks;
+      report.pdf.indexed += 1;
+      report.pdf.chunks += result.chunks;
+    } else {
+      console.log(`[Index][NOTE] ${noteName}`);
+      const result = await indexNote({
+        noteName,
+        notePath,
+        options,
+        cacheBaseDir,
+      });
+
+      manifest.sources[absolutePath] = {
+        ...buildManifestEntryBase({ fingerprint, options, type: "note" }),
+        noteName,
+        noteLabel: note.label,
+        artifactDir: result.artifactDir,
+      };
+
+      report.notes.indexed += 1;
+      report.notes.chunks += result.chunks;
+    }
   }
 
   await writeManifest(manifestPath, manifest);

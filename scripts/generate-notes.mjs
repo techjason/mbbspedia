@@ -113,12 +113,83 @@ const FOLLOW_UP_PROMPTS = [
   `Finally, proceed to common complications. (Remember to explain why for concepts and explain from first principles. Also bold and italicise points mentioned on lecture slides. Do not add document-banner headings or any Part X title. Include exactly one <ActiveRecallQuiz /> block using items[{ question, markscheme }], then include a "## References" block after it. ${FOLLOW_UP_CITATION_RULES})`,
 ];
 
-const SECTION_FILE_NAMES = ["etiology", "ddx", "dx", "mx", "complications"];
-const SECTION_TAB_NAMES = ["Etiology", "DDx", "Dx", "Mx", "Complications"];
+const DEFAULT_SECTION_PLAN = [
+  { fileName: "etiology", tabName: "Etiology" },
+  { fileName: "ddx", tabName: "DDx" },
+  { fileName: "dx", tabName: "Dx" },
+  { fileName: "mx", tabName: "Mx" },
+  { fileName: "complications", tabName: "Complications" },
+];
+
+const HISTORY_TAKING_PROMPT_TEMPLATE = `You are a dedicated medical note-curation AI agent preparing HKUMed Clinical Medical School OSCEs.
+
+Task: Generate one-shot, comprehensive "history taking" notes for the chief complaint [{{condition}}].
+
+You are given sample notes file name(s): [{{sampleNotesFileName}}]
+Powerpoint attachment file name(s): [{{powerpointFileNames}}]
+
+Deliver a complete history-taking guide in ONE response only (no follow-up sections). Cover:
+- Focused presenting complaint framework and symptom analysis (onset, timing, progression, severity, red flags).
+- Targeted systems review relevant to this condition.
+- Risk factors, exposure history, comorbidities, medications, allergy history, family history, social history, and functional baseline.
+- Focused differentiating questions that help distinguish important alternatives.
+- Red-flag findings and escalation triggers.
+- Common pitfalls in history-taking for this condition.
+- High-yield exam-focused interpretation tips ("why this question matters").
+- Include a model reporting script to a clinician/surgeon. This should follow the British framework of chief complaint, HPI, PMHx, Past Surgical History, Medication and Allergies, Family History, Social History and a summary. NO NEED to include physical exam results. Example: "Mr Chan is a 50-year-old gentleman who presented 7 days ago to QMH with ...". 
+
+Tone: Down-to-earth, logical, slightly conversational, and authoritative, like a senior doctor teaching on a ward round.
+
+Formatting rules:
+- Explain why each key history question is asked, not just what to ask.
+- Use markdown headings and bullet points.
+- Include practical phrasing examples for key questions when useful.
+- Bold and italicize points mentioned on lecture slides.
+- Include a master mermaid diagram of the history taking framework.
+- Include one final <Callout title="High Yield Summary"></Callout>.
+- Include exactly one <ActiveRecallQuiz /> block using this exact shape:
+  <ActiveRecallQuiz
+    title="Active Recall - History Taking"
+    items={[
+      {
+        question: "Question text commonly asked during OSCE Viva",
+        markscheme: "Concise answer used for OSCE Viva",
+      },
+    ]}
+  />
+- Include 3 to 6 high-yield questions that will be asked in the OSCE Viva in items.
+- Keep question and markscheme values as plain double-quoted strings that compile in MDX/JSX.
+- Do not add document-banner headings/subheadings such as "Comprehensive Notes on ...", "... - Part X", or any standalone "Part 1/2/3" line.
+${TOPIC_CITATION_RULES}
+
+Examples of Callouts:
+
+<Callout title="Title">Callout used to convey an important concept/message</Callout>
+
+<Callout title="Title" type="error">
+ Callout used to convey a usual mistake that medical students tend to make or overlook
+</Callout>
+
+<Callout title="Title" type="idea">
+  Callout used to convey an idea or suggestion
+</Callout>
+
+Chief Complaint: [{{condition}}]`;
+
+const PROMPT_PROFILES = {
+  default: {
+    template: PROMPT_1_TEMPLATE,
+    oneShotSection: { fileName: "etiology", tabName: "Etiology" },
+  },
+  "history-taking": {
+    template: HISTORY_TAKING_PROMPT_TEMPLATE,
+    oneShotSection: { fileName: "history-taking", tabName: "History Taking" },
+  },
+};
 
 const DEFAULT_SPECIALTY = "general-surgery";
-const SURGERY_SAMPLE_NOTE_PATH = "scripts/felixlai.md";
-const SURGERY_SECONDARY_NOTE_PATH = "scripts/maxim.md";
+const SURGERY_SAMPLE_NOTE_PATH = "scripts/SeniorNotes/felixlai.md";
+const SURGERY_SECONDARY_NOTE_PATH = "scripts/SeniorNotes/maxim.md";
 const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_SENIOR_NOTES = [
   { id: "felix", path: SURGERY_SAMPLE_NOTE_PATH, label: "Felix Lai" },
@@ -221,6 +292,10 @@ Options:
   --no-context-scouts           Disable retrieval pipeline and use legacy direct context injection.
   --sample-note "<path>"        Legacy sample notes file (used with --no-context-scouts).
   --slides "<path>"             Legacy slides text file (used with --no-context-scouts).
+  --prompt-profile "<profile>"  Prompt preset: default | history-taking. Default: default
+  --history-taking              Shortcut for --prompt-profile "history-taking" --one-shot
+  --prompt-file "<path>"        Custom initial prompt template file (supports {{condition}}, {{sampleNotesFileName}}, {{powerpointFileNames}}).
+  --one-shot                    Generate only one section (skip follow-up prompts).
   --devtools                    Enable AI SDK DevTools middleware (default: enabled).
   --no-devtools                 Disable AI SDK DevTools middleware for this run.
   --help                        Show this help.
@@ -231,6 +306,7 @@ Examples:
   npm run generate:notes -- --selection-model "anthropic/claude-opus-4.6" --top-slides 5 "acute pancreatitis"
   npm run generate:notes -- --psychiatry "major depressive disorder"
   npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides" "major depressive disorder"
+  npm run generate:notes -- --history-taking "chest pain"
 `);
 }
 
@@ -267,7 +343,9 @@ function parseSeniorNoteSpec(rawValue, fallbackIndex) {
   }
 
   const fallbackLabel =
-    label || path.basename(notePath, path.extname(notePath)) || `note-${fallbackIndex + 1}`;
+    label ||
+    path.basename(notePath, path.extname(notePath)) ||
+    `note-${fallbackIndex + 1}`;
   const id = slugify(fallbackLabel) || `note-${fallbackIndex + 1}`;
   return { id, path: notePath, label: fallbackLabel };
 }
@@ -300,6 +378,9 @@ function parseArgs(argv) {
     cacheDir: DEFAULT_SURGERY_CACHE_DIR,
     cacheDirExplicit: false,
     allowStaleIndex: false,
+    promptProfile: "default",
+    promptFilePath: undefined,
+    oneShot: false,
     devtools: true,
     topics: [],
   };
@@ -438,6 +519,29 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--prompt-profile") {
+      options.promptProfile = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (arg === "--history-taking") {
+      options.promptProfile = "history-taking";
+      options.oneShot = true;
+      continue;
+    }
+
+    if (arg === "--prompt-file") {
+      options.promptFilePath = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (arg === "--one-shot") {
+      options.oneShot = true;
+      continue;
+    }
+
     if (arg === "--devtools") {
       options.devtools = true;
       continue;
@@ -506,6 +610,18 @@ function parseArgs(argv) {
         `Specialty "${normalizedSpecialty}" requires an explicit slides directory. Use --slides-dir "<path>".`,
       );
     }
+  }
+
+  const normalizedPromptProfile = slugify(options.promptProfile) || "default";
+  if (!(normalizedPromptProfile in PROMPT_PROFILES)) {
+    throw new Error(
+      `Unknown prompt profile: "${options.promptProfile}". Valid profiles: ${Object.keys(PROMPT_PROFILES).join(", ")}`,
+    );
+  }
+  options.promptProfile = normalizedPromptProfile;
+
+  if (options.promptProfile === "history-taking") {
+    options.oneShot = true;
   }
 
   return options;
@@ -772,6 +888,14 @@ function toTitleCase(value) {
     .filter(Boolean)
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
+}
+
+function toPascalCase(value) {
+  return String(value)
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1).toLowerCase())
+    .join("");
 }
 
 function previewText(text, length = 120) {
@@ -1773,10 +1897,10 @@ async function buildRetrievedContextForSectionFromIndex({
   rankedSources.push({
     sourceGroup: "slides",
     items: rankChunksHybrid({
-    query,
-    chunks: slideChunks,
-    embeddingById: slideEmbeddingById,
-    queryEmbedding,
+      query,
+      chunks: slideChunks,
+      embeddingById: slideEmbeddingById,
+      queryEmbedding,
     }).slice(0, SECTION_PER_SOURCE_RANK_LIMIT),
   });
 
@@ -1816,7 +1940,10 @@ async function buildRetrievedContextForSectionFromIndex({
   const assembled = assembleSectionContext({
     selectedChunks,
     contextBudgetChars: SECTION_CONTEXT_CHAR_BUDGET,
-    groupOrder: [...indexedContext.notes.map((note) => note.groupKey), "slides"],
+    groupOrder: [
+      ...indexedContext.notes.map((note) => note.groupKey),
+      "slides",
+    ],
     groupedTitles: {
       ...Object.fromEntries(
         indexedContext.notes.map((note) => [
@@ -1847,13 +1974,15 @@ async function buildRetrievedContextForSectionFromIndex({
 }
 
 function buildPromptOne({
+  template,
   condition,
   sampleNotesFileName,
   powerpointFileNames,
   sampleNotesContent,
   slidesContent,
 }) {
-  let prompt = PROMPT_1_TEMPLATE.replaceAll("{{condition}}", condition)
+  let prompt = template
+    .replaceAll("{{condition}}", condition)
     .replaceAll("{{sampleNotesFileName}}", sampleNotesFileName)
     .replaceAll("{{powerpointFileNames}}", powerpointFileNames ?? "");
 
@@ -1866,6 +1995,25 @@ function buildPromptOne({
   }
 
   return prompt;
+}
+
+function resolveSectionPlan(options) {
+  if (!options.oneShot) {
+    return DEFAULT_SECTION_PLAN.slice();
+  }
+
+  const profile =
+    PROMPT_PROFILES[options.promptProfile] ?? PROMPT_PROFILES.default;
+  return [profile.oneShotSection];
+}
+
+function resolvePromptTemplate({ promptProfile, customPromptTemplate }) {
+  if (customPromptTemplate) {
+    return customPromptTemplate;
+  }
+
+  const profile = PROMPT_PROFILES[promptProfile] ?? PROMPT_PROFILES.default;
+  return profile.template;
 }
 
 const TOPIC_DESCRIPTION_PROMPT = `You are a medical education assistant. Given a medical topic name, respond with exactly one short sentence: a succinct clinical definition (what it is). No preamble, no quotes, no bullet points. Example: for "Liver cirrhosis" → Chronic liver disease characterized by fibrosis and regenerative nodules leading to loss of function.
@@ -1889,48 +2037,50 @@ async function generateTopicDescription({ topic, title, model }) {
   }
 }
 
-function buildTopicDocMdx({ title, specialty, slug, description }) {
+function buildTopicDocMdx({
+  title,
+  specialty,
+  slug,
+  description,
+  sectionPlan,
+}) {
   const desc =
     description != null && description !== ""
       ? JSON.stringify(description)
       : `Definition and clinical overview of ${title}.`;
+  const sections = sectionPlan?.length ? sectionPlan : DEFAULT_SECTION_PLAN;
+
+  const imports = sections
+    .map(({ fileName }) => {
+      const componentName = `${toPascalCase(fileName) || "Section"}Section`;
+      return `import ${componentName} from "../../fragments/${specialty}/${slug}/${fileName}.mdx";`;
+    })
+    .join("\n");
+
+  const tabsItems = sections
+    .map(({ tabName }) => JSON.stringify(tabName))
+    .join(", ");
+
+  const tabBlocks = sections
+    .map(({ fileName, tabName }) => {
+      const componentName = `${toPascalCase(fileName) || "Section"}Section`;
+      return `<Tab value=${JSON.stringify(tabName)}>
+  <${componentName} components={props.components} />
+
+</Tab>`;
+    })
+    .join("\n\n");
+
   return `---
 title: ${title}
 description: ${desc}
 ---
 
-import EtiologySection from "../../fragments/${specialty}/${slug}/etiology.mdx";
-import DdxSection from "../../fragments/${specialty}/${slug}/ddx.mdx";
-import DxSection from "../../fragments/${specialty}/${slug}/dx.mdx";
-import MxSection from "../../fragments/${specialty}/${slug}/mx.mdx";
-import ComplicationsSection from "../../fragments/${specialty}/${slug}/complications.mdx";
+${imports}
 
-<Tabs items={["Etiology", "DDx", "Dx", "Mx", "Complications"]}>
+<Tabs items={[${tabsItems}]}>
 
-<Tab value="Etiology">
-  <EtiologySection components={props.components} />
-
-</Tab>
-
-<Tab value="DDx">
-  <DdxSection components={props.components} />
-
-</Tab>
-
-<Tab value="Dx">
-  <DxSection components={props.components} />
-
-</Tab>
-
-<Tab value="Mx">
-  <MxSection components={props.components} />
-
-</Tab>
-
-<Tab value="Complications">
-  <ComplicationsSection components={props.components} />
-
-</Tab>
+${tabBlocks}
 
 </Tabs>
 `;
@@ -1991,6 +2141,22 @@ async function loadDotEnvFiles() {
   }
 }
 
+async function loadCustomPromptTemplate(promptFilePath) {
+  if (!promptFilePath) {
+    return "";
+  }
+
+  const absolutePath = path.resolve(process.cwd(), promptFilePath);
+  const content = await readFile(absolutePath, "utf8");
+  const trimmed = content.trim();
+
+  if (!trimmed) {
+    throw new Error(`Prompt file is empty: ${promptFilePath}`);
+  }
+
+  return trimmed;
+}
+
 async function generateSingleSection({
   messages,
   model,
@@ -2031,6 +2197,9 @@ async function generateTopic({
   topic,
   model,
   specialty,
+  promptTemplate,
+  oneShot,
+  sectionPlan,
   sampleNotesFileName,
   powerpointFileNames,
   sampleNotesContent,
@@ -2059,20 +2228,34 @@ async function generateTopic({
 
   const messages = [];
 
+  const resolvedSectionPlan =
+    sectionPlan?.length > 0 ? sectionPlan : DEFAULT_SECTION_PLAN;
+
   const prompts = [
     buildPromptOne({
+      template: promptTemplate,
       condition: topic,
       sampleNotesFileName,
       powerpointFileNames,
       sampleNotesContent,
       slidesContent,
     }),
-    ...FOLLOW_UP_PROMPTS,
   ];
 
+  if (!oneShot) {
+    prompts.push(...FOLLOW_UP_PROMPTS);
+  }
+
+  if (prompts.length !== resolvedSectionPlan.length) {
+    throw new Error(
+      `Prompt/section count mismatch (${prompts.length} prompts vs ${resolvedSectionPlan.length} sections).`,
+    );
+  }
+
   for (let i = 0; i < prompts.length; i += 1) {
-    const sectionFileName = SECTION_FILE_NAMES[i];
-    const sectionTabName = SECTION_TAB_NAMES[i];
+    const section = resolvedSectionPlan[i];
+    const sectionFileName = section.fileName;
+    const sectionTabName = section.tabName;
     let sectionPrompt = prompts[i];
 
     if (typeof contextProvider === "function") {
@@ -2102,7 +2285,13 @@ async function generateTopic({
 
   console.log(`[${topic}] Generating one-line description...`);
   const description = await generateTopicDescription({ topic, title, model });
-  const topicDoc = buildTopicDocMdx({ title, specialty, slug, description });
+  const topicDoc = buildTopicDocMdx({
+    title,
+    specialty,
+    slug,
+    description,
+    sectionPlan: resolvedSectionPlan,
+  });
   await writeFile(topicDocPath, topicDoc, "utf8");
   console.log(`[${topic}] Wrote ${topicDocPath}`);
 }
@@ -2122,6 +2311,15 @@ async function main() {
     throw new Error("At least one topic is required.");
   }
 
+  const customPromptTemplate = await loadCustomPromptTemplate(
+    options.promptFilePath,
+  );
+  const promptTemplate = resolvePromptTemplate({
+    promptProfile: options.promptProfile,
+    customPromptTemplate,
+  });
+  const sectionPlan = resolveSectionPlan(options);
+
   const generationModel = buildLanguageModel(options.model, options.devtools);
   const selectionModel = buildLanguageModel(
     options.selectionModel,
@@ -2131,6 +2329,11 @@ async function main() {
   console.log(`Model: ${options.model}`);
   console.log(`Selection model: ${options.selectionModel}`);
   console.log(`Specialty: ${options.specialty}`);
+  console.log(`Prompt profile: ${options.promptProfile}`);
+  console.log(`One-shot: ${options.oneShot ? "enabled" : "disabled"}`);
+  if (options.promptFilePath) {
+    console.log(`Custom prompt file: ${options.promptFilePath}`);
+  }
   console.log(`DevTools: ${options.devtools ? "enabled" : "disabled"}`);
   console.log(
     `Context scouts: ${options.contextScouts ? "enabled" : "disabled"}`,
@@ -2166,6 +2369,9 @@ async function main() {
           topic,
           model: generationModel,
           specialty: options.specialty,
+          promptTemplate,
+          oneShot: options.oneShot,
+          sectionPlan,
           sampleNotesFileName: formatPromptArray([sampleNotes.fileName]),
           powerpointFileNames: formatPromptArray([slides.fileName]),
           sampleNotesContent: sampleNotes.content,
@@ -2199,6 +2405,9 @@ async function main() {
           topic,
           model: generationModel,
           specialty: options.specialty,
+          promptTemplate,
+          oneShot: options.oneShot,
+          sectionPlan,
           sampleNotesFileName: formatPromptArray(promptNoteFileNames),
           powerpointFileNames: formatPromptArray(promptSlideFileNames),
           sampleNotesContent: "",
@@ -2244,6 +2453,9 @@ async function main() {
           topic,
           model: generationModel,
           specialty: options.specialty,
+          promptTemplate,
+          oneShot: options.oneShot,
+          sectionPlan,
           sampleNotesFileName: formatPromptArray(promptNoteFileNames),
           powerpointFileNames: formatPromptArray(
             retrieved.selectedSlideFileNames ?? [],
