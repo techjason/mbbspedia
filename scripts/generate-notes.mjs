@@ -132,6 +132,7 @@ Deliver a complete history-taking guide in ONE response only (no follow-up secti
 - Focused presenting complaint framework and symptom analysis (onset, timing, progression, severity, red flags).
 - Targeted systems review relevant to this condition.
 - Risk factors, exposure history, comorbidities, medications, allergy history, family history, social history, and functional baseline.
+- This will be done in Hong Kong, so include relevant Cantonese translations that will be used in the OSCE Viva.
 - Focused differentiating questions that help distinguish important alternatives.
 - Red-flag findings and escalation triggers.
 - Common pitfalls in history-taking for this condition.
@@ -203,6 +204,7 @@ const DEFAULT_PSYCHIATRY_SENIOR_NOTES = [
   },
 ];
 const DEFAULT_SLIDES_DIR = "/Users/jason/Documents/BlockBSlides";
+const DEFAULT_SURGERY_SENIOR_NOTES_DIR = "scripts/SeniorNotes";
 const DEFAULT_CACHE_ROOT = ".cache/rag";
 const DEFAULT_SURGERY_CACHE_DIR = `${DEFAULT_CACHE_ROOT}/surgery`;
 
@@ -282,6 +284,7 @@ Options:
   --selection-model "<provider/model>" Selection model for scouts/slides. Default: anthropic/claude-opus-4.6
   --specialty "<folder-name>"  Default: ${DEFAULT_SPECIALTY}
   --senior-note "<path>"       Add a senior note source (repeatable). Format: "<label>=<path>" or "<path>".
+  --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory as senior notes (repeatable).
   --felix-note "<path>"        Backward-compatible alias for senior note slot #1.
   --maxim-note "<path>"        Backward-compatible alias for senior note slot #2.
   --slides-dir "<path>"         Default: /Users/jason/Documents/BlockBSlides
@@ -304,6 +307,7 @@ Examples:
   npm run generate:notes -- "acute pancreatitis"
   npm run generate:notes -- --topic-concurrency 3 "acute pancreatitis" "appendicitis"
   npm run generate:notes -- --selection-model "anthropic/claude-opus-4.6" --top-slides 5 "acute pancreatitis"
+  npm run generate:notes -- --senior-notes-dir "scripts/SeniorNotes" --history-taking "lower gi bleed"
   npm run generate:notes -- --psychiatry "major depressive disorder"
   npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides" "major depressive disorder"
   npm run generate:notes -- --history-taking "chest pain"
@@ -350,6 +354,10 @@ function parseSeniorNoteSpec(rawValue, fallbackIndex) {
   return { id, path: notePath, label: fallbackLabel };
 }
 
+function isPdfFilePath(filePath) {
+  return path.extname(String(filePath ?? "")).toLowerCase() === ".pdf";
+}
+
 function upsertSeniorNote(notes, entry) {
   const next = Array.isArray(notes) ? notes.slice() : [];
   const index = next.findIndex((note) => note.id === entry.id);
@@ -361,6 +369,21 @@ function upsertSeniorNote(notes, entry) {
   return next;
 }
 
+function upsertSeniorNoteByPath(notes, entry) {
+  const next = Array.isArray(notes) ? notes.slice() : [];
+  const absolutePath = path.resolve(process.cwd(), entry.path);
+  const existingIndex = next.findIndex(
+    (note) => path.resolve(process.cwd(), note.path) === absolutePath,
+  );
+
+  if (existingIndex >= 0) {
+    next[existingIndex] = entry;
+    return next;
+  }
+
+  return upsertSeniorNote(next, entry);
+}
+
 function parseArgs(argv) {
   const options = {
     model: "anthropic/claude-opus-4.6",
@@ -370,6 +393,7 @@ function parseArgs(argv) {
     sampleNotePath: SURGERY_SAMPLE_NOTE_PATH,
     slidesPath: undefined,
     seniorNotes: DEFAULT_SENIOR_NOTES.slice(),
+    seniorNotesDirs: [DEFAULT_SURGERY_SENIOR_NOTES_DIR],
     seniorNotesExplicit: false,
     slidesDir: DEFAULT_SLIDES_DIR,
     slidesDirExplicit: false,
@@ -415,6 +439,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_SPECIALTY;
       options.sampleNotePath = SURGERY_SAMPLE_NOTE_PATH;
       options.seniorNotes = DEFAULT_SENIOR_NOTES.slice();
+      options.seniorNotesDirs = [DEFAULT_SURGERY_SENIOR_NOTES_DIR];
       options.seniorNotesExplicit = false;
       options.slidesDir = DEFAULT_SLIDES_DIR;
       options.slidesDirExplicit = false;
@@ -424,6 +449,7 @@ function parseArgs(argv) {
     if (arg === "-psychiatry" || arg === "--psychiatry") {
       options.specialty = "psychiatry";
       options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
+      options.seniorNotesDirs = [];
       options.seniorNotesExplicit = false;
       options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
       options.slidesDirExplicit = false;
@@ -450,6 +476,7 @@ function parseArgs(argv) {
     if (arg === "--senior-note") {
       if (!options.seniorNotesExplicit) {
         options.seniorNotes = [];
+        options.seniorNotesDirs = [];
         options.seniorNotesExplicit = true;
       }
       const note = parseSeniorNoteSpec(argv[i + 1], options.seniorNotes.length);
@@ -458,7 +485,26 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--senior-notes-dir") {
+      const rawDir = String(argv[i + 1] ?? "").trim();
+      if (!rawDir) {
+        throw new Error("--senior-notes-dir requires a directory path");
+      }
+      if (!options.seniorNotesExplicit) {
+        options.seniorNotes = [];
+        options.seniorNotesDirs = [];
+        options.seniorNotesExplicit = true;
+      }
+      options.seniorNotesDirs.push(rawDir);
+      i += 1;
+      continue;
+    }
+
     if (arg === "--felix-note") {
+      if (!options.seniorNotesExplicit) {
+        options.seniorNotes = [];
+        options.seniorNotesDirs = [];
+      }
       options.seniorNotesExplicit = true;
       options.seniorNotes = upsertSeniorNote(options.seniorNotes, {
         id: "felix",
@@ -470,6 +516,10 @@ function parseArgs(argv) {
     }
 
     if (arg === "--maxim-note") {
+      if (!options.seniorNotesExplicit) {
+        options.seniorNotes = [];
+        options.seniorNotesDirs = [];
+      }
       options.seniorNotesExplicit = true;
       options.seniorNotes = upsertSeniorNote(options.seniorNotes, {
         id: "maxim",
@@ -589,14 +639,17 @@ function parseArgs(argv) {
   if (normalizedSpecialty === "psychiatry") {
     if (!options.seniorNotesExplicit) {
       options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
+      options.seniorNotesDirs = [];
     }
     if (!options.slidesDirExplicit) {
       options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
     }
   }
 
-  if (options.seniorNotes.length === 0) {
-    throw new Error("At least one senior note is required. Use --senior-note.");
+  if (options.seniorNotes.length === 0 && options.seniorNotesDirs.length === 0) {
+    throw new Error(
+      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
+    );
   }
 
   if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
@@ -990,6 +1043,43 @@ async function listSlidePdfs(slidesDir) {
   }
 }
 
+async function listSeniorNoteFiles(notesDir) {
+  const absoluteNotesDir = path.resolve(process.cwd(), notesDir);
+
+  try {
+    const entries = await readdir(absoluteNotesDir, { withFileTypes: true });
+    return entries
+      .filter((entry) => {
+        if (!entry.isFile()) return false;
+        const ext = path.extname(entry.name).toLowerCase();
+        return ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf";
+      })
+      .map((entry) => {
+        const absolutePath = path.join(absoluteNotesDir, entry.name);
+        const relativePath = path.relative(process.cwd(), absolutePath);
+        const label = path.basename(entry.name, path.extname(entry.name));
+        return {
+          id: slugify(relativePath) || slugify(entry.name) || "note",
+          path: absolutePath,
+          label: label || path.basename(entry.name),
+        };
+      })
+      .sort((a, b) => a.path.localeCompare(b.path));
+  } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      console.warn(`[SeniorNotes] Directory not found: ${absoluteNotesDir}`);
+      return [];
+    }
+
+    throw error;
+  }
+}
+
 function parsePagesCount(mutoolInfoOutput) {
   const match = mutoolInfoOutput.match(/Pages:\s+(\d+)/);
   if (!match) {
@@ -1293,22 +1383,40 @@ async function prepareContextSources(options) {
   const chunkById = new Map();
 
   for (const note of options.seniorNotes) {
-    const source = await readTextFileOrEmpty(
-      note.path,
-      `Senior note (${note.label})`,
-    );
+    const absolutePath = path.resolve(process.cwd(), note.path);
     const groupKey = `note:${note.id}`;
-    const chunks = source.content
-      ? buildChunksFromText({
-          text: source.content,
-          prefix: `note-${note.id}`,
-          sourceName: path.basename(source.absolutePath),
-          sourcePath: source.absolutePath,
+    let chunks = [];
+    if (isPdfFilePath(absolutePath)) {
+      const pages = await extractPdfPageTexts(absolutePath);
+      for (const page of pages) {
+        const pageChunks = buildChunksFromText({
+          text: page.text,
+          prefix: `note-${note.id}-p${page.pageNumber}`,
+          sourceName: path.basename(absolutePath),
+          sourcePath: absolutePath,
         }).map((chunk) => ({
           ...chunk,
           sourceGroup: groupKey,
-        }))
-      : [];
+        }));
+        chunks.push(...pageChunks);
+      }
+    } else {
+      const source = await readTextFileOrEmpty(
+        note.path,
+        `Senior note (${note.label})`,
+      );
+      chunks = source.content
+        ? buildChunksFromText({
+            text: source.content,
+            prefix: `note-${note.id}`,
+            sourceName: path.basename(source.absolutePath),
+            sourcePath: source.absolutePath,
+          }).map((chunk) => ({
+            ...chunk,
+            sourceGroup: groupKey,
+          }))
+        : [];
+    }
 
     for (const chunk of chunks) {
       chunkById.set(chunk.id, chunk);
@@ -1318,7 +1426,7 @@ async function prepareContextSources(options) {
       id: note.id,
       label: note.label,
       path: note.path,
-      absolutePath: source.absolutePath,
+      absolutePath,
       chunks,
       groupKey,
     });
@@ -1666,7 +1774,10 @@ function buildIndexCommandHint(options) {
   const notesArgs = options.seniorNotes
     .map((note) => `--senior-note ${JSON.stringify(note.path)}`)
     .join(" ");
-  return `npm run index:rag -- --specialty "${options.specialty}" --slides-dir "${options.slidesDir}" --cache-dir "${options.cacheDir}" ${notesArgs}`.trim();
+  const notesDirArgs = options.seniorNotesDirs
+    .map((notesDir) => `--senior-notes-dir ${JSON.stringify(notesDir)}`)
+    .join(" ");
+  return `npm run index:rag -- --specialty "${options.specialty}" --slides-dir "${options.slidesDir}" --cache-dir "${options.cacheDir}" ${notesArgs} ${notesDirArgs}`.trim();
 }
 
 async function listCacheReadinessIssues(options, manifest) {
@@ -1677,7 +1788,7 @@ async function listCacheReadinessIssues(options, manifest) {
     path.resolve(process.cwd(), note.path),
   );
   for (const notePath of requiredNotes) {
-    requiredByPath.set(notePath, "note");
+    requiredByPath.set(notePath, isPdfFilePath(notePath) ? "pdf" : "note");
   }
 
   const slides = await listSlidePdfs(options.slidesDir);
@@ -1780,17 +1891,40 @@ async function prepareIndexedContextSources(options) {
   const indexedNotes = [];
   for (const note of options.seniorNotes) {
     const notePath = path.resolve(process.cwd(), note.path);
+    const noteIsPdf = isPdfFilePath(notePath);
     const entry = manifest.sources[notePath];
     if (!entry?.artifactDir || entry.specialty !== options.specialty) {
       return null;
     }
 
-    const indexed = await readIndexedChunksAndEmbeddings(
-      cacheBaseDir,
-      entry.artifactDir,
-    );
-    if (!indexed) {
-      return null;
+    let chunks = [];
+    let embeddingById = new Map();
+    if (noteIsPdf) {
+      const indexed = await readIndexedSlideArtifacts(
+        cacheBaseDir,
+        entry.artifactDir,
+      );
+      if (!indexed) {
+        return null;
+      }
+      chunks = indexed.chunks.map((chunk) => ({
+        ...chunk,
+        sourceName: chunk.sourceName || path.basename(notePath),
+      }));
+      embeddingById = indexed.chunkEmbeddingById;
+    } else {
+      const indexed = await readIndexedChunksAndEmbeddings(
+        cacheBaseDir,
+        entry.artifactDir,
+      );
+      if (!indexed) {
+        return null;
+      }
+      chunks = indexed.chunks.map((chunk) => ({
+        ...chunk,
+        sourceName: chunk.sourceName || path.basename(notePath),
+      }));
+      embeddingById = indexed.embeddingById;
     }
 
     const groupKey = `note:${note.id}`;
@@ -1799,12 +1933,11 @@ async function prepareIndexedContextSources(options) {
       label: note.label,
       sourcePath: notePath,
       groupKey,
-      chunks: indexed.chunks.map((chunk) => ({
+      chunks: chunks.map((chunk) => ({
         ...chunk,
         sourceGroup: groupKey,
-        sourceName: chunk.sourceName || path.basename(notePath),
       })),
-      embeddingById: indexed.embeddingById,
+      embeddingById,
     });
   }
 
@@ -2311,6 +2444,19 @@ async function main() {
     throw new Error("At least one topic is required.");
   }
 
+  for (const notesDir of options.seniorNotesDirs) {
+    const discoveredNotes = await listSeniorNoteFiles(notesDir);
+    for (const note of discoveredNotes) {
+      options.seniorNotes = upsertSeniorNoteByPath(options.seniorNotes, note);
+    }
+  }
+
+  if (options.seniorNotes.length === 0) {
+    throw new Error(
+      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
+    );
+  }
+
   const customPromptTemplate = await loadCustomPromptTemplate(
     options.promptFilePath,
   );
@@ -2345,6 +2491,9 @@ async function main() {
   console.log(
     `Allow stale index: ${options.allowStaleIndex ? "enabled" : "disabled"}`,
   );
+  if (options.seniorNotesDirs.length > 0) {
+    console.log(`Senior note dirs: ${options.seniorNotesDirs.join(", ")}`);
+  }
   console.log(`Topics: ${options.topics.join(", ")}`);
   console.log(
     `Senior notes: ${options.seniorNotes.map((note) => `${note.id}=${note.path}`).join(", ")}`,
