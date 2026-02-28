@@ -210,7 +210,9 @@ export function FragmentDropdownSection({
         </HeadingTag>
 
         {splitSections.introNodes.length > 0 ? (
-          <div className="pb-6">{splitSections.introNodes}</div>
+          <div className="pb-2 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+            {splitSections.introNodes}
+          </div>
         ) : null}
 
         <div className="pb-3">
@@ -257,7 +259,11 @@ export function FragmentDropdownSection({
         </button>
       </HeadingTag>
 
-      <div id={contentId} hidden={!open} className="">
+      <div
+        id={contentId}
+        hidden={!open}
+        className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+      >
         {contentNodes}
       </div>
     </div>
