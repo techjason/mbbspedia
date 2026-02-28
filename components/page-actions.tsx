@@ -2,6 +2,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, ExternalLinkIcon } from 'lucide-react';
 import { cn } from '../lib/cn';
+import {
+  COLLAPSE_ALL_FRAGMENT_DROPDOWNS_EVENT,
+  EXPAND_ALL_FRAGMENT_DROPDOWNS_EVENT,
+} from '../lib/fragment-dropdown-events';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -71,6 +75,38 @@ export function LLMCopyButton({
     >
       {checked ? <Check /> : <Copy />}
       Copy Markdown
+    </button>
+  );
+}
+
+export function ExpandAllButton() {
+  return (
+    <button
+      className={cn(
+        buttonVariants({
+          color: 'secondary',
+          size: 'sm',
+        }),
+      )}
+      onClick={() => window.dispatchEvent(new Event(EXPAND_ALL_FRAGMENT_DROPDOWNS_EVENT))}
+    >
+      Expand all
+    </button>
+  );
+}
+
+export function CollapseAllButton() {
+  return (
+    <button
+      className={cn(
+        buttonVariants({
+          color: 'secondary',
+          size: 'sm',
+        }),
+      )}
+      onClick={() => window.dispatchEvent(new Event(COLLAPSE_ALL_FRAGMENT_DROPDOWNS_EVENT))}
+    >
+      Collapse all
     </button>
   );
 }

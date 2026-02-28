@@ -302,6 +302,7 @@ function buildSystemPrompt({
     "- Never invent sources, citation numbers, or references.",
     "- If you use any inline citations, end with exactly one '## References' section.",
     "- In that section, list each cited source once as '[n] Source Name'.",
+    "- Copy each source label from the citation map exactly (including markdown links and section labels).",
     "",
     "If retrieval status is WEAK_OR_EMPTY:",
     "- Start the answer with: 'Evidence warning: Retrieved context is limited for this query.'",

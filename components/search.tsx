@@ -12,9 +12,7 @@ import {
   type SharedProps,
 } from "fumadocs-ui/components/dialog/search";
 import { useDocsSearch } from "fumadocs-core/search/client";
-import type { SortedResult } from "fumadocs-core/search/server";
 import { useI18n } from "fumadocs-ui/contexts/i18n";
-import { useRef } from "react";
 
 export default function DocsSearchDialog(props: SharedProps) {
   const { locale } = useI18n();
@@ -22,22 +20,15 @@ export default function DocsSearchDialog(props: SharedProps) {
     type: "fetch",
     api: "/api/search",
     locale,
-    delayMs: 60,
+    delayMs: 30,
   });
 
-  const currentItems = query.data !== "empty" ? query.data : null;
-  const lastItemsRef = useRef<SortedResult[] | null>(null);
-
-  if (currentItems) {
-    lastItemsRef.current = currentItems;
-  }
-
-  if (!currentItems && search.trim().length === 0) {
-    lastItemsRef.current = null;
-  }
-
-  const itemsToDisplay =
-    currentItems ?? (query.isLoading ? lastItemsRef.current : null);
+  const listItems =
+    search.trim().length === 0
+      ? null
+      : query.data !== "empty"
+        ? query.data
+        : [];
 
   return (
     <SearchDialog
@@ -59,7 +50,7 @@ export default function DocsSearchDialog(props: SharedProps) {
             Searching...
           </div>
         )}
-        <SearchDialogList items={itemsToDisplay} />
+        <SearchDialogList items={listItems} />
         {query.error && (
           <div className="px-3 pb-2 text-xs text-red-400">
             Search request failed. Verify <code>MIXEDBREAD_API_KEY</code> and{" "}

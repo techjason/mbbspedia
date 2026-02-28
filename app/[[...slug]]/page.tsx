@@ -10,7 +10,12 @@ import { getMDXComponents } from "@/mdx-components";
 import type { Metadata } from "next";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { TabAwareTOC } from "@/components/mdx/tab-aware-toc";
-import { LLMCopyButton, ViewOptions } from "@/components/page-actions";
+import {
+  CollapseAllButton,
+  ExpandAllButton,
+  LLMCopyButton,
+  ViewOptions,
+} from "@/components/page-actions";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -91,6 +96,8 @@ export default async function Page(props: PageProps<"/[[...slug]]">) {
           githubUrl={getGithubUrl(page.path)}
           fragmentGithubUrls={fragmentGithubUrls}
         />
+        <ExpandAllButton />
+        <CollapseAllButton />
       </div>
       <DocsBody>
         <MDX

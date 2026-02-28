@@ -13,6 +13,10 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/cn";
+import {
+  COLLAPSE_ALL_FRAGMENT_DROPDOWNS_EVENT,
+  EXPAND_ALL_FRAGMENT_DROPDOWNS_EVENT,
+} from "@/lib/fragment-dropdown-events";
 
 type HeadingProps = {
   children?: ReactNode;
@@ -175,8 +179,29 @@ export function FragmentDropdownSection({
 
     syncOpenStateFromHash();
     window.addEventListener("hashchange", syncOpenStateFromHash);
+
+    const expandAllSections = () => {
+      setOpen(true);
+    };
+    const collapseAllSections = () => {
+      setOpen(false);
+    };
+    window.addEventListener(EXPAND_ALL_FRAGMENT_DROPDOWNS_EVENT, expandAllSections);
+    window.addEventListener(
+      COLLAPSE_ALL_FRAGMENT_DROPDOWNS_EVENT,
+      collapseAllSections,
+    );
+
     return () => {
       window.removeEventListener("hashchange", syncOpenStateFromHash);
+      window.removeEventListener(
+        EXPAND_ALL_FRAGMENT_DROPDOWNS_EVENT,
+        expandAllSections,
+      );
+      window.removeEventListener(
+        COLLAPSE_ALL_FRAGMENT_DROPDOWNS_EVENT,
+        collapseAllSections,
+      );
     };
   }, [hasCollapsibleSection]);
 
