@@ -179,23 +179,13 @@ function getSectionHeadingDepth(children) {
     }
     headingCounts.set(child.depth, (headingCounts.get(child.depth) ?? 0) + 1);
   }
-  const preferredDepths = [3, 2, 1];
+  const preferredDepths = [2, 1, 3, 4, 5, 6];
   for (const depth of preferredDepths) {
     if ((headingCounts.get(depth) ?? 0) >= 3) {
       return depth;
     }
   }
   for (const depth of preferredDepths) {
-    if ((headingCounts.get(depth) ?? 0) >= 2) {
-      return depth;
-    }
-  }
-  for (let depth = 4; depth <= 6; depth += 1) {
-    if ((headingCounts.get(depth) ?? 0) >= 3) {
-      return depth;
-    }
-  }
-  for (let depth = 4; depth <= 6; depth += 1) {
     if ((headingCounts.get(depth) ?? 0) >= 2) {
       return depth;
     }
@@ -216,7 +206,7 @@ function wrapSections(tree, headingDepth) {
     index += 1;
     while (index < tree.children.length) {
       const node = tree.children[index];
-      if (isHeadingAtDepth(node, headingDepth)) {
+      if (node.type === "heading" && typeof node.depth === "number" && node.depth <= headingDepth) {
         break;
       }
       sectionChildren.push(node);

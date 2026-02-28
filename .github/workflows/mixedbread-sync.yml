@@ -1,0 +1,60 @@
+name: Mixedbread Content Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "content/**/*.mdx"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mixedbread-content-sync
+  cancel-in-progress: true
+
+jobs:
+  sync-store:
+    runs-on: ubuntu-latest
+    env:
+      MXBAI_API_KEY: ${{ secrets.MIXEDBREAD_API_KEY }}
+      MIXEDBREAD_STORE_IDENTIFIER: ${{ secrets.MIXEDBREAD_STORE_IDENTIFIER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate secrets and resolve store
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${MXBAI_API_KEY:-}" ]]; then
+            echo "Missing required secret: MIXEDBREAD_API_KEY"
+            exit 1
+          fi
+          STORE_IDENTIFIER="${MIXEDBREAD_STORE_IDENTIFIER:-mbbspedia}"
+          echo "STORE_IDENTIFIER=$STORE_IDENTIFIER" >> "$GITHUB_ENV"
+
+      - name: Ensure Mixedbread store exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npx mxbai store get "$STORE_IDENTIFIER" >/dev/null 2>&1; then
+            echo "Store exists: $STORE_IDENTIFIER"
+          else
+            echo "Creating store: $STORE_IDENTIFIER"
+            npx mxbai store create "$STORE_IDENTIFIER"
+          fi
+
+      - name: Sync changed content to Mixedbread
+        run: npx mxbai store sync "$STORE_IDENTIFIER" "content/**/*.mdx" --strategy high_quality --yes
