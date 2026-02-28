@@ -155,6 +155,96 @@ function remarkCitations() {
   };
 }
 
+// lib/mdx/remark-fragment-dropdown-sections.ts
+function hasChildren2(node) {
+  return Array.isArray(node.children);
+}
+function isHeadingAtDepth(node, depth) {
+  return node.type === "heading" && node.depth === depth;
+}
+function getFilePath(file) {
+  if (!file) return "";
+  const rawPath = file.path ?? file.history?.[0] ?? "";
+  return rawPath.replace(/\\/g, "/");
+}
+function isFragmentFile(file) {
+  const path = getFilePath(file);
+  return path.includes("/content/fragments/");
+}
+function getSectionHeadingDepth(children) {
+  const headingCounts = /* @__PURE__ */ new Map();
+  for (const child of children) {
+    if (child.type !== "heading" || typeof child.depth !== "number") {
+      continue;
+    }
+    headingCounts.set(child.depth, (headingCounts.get(child.depth) ?? 0) + 1);
+  }
+  const preferredDepths = [3, 2, 1];
+  for (const depth of preferredDepths) {
+    if ((headingCounts.get(depth) ?? 0) >= 3) {
+      return depth;
+    }
+  }
+  for (const depth of preferredDepths) {
+    if ((headingCounts.get(depth) ?? 0) >= 2) {
+      return depth;
+    }
+  }
+  for (let depth = 4; depth <= 6; depth += 1) {
+    if ((headingCounts.get(depth) ?? 0) >= 3) {
+      return depth;
+    }
+  }
+  for (let depth = 4; depth <= 6; depth += 1) {
+    if ((headingCounts.get(depth) ?? 0) >= 2) {
+      return depth;
+    }
+  }
+  return null;
+}
+function wrapSections(tree, headingDepth) {
+  const nextChildren = [];
+  let index = 0;
+  while (index < tree.children.length) {
+    const current = tree.children[index];
+    if (!isHeadingAtDepth(current, headingDepth)) {
+      nextChildren.push(current);
+      index += 1;
+      continue;
+    }
+    const sectionChildren = [current];
+    index += 1;
+    while (index < tree.children.length) {
+      const node = tree.children[index];
+      if (isHeadingAtDepth(node, headingDepth)) {
+        break;
+      }
+      sectionChildren.push(node);
+      index += 1;
+    }
+    nextChildren.push({
+      type: "mdxJsxFlowElement",
+      name: "FragmentDropdownSection",
+      attributes: [],
+      children: sectionChildren
+    });
+  }
+  tree.children = nextChildren;
+}
+function remarkFragmentDropdownSections() {
+  return (tree, file) => {
+    if (tree.type !== "root" || !hasChildren2(tree) || !isFragmentFile(file)) {
+      return;
+    }
+    const root = tree;
+    const headingDepth = getSectionHeadingDepth(root.children);
+    if (headingDepth === null) {
+      return;
+    }
+    wrapSections(root, headingDepth);
+  };
+}
+
 // source.config.ts
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -168,7 +258,12 @@ var docs = defineDocs({
 });
 var source_config_default = defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkMath, remarkMdxMermaid, remarkCitations],
+    remarkPlugins: [
+      remarkMath,
+      remarkMdxMermaid,
+      remarkCitations,
+      remarkFragmentDropdownSections
+    ],
     rehypePlugins: (v) => [rehypeKatex, ...v]
   }
 });

@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, ExternalLinkIcon } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -8,6 +8,23 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cva } from 'class-variance-authority';
 
 const cache = new Map<string, string>();
+type FragmentTabKey = 'etiology' | 'ddx' | 'dx' | 'mx' | 'complications';
+
+function toFragmentTabKey(value: string): FragmentTabKey | null {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, '');
+  if (normalized === 'etiology') return 'etiology';
+  if (normalized === 'ddx') return 'ddx';
+  if (normalized === 'dx') return 'dx';
+  if (normalized === 'mx') return 'mx';
+  if (normalized === 'complications' || normalized === 'complication') return 'complications';
+  return null;
+}
+
+function readActiveTabKey(): FragmentTabKey | null {
+  const activeTab = document.querySelector<HTMLElement>('#nd-page [role="tab"][data-state="active"]');
+  if (!activeTab) return null;
+  return toFragmentTabKey(activeTab.textContent ?? '');
+}
 
 export function LLMCopyButton({
   /**
@@ -65,6 +82,7 @@ const optionVariants = cva(
 export function ViewOptions({
   markdownUrl,
   githubUrl,
+  fragmentGithubUrls,
 }: {
   /**
    * A URL to the raw Markdown/MDX content of page
@@ -75,7 +93,38 @@ export function ViewOptions({
    * Source file URL on GitHub
    */
   githubUrl: string;
+
+  /**
+   * Optional source file URLs for tab-based fragment sections.
+   */
+  fragmentGithubUrls?: Partial<Record<FragmentTabKey, string>>;
 }) {
+  const [resolvedGithubUrl, setResolvedGithubUrl] = useState(githubUrl);
+
+  useEffect(() => {
+    const updateGithubUrl = () => {
+      const activeTabKey = readActiveTabKey();
+      if (!activeTabKey) {
+        setResolvedGithubUrl(githubUrl);
+        return;
+      }
+
+      setResolvedGithubUrl(fragmentGithubUrls?.[activeTabKey] ?? githubUrl);
+    };
+
+    updateGithubUrl();
+
+    const observer = new MutationObserver(updateGithubUrl);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-state'],
+    });
+
+    return () => observer.disconnect();
+  }, [fragmentGithubUrls, githubUrl]);
+
   const items = useMemo(() => {
     const fullMarkdownUrl =
       typeof window !== 'undefined' ? new URL(markdownUrl, window.location.origin) : 'loading';
@@ -119,7 +168,7 @@ export function ViewOptions({
       },
       {
         title: 'Open in GitHub',
-        href: githubUrl,
+        href: resolvedGithubUrl,
         icon: (
           <svg fill="currentColor" role="img" viewBox="0 0 24 24">
             <title>GitHub</title>
@@ -128,7 +177,7 @@ export function ViewOptions({
         ),
       },
     ];
-  }, [githubUrl, markdownUrl]);
+  }, [markdownUrl, resolvedGithubUrl]);
 
   return (
     <Popover>

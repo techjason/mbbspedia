@@ -11,6 +11,59 @@ import type { Metadata } from "next";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { TabAwareTOC } from "@/components/mdx/tab-aware-toc";
 import { LLMCopyButton, ViewOptions } from "@/components/page-actions";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+type FragmentTabKey = "etiology" | "ddx" | "dx" | "mx" | "complications";
+
+const SECTION_IMPORT_TO_TAB_KEY: Record<string, FragmentTabKey> = {
+  EtiologySection: "etiology",
+  DdxSection: "ddx",
+  DxSection: "dx",
+  MxSection: "mx",
+  ComplicationsSection: "complications",
+};
+
+function getGithubUrl(pagePath: string) {
+  return `https://github.com/techjason/mbbspedia/blob/main/content/docs/${pagePath}`;
+}
+
+function getGithubUrlFromRepoPath(repoPath: string) {
+  const normalizedPath = repoPath.replace(/\\/g, "/");
+  return `https://github.com/techjason/mbbspedia/blob/main/${normalizedPath}`;
+}
+
+async function getFragmentGithubUrls(pagePath: string) {
+  const docsRepoPath = path.posix.join("content/docs", pagePath);
+  const docsAbsPath = path.join(process.cwd(), docsRepoPath);
+
+  const fragmentGithubUrls: Partial<Record<FragmentTabKey, string>> = {};
+
+  try {
+    const source = await readFile(docsAbsPath, "utf8");
+    const importRegex = /import\s+(\w+)\s+from\s+["']([^"']+)["'];/g;
+    const docsDir = path.dirname(docsAbsPath);
+
+    for (const match of source.matchAll(importRegex)) {
+      const sectionName = match[1];
+      const importPath = match[2];
+      const tabKey = SECTION_IMPORT_TO_TAB_KEY[sectionName];
+
+      if (!tabKey || !importPath.endsWith(".mdx")) continue;
+
+      const resolvedAbsPath = path.resolve(docsDir, importPath);
+      const repoRelativePath = path.relative(process.cwd(), resolvedAbsPath);
+
+      if (!repoRelativePath || repoRelativePath.startsWith("..")) continue;
+
+      fragmentGithubUrls[tabKey] = getGithubUrlFromRepoPath(repoRelativePath);
+    }
+  } catch {
+    return {};
+  }
+
+  return fragmentGithubUrls;
+}
 
 export default async function Page(props: PageProps<"/[[...slug]]">) {
   const params = await props.params;
@@ -18,6 +71,7 @@ export default async function Page(props: PageProps<"/[[...slug]]">) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const fragmentGithubUrls = await getFragmentGithubUrls(page.path);
 
   return (
     <DocsPage
@@ -34,7 +88,8 @@ export default async function Page(props: PageProps<"/[[...slug]]">) {
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/techjason/mbbspedia/blob/dev/apps/docs/content/docs/${page.path}`}
+          githubUrl={getGithubUrl(page.path)}
+          fragmentGithubUrls={fragmentGithubUrls}
         />
       </div>
       <DocsBody>
