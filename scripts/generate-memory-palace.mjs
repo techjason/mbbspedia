@@ -27,23 +27,20 @@ const KNOWN_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 const BLUEPRINT_SCHEMA = z.object({
   sceneTitle: z.string().min(1),
   sceneSetting: z.string().min(1),
-  anchors: z
-    .array(
-      z.object({
-        number: z.number().int().min(1).max(20),
-        scene: z.string().min(1),
-        visualCue: z.string().min(1),
-        medicalMeaning: z.string().min(1),
-      }),
-    )
-    .min(8)
-    .max(10),
+  anchors: z.array(
+    z.object({
+      number: z.number().int().min(1).max(99),
+      scene: z.string().min(1),
+      visualCue: z.string().min(1),
+      medicalMeaning: z.string().min(1),
+    }),
+  ),
 });
 
 const LEGEND_SCHEMA = z.object({
   rows: z.array(
     z.object({
-      number: z.number().int().min(1).max(20),
+      number: z.number().int().min(1).max(99),
       visualCue: z.string().min(1),
       meaning: z.string().min(1),
     }),
@@ -249,7 +246,9 @@ async function scanArticles() {
     if (!absolutePath.endsWith(".mdx")) continue;
     if (path.basename(absolutePath).toLowerCase() === "index.mdx") continue;
 
-    const relativePath = path.relative(DOCS_ROOT, absolutePath).replace(/\\/g, "/");
+    const relativePath = path
+      .relative(DOCS_ROOT, absolutePath)
+      .replace(/\\/g, "/");
     const raw = await readFile(absolutePath, "utf8");
     const frontmatter = extractFrontmatter(raw);
     const title =
@@ -326,7 +325,9 @@ async function promptForArticleSelection(articles) {
         continue;
       }
 
-      const visible = ranked.slice(0, RESULT_PREVIEW_LIMIT).map((entry) => entry.article);
+      const visible = ranked
+        .slice(0, RESULT_PREVIEW_LIMIT)
+        .map((entry) => entry.article);
       console.log("");
       visible.forEach((article, index) => {
         console.log(`${index + 1}. ${article.title} (${article.docStem})`);
@@ -391,7 +392,10 @@ function resolveArticleByStem(articles, docStem) {
 
 function resolveMemoryPalaceImportSpecifier(summaryImportSpecifier) {
   if (summaryImportSpecifier.endsWith("/summary.mdx")) {
-    return summaryImportSpecifier.replace(/\/summary\.mdx$/, "/memory-palace.mdx");
+    return summaryImportSpecifier.replace(
+      /\/summary\.mdx$/,
+      "/memory-palace.mdx",
+    );
   }
 
   return path.posix.join(
@@ -408,7 +412,9 @@ async function resolveSelectedArticle(article) {
     article.title ||
     humanizeFileName(path.basename(article.absolutePath));
   const description =
-    parseFrontmatterValue(frontmatter, "description") || article.description || "";
+    parseFrontmatterValue(frontmatter, "description") ||
+    article.description ||
+    "";
   const summaryMatch = docSource.match(
     /^import\s+SummarySection\s+from\s+["']([^"']+)["'];?\s*$/m,
   );
@@ -445,6 +451,7 @@ async function resolveSelectedArticle(article) {
     docSource,
     summaryAbsPath,
     summaryImportSpecifier,
+    summaryRaw,
     summaryText: cleanMdxText(summaryRaw),
     fragmentDir,
     memoryPalaceAbsPath,
@@ -499,26 +506,32 @@ function normalizeLegend(legend, anchorCount) {
   }));
 }
 
-async function generateBlueprint({ title, description, summaryText, textModel }) {
+async function generateBlueprint({
+  title,
+  description,
+  summaryText,
+  textModel,
+}) {
   const { output } = await generateText({
     model: gateway(textModel),
     output: Output.object({ schema: BLUEPRINT_SCHEMA }),
     system:
-      "You design high-retention medical memory palaces. Produce a concrete, visually coherent scene plan that can be drawn as one sketch. Use clear, memorable loci in a stable left-to-right or top-to-bottom order.",
+      "You design high-retention medical memory palaces. Produce a concrete, visually coherent scene plan that can be drawn as one sketch.",
     prompt: `Create a numbered memory-palace blueprint for the following article.
 
 Topic title: ${title}
 Topic description: ${description || "N/A"}
 
 Requirements:
-- Produce exactly 8 to 10 numbered loci.
+- Use as many numbered loci as needed to cover the important recall targets well.
 - Number the loci sequentially starting from 1.
 - Each locus must be easy to sketch in a hand-drawn, sketchy educational style.
 - Keep each medical meaning concise but exam-useful.
 - Prefer concrete objects, places, gestures, and exaggerated visual metaphors over abstract concepts.
 - Keep the whole scene visually coherent as one memory palace.
+- The summary callouts are the highest-priority material. Cover them thoroughly.
 
-Article summary:
+Full summary tab MDX, including callouts:
 ${summaryText}`,
   });
 
@@ -580,7 +593,9 @@ ${JSON.stringify(blueprint, null, 2)}`,
 }
 
 function extensionFromMediaType(mediaType) {
-  const normalized = String(mediaType ?? "").trim().toLowerCase();
+  const normalized = String(mediaType ?? "")
+    .trim()
+    .toLowerCase();
   if (normalized === "image/png") return "png";
   if (normalized === "image/jpeg") return "jpg";
   if (normalized === "image/webp") return "webp";
@@ -618,7 +633,11 @@ ${tableRows}
 }
 
 function ensureMemoryPalaceImport(docSource, importSpecifier) {
-  if (/^import\s+MemoryPalaceSection\s+from\s+["'][^"']+["'];?\s*$/m.test(docSource)) {
+  if (
+    /^import\s+MemoryPalaceSection\s+from\s+["'][^"']+["'];?\s*$/m.test(
+      docSource,
+    )
+  ) {
     return docSource;
   }
 
@@ -626,7 +645,9 @@ function ensureMemoryPalaceImport(docSource, importSpecifier) {
     /^(import\s+SummarySection\s+from\s+["'][^"']+["'];?)\n+/m,
   );
   if (!summaryImportMatch) {
-    throw new Error("Could not find SummarySection import to anchor Memory Palace import.");
+    throw new Error(
+      "Could not find SummarySection import to anchor Memory Palace import.",
+    );
   }
 
   const inserted = `${summaryImportMatch[1]}\nimport MemoryPalaceSection from ${JSON.stringify(
@@ -638,15 +659,23 @@ function ensureMemoryPalaceImport(docSource, importSpecifier) {
 function ensureMemoryPalaceTabItem(docSource) {
   const tabsMatch = docSource.match(/<Tabs items=\{\[([\s\S]*?)\]\}>/);
   if (!tabsMatch) {
-    throw new Error('Could not find `<Tabs items={[...]} >` block in article doc.');
+    throw new Error(
+      "Could not find `<Tabs items={[...]} >` block in article doc.",
+    );
   }
 
   const itemsSource = tabsMatch[1];
-  if (itemsSource.includes('"Memory Palace"') || itemsSource.includes("'Memory Palace'")) {
+  if (
+    itemsSource.includes('"Memory Palace"') ||
+    itemsSource.includes("'Memory Palace'")
+  ) {
     return docSource;
   }
 
-  if (!itemsSource.includes('"Summary"') && !itemsSource.includes("'Summary'")) {
+  if (
+    !itemsSource.includes('"Summary"') &&
+    !itemsSource.includes("'Summary'")
+  ) {
     throw new Error('Could not find "Summary" entry in tab items array.');
   }
 
@@ -666,9 +695,13 @@ function ensureMemoryPalaceTabBlock(docSource) {
     return docSource;
   }
 
-  const summaryTabMatch = docSource.match(/<Tab value="Summary">[\s\S]*?<\/Tab>/);
+  const summaryTabMatch = docSource.match(
+    /<Tab value="Summary">[\s\S]*?<\/Tab>/,
+  );
   if (!summaryTabMatch) {
-    throw new Error('Could not find `<Tab value="Summary">` block in article doc.');
+    throw new Error(
+      'Could not find `<Tab value="Summary">` block in article doc.',
+    );
   }
 
   const memoryPalaceBlock = `<Tab value="Memory Palace">
@@ -696,7 +729,9 @@ async function findExistingImageAssets(docStem) {
 }
 
 async function confirmOverwriteIfNeeded({ selectedArticle, force }) {
-  const existingImageAssets = await findExistingImageAssets(selectedArticle.docStem);
+  const existingImageAssets = await findExistingImageAssets(
+    selectedArticle.docStem,
+  );
   const fragmentExists = await fileExists(selectedArticle.memoryPalaceAbsPath);
   const needsOverwrite = fragmentExists || existingImageAssets.length > 0;
 
@@ -725,7 +760,9 @@ async function confirmOverwriteIfNeeded({ selectedArticle, force }) {
     );
     const confirmed = /^y(es)?$/i.test(answer.trim());
     if (!confirmed) {
-      throw new Error("Aborted without overwriting existing memory palace assets.");
+      throw new Error(
+        "Aborted without overwriting existing memory palace assets.",
+      );
     }
   } finally {
     rl.close();
@@ -772,12 +809,16 @@ async function main() {
     force: options.force,
   });
 
-  console.log(`[memory-palace] Selected article: ${selectedArticle.title} (${selectedArticle.docStem})`);
-  console.log(`[memory-palace] Generating blueprint with ${options.textModel}...`);
+  console.log(
+    `[memory-palace] Selected article: ${selectedArticle.title} (${selectedArticle.docStem})`,
+  );
+  console.log(
+    `[memory-palace] Generating blueprint with ${options.textModel}...`,
+  );
   const blueprint = await generateBlueprint({
     title: selectedArticle.title,
     description: selectedArticle.description,
-    summaryText: selectedArticle.summaryText,
+    summaryText: selectedArticle.summaryRaw,
     textModel: options.textModel,
   });
 
@@ -804,12 +845,15 @@ async function main() {
     PUBLIC_ROOT,
     `${selectedArticle.docStem}.${imageExtension}`,
   );
-  const imagePublicPath = `/memory-palaces/${selectedArticle.docStem}.${imageExtension}`.replace(
-    /\\/g,
-    "/",
-  );
+  const imagePublicPath =
+    `/memory-palaces/${selectedArticle.docStem}.${imageExtension}`.replace(
+      /\\/g,
+      "/",
+    );
 
-  console.log(`[memory-palace] Generating legend rows with ${options.textModel}...`);
+  console.log(
+    `[memory-palace] Generating legend rows with ${options.textModel}...`,
+  );
   const legendRows = await generateLegendRows({
     title: selectedArticle.title,
     blueprint,
@@ -824,7 +868,10 @@ async function main() {
 
   const updatedDocSource = [
     (source) =>
-      ensureMemoryPalaceImport(source, selectedArticle.memoryPalaceImportSpecifier),
+      ensureMemoryPalaceImport(
+        source,
+        selectedArticle.memoryPalaceImportSpecifier,
+      ),
     ensureMemoryPalaceTabItem,
     ensureMemoryPalaceTabBlock,
   ].reduce((source, transform) => transform(source), selectedArticle.docSource);
@@ -837,8 +884,12 @@ async function main() {
   await writeFile(selectedArticle.absolutePath, updatedDocSource, "utf8");
 
   console.log(`[memory-palace] Wrote image: ${imageAbsolutePath}`);
-  console.log(`[memory-palace] Wrote fragment: ${selectedArticle.memoryPalaceAbsPath}`);
-  console.log(`[memory-palace] Updated article: ${selectedArticle.absolutePath}`);
+  console.log(
+    `[memory-palace] Wrote fragment: ${selectedArticle.memoryPalaceAbsPath}`,
+  );
+  console.log(
+    `[memory-palace] Updated article: ${selectedArticle.absolutePath}`,
+  );
 }
 
 main().catch((error) => {
