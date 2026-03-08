@@ -526,9 +526,10 @@ Requirements:
 - Use as many numbered loci as needed to cover the important recall targets well.
 - Number the loci sequentially starting from 1.
 - Each locus must be easy to sketch in a hand-drawn, sketchy educational style.
-- Keep each medical meaning concise but exam-useful.
-- Prefer concrete objects, places, gestures, and exaggerated visual metaphors over abstract concepts.
+- Design the palace as one unified environment with a single dominant setting.
+- Do not create loci that feel like separate poster panels or disconnected mini-illustrations.
 - Keep the whole scene visually coherent as one memory palace.
+- If a concept can only be communicated by writing a word, use a pictorial metaphor instead.
 - The summary callouts are the highest-priority material. Cover them thoroughly.
 
 Full summary tab MDX, including callouts:
@@ -556,16 +557,20 @@ Numbered loci to include exactly once each:
 ${anchorLines}
 
 Visual requirements:
-- Hand-drawn, sketchy, slightly whimsical study-sheet style.
-- Clean composition with generous whitespace and uncluttered spacing.
 - Landscape composition with a roughly 4:3 feel.
 - Arabic numerals must be clearly visible next to each locus.
-- Make the numbered cues readable at a glance.
 - Use a light paper or notebook-page background.
 - Keep it as one coherent memory palace, not a collage of unrelated panels.
 - No legend table, no paragraph text, no citations, no reference list.
 - Avoid dense prose labels; if text is used, keep it minimal and secondary to the drawing.
-- Emphasize recognisable objects, spatial flow, and visual metaphors for recall.`;
+- This must look like one sketchbook spread of a single imagined place, not a labeled medical infographic.
+- Use only the numbered markers for indexing. Do NOT render labels, captions, banners, titles, acronyms, scoreboards, arrows with words, section names, or explanatory text anywhere in the image.
+- Express concepts through visual metaphor, anatomy, props, pose, motion, costume, scale, and exaggeration, not through text.
+- Avoid boxed callout panels, comic-book frames, cutaway mini-scenes, or infographic layout blocks.
+- Avoid a classroom poster look. Prefer a hand-drawn panoramic sketch with one shared setting.
+- Keep the composition uncluttered but immersive, with continuous ground, walls, roads, pipes, or architectural structure tying the loci together.
+- Arabic numerals should be present and readable near each locus, but they should be small secondary markers, not the main visual feature.
+- No legend table, no paragraph text, no citations, no reference list inside the image.`;
 }
 
 async function generateLegendRows({ title, blueprint, textModel }) {
