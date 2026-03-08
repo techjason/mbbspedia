@@ -30,19 +30,10 @@ const BLUEPRINT_SCHEMA = z.object({
   anchors: z.array(
     z.object({
       number: z.number().int().min(1).max(99),
+      coveredTargetIds: z.array(z.number().int().min(1)).min(1),
       scene: z.string().min(1),
       visualCue: z.string().min(1),
       medicalMeaning: z.string().min(1),
-    }),
-  ),
-});
-
-const LEGEND_SCHEMA = z.object({
-  rows: z.array(
-    z.object({
-      number: z.number().int().min(1).max(99),
-      visualCue: z.string().min(1),
-      meaning: z.string().min(1),
     }),
   ),
 });
@@ -194,6 +185,116 @@ function cleanMdxText(raw) {
     .replace(/\|/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function cleanInlineMdxText(raw) {
+  return String(raw ?? "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\[(\d+)\]/g, "")
+    .replace(/[*_`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractRecallTargets(summaryRaw) {
+  const lines = String(summaryRaw ?? "").split(/\r?\n/);
+  const recallTargets = [];
+  let section = "";
+  let subsection = "";
+
+  const pushTarget = (text) => {
+    const cleanedText = cleanInlineMdxText(text).replace(/:\s*$/, "").trim();
+    if (!cleanedText) {
+      return;
+    }
+
+    recallTargets.push({
+      id: recallTargets.length + 1,
+      section,
+      subsection,
+      text: cleanedText,
+    });
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    const calloutMatch = trimmed.match(
+      /^<Callout\b[^>]*title=(["'])(.*?)\1[^>]*>/i,
+    );
+    if (calloutMatch) {
+      section = cleanInlineMdxText(calloutMatch[2]);
+      subsection = "";
+      continue;
+    }
+
+    if (trimmed.startsWith("</Callout")) {
+      subsection = "";
+      continue;
+    }
+
+    const numberedMatch = trimmed.match(/^\d+\.\s+(.*)$/);
+    if (numberedMatch) {
+      pushTarget(numberedMatch[1]);
+      continue;
+    }
+
+    const bulletMatch = trimmed.match(/^-\s+(.*)$/);
+    if (bulletMatch) {
+      pushTarget(bulletMatch[1]);
+      continue;
+    }
+
+    const boldLabelBodyMatch = trimmed.match(/^\*\*(.+?)\*\*:\s*(.+)$/);
+    if (boldLabelBodyMatch) {
+      const label = cleanInlineMdxText(boldLabelBodyMatch[1]);
+      const body = cleanInlineMdxText(boldLabelBodyMatch[2]);
+
+      if (!body) {
+        subsection = label;
+        continue;
+      }
+
+      pushTarget(`${label}: ${body}`);
+      continue;
+    }
+
+    const wholeBoldMatch = trimmed.match(/^\*\*(.+?)\*\*$/);
+    if (wholeBoldMatch) {
+      const cleaned = cleanInlineMdxText(wholeBoldMatch[1]);
+      if (!cleaned) {
+        continue;
+      }
+
+      if (cleaned.endsWith(":")) {
+        subsection = cleaned.replace(/:\s*$/, "").trim();
+        continue;
+      }
+
+      pushTarget(cleaned);
+      continue;
+    }
+
+    pushTarget(trimmed);
+  }
+
+  return recallTargets;
+}
+
+function formatRecallTargetForPrompt(target) {
+  const scope = [target.section, target.subsection].filter(Boolean).join(" > ");
+  return `[${target.id}] ${scope ? `${scope} :: ` : ""}${target.text}`;
+}
+
+function formatRecallTargetForLegend(target) {
+  return target.text;
+}
+
+function formatRecallTargetsForPrompt(recallTargets) {
+  return recallTargets.map(formatRecallTargetForPrompt).join("\n");
 }
 
 function normalizeSearchText(value) {
@@ -459,8 +560,10 @@ async function resolveSelectedArticle(article) {
   };
 }
 
-function normalizeBlueprint(blueprint) {
+function normalizeBlueprint(blueprint, recallTargets) {
   const anchors = [...blueprint.anchors].sort((a, b) => a.number - b.number);
+  const validTargetIds = new Set(recallTargets.map((target) => target.id));
+  const targetCoverageCounts = new Map();
 
   anchors.forEach((anchor, index) => {
     if (anchor.number !== index + 1) {
@@ -470,80 +573,128 @@ function normalizeBlueprint(blueprint) {
     }
   });
 
-  return {
-    sceneTitle: blueprint.sceneTitle.trim(),
-    sceneSetting: blueprint.sceneSetting.trim(),
-    anchors: anchors.map((anchor) => ({
+  const normalizedAnchors = anchors.map((anchor) => {
+    const coveredTargetIds = [...new Set(anchor.coveredTargetIds)].sort(
+      (a, b) => a - b,
+    );
+
+    if (coveredTargetIds.length === 0) {
+      throw new Error(
+        `Anchor ${anchor.number} must cover at least one target.`,
+      );
+    }
+
+    for (const targetId of coveredTargetIds) {
+      if (!validTargetIds.has(targetId)) {
+        throw new Error(
+          `Anchor ${anchor.number} references unknown target ID ${targetId}.`,
+        );
+      }
+
+      targetCoverageCounts.set(
+        targetId,
+        (targetCoverageCounts.get(targetId) ?? 0) + 1,
+      );
+    }
+
+    return {
       number: anchor.number,
+      coveredTargetIds,
       scene: anchor.scene.trim(),
       visualCue: anchor.visualCue.trim(),
       medicalMeaning: anchor.medicalMeaning.trim(),
-    })),
-  };
-}
+    };
+  });
 
-function normalizeLegend(legend, anchorCount) {
-  const rows = [...legend.rows].sort((a, b) => a.number - b.number);
-
-  if (rows.length !== anchorCount) {
+  const missingTargets = recallTargets.filter(
+    (target) => !targetCoverageCounts.has(target.id),
+  );
+  if (missingTargets.length > 0) {
     throw new Error(
-      `Legend row count ${rows.length} does not match blueprint anchor count ${anchorCount}.`,
+      `Blueprint is missing recall targets: ${missingTargets
+        .slice(0, 8)
+        .map((target) => target.id)
+        .join(", ")}${missingTargets.length > 8 ? ", ..." : ""}.`,
     );
   }
 
-  rows.forEach((row, index) => {
-    if (row.number !== index + 1) {
-      throw new Error(
-        `Legend numbering must be sequential starting at 1. Received ${row.number} at position ${index + 1}.`,
-      );
-    }
-  });
+  const duplicateCoverage = [...targetCoverageCounts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([targetId]) => targetId);
+  if (duplicateCoverage.length > 0) {
+    throw new Error(
+      `Blueprint covers some recall targets more than once: ${duplicateCoverage
+        .slice(0, 8)
+        .join(", ")}${duplicateCoverage.length > 8 ? ", ..." : ""}.`,
+    );
+  }
 
-  return rows.map((row) => ({
-    number: row.number,
-    visualCue: row.visualCue.trim(),
-    meaning: row.meaning.trim(),
-  }));
+  return {
+    sceneTitle: blueprint.sceneTitle.trim(),
+    sceneSetting: blueprint.sceneSetting.trim(),
+    anchors: normalizedAnchors,
+  };
 }
 
 async function generateBlueprint({
   title,
   description,
-  summaryText,
+  recallTargets,
   textModel,
 }) {
   const { output } = await generateText({
     model: gateway(textModel),
     output: Output.object({ schema: BLUEPRINT_SCHEMA }),
     system:
-      "You design high-retention medical memory palaces. Produce a concrete, visually coherent scene plan that can be drawn as one sketch.",
+      "You design high-retention medical memory palaces. Produce a concrete, visually coherent scene plan that can be drawn as one sketch. Coverage must be exact and complete.",
     prompt: `Create a numbered memory-palace blueprint for the following article.
 
 Topic title: ${title}
 Topic description: ${description || "N/A"}
 
+Mandatory recall targets (${recallTargets.length} total):
+${formatRecallTargetsForPrompt(recallTargets)}
+
 Requirements:
-- Use as many numbered loci as needed to cover the important recall targets well.
+- Every target ID above is mandatory.
+- Every target ID must appear exactly once in anchors[].coveredTargetIds.
+- Use as many numbered loci as needed to cover all recall targets without dropping details.
+- You may group closely related target IDs into one locus only if the scene remains drawable and medicalMeaning explicitly covers every grouped target.
+- If grouping would hide or blur an exam-significant fact, split it into more loci.
+- Do not collapse enumerated lists into vague summaries. If the source names six complications separately, all six must remain individually covered in coveredTargetIds and in medicalMeaning.
 - Number the loci sequentially starting from 1.
 - Each locus must be easy to sketch in a hand-drawn, sketchy educational style.
 - Design the palace as one unified environment with a single dominant setting.
 - Do not create loci that feel like separate poster panels or disconnected mini-illustrations.
 - Keep the whole scene visually coherent as one memory palace.
 - If a concept can only be communicated by writing a word, use a pictorial metaphor instead.
-- The summary callouts are the highest-priority material. Cover them thoroughly.
+- Prefer a complete palace over an over-compressed palace.
+- medicalMeaning must explicitly mention the facts represented by all coveredTargetIds for that locus.
 
-Full summary tab MDX, including callouts:
-${summaryText}`,
+Output rules:
+- Include coveredTargetIds on every anchor.
+- Keep scene and visualCue concrete and drawable.
+- Keep medicalMeaning concise but complete.
+`,
   });
 
-  return normalizeBlueprint(output);
+  return normalizeBlueprint(output, recallTargets);
 }
 
-function buildImagePrompt({ title, description, blueprint }) {
+function buildImagePrompt({ title, description, blueprint, recallTargets }) {
+  const recallTargetMap = new Map(
+    recallTargets.map((target) => [target.id, target]),
+  );
   const anchorLines = blueprint.anchors
     .map(
       (anchor) =>
-        `${anchor.number}. Scene: ${anchor.scene}. Visual cue: ${anchor.visualCue}. Meaning: ${anchor.medicalMeaning}.`,
+        `${anchor.number}. Scene: ${anchor.scene}. Visual cue: ${
+          anchor.visualCue
+        }. Must visually encode: ${anchor.coveredTargetIds
+          .map((targetId) =>
+            formatRecallTargetForPrompt(recallTargetMap.get(targetId)),
+          )
+          .join(" | ")}. Meaning: ${anchor.medicalMeaning}.`,
     )
     .join("\n");
 
@@ -573,28 +724,20 @@ Visual requirements:
 - No legend table, no paragraph text, no citations, no reference list inside the image.`;
 }
 
-async function generateLegendRows({ title, blueprint, textModel }) {
-  const { output } = await generateText({
-    model: gateway(textModel),
-    output: Output.object({ schema: LEGEND_SCHEMA }),
-    system:
-      "You write concise numbered legends for medical memory palaces. Preserve numbering exactly and keep each row aligned to the supplied blueprint.",
-    prompt: `Rewrite the following blueprint as legend rows for a memory-palace tab.
+function buildLegendRowsFromBlueprint({ blueprint, recallTargets }) {
+  const recallTargetMap = new Map(
+    recallTargets.map((target) => [target.id, target]),
+  );
 
-Topic title: ${title}
-
-Rules:
-- Return the same number of rows as the blueprint.
-- Preserve numbering exactly.
-- Keep visualCue short and concrete.
-- Keep meaning concise and medically specific.
-- Do not add new loci or merge rows.
-
-Blueprint:
-${JSON.stringify(blueprint, null, 2)}`,
-  });
-
-  return normalizeLegend(output, blueprint.anchors.length);
+  return blueprint.anchors.map((anchor) => ({
+    number: anchor.number,
+    visualCue: anchor.visualCue.trim(),
+    meaning: anchor.coveredTargetIds
+      .map((targetId) => recallTargetMap.get(targetId))
+      .filter(Boolean)
+      .map((target) => `- ${formatRecallTargetForLegend(target)}`)
+      .join("\n"),
+  }));
 }
 
 function extensionFromMediaType(mediaType) {
@@ -809,6 +952,12 @@ async function main() {
     : await promptForArticleSelection(articles);
 
   const selectedArticle = await resolveSelectedArticle(selectedArticleBase);
+  const recallTargets = extractRecallTargets(selectedArticle.summaryRaw);
+  if (recallTargets.length === 0) {
+    throw new Error(
+      `Could not extract recall targets from summary: ${selectedArticle.summaryAbsPath}`,
+    );
+  }
   const { existingImageAssets } = await confirmOverwriteIfNeeded({
     selectedArticle,
     force: options.force,
@@ -818,12 +967,15 @@ async function main() {
     `[memory-palace] Selected article: ${selectedArticle.title} (${selectedArticle.docStem})`,
   );
   console.log(
+    `[memory-palace] Extracted ${recallTargets.length} recall targets from summary.`,
+  );
+  console.log(
     `[memory-palace] Generating blueprint with ${options.textModel}...`,
   );
   const blueprint = await generateBlueprint({
     title: selectedArticle.title,
     description: selectedArticle.description,
-    summaryText: selectedArticle.summaryRaw,
+    recallTargets,
     textModel: options.textModel,
   });
 
@@ -834,6 +986,7 @@ async function main() {
       title: selectedArticle.title,
       description: selectedArticle.description,
       blueprint,
+      recallTargets,
     }),
   });
 
@@ -857,12 +1010,11 @@ async function main() {
     );
 
   console.log(
-    `[memory-palace] Generating legend rows with ${options.textModel}...`,
+    "[memory-palace] Building legend rows from validated coverage...",
   );
-  const legendRows = await generateLegendRows({
-    title: selectedArticle.title,
+  const legendRows = buildLegendRowsFromBlueprint({
     blueprint,
-    textModel: options.textModel,
+    recallTargets,
   });
 
   const fragmentSource = buildMemoryPalaceFragment({
