@@ -670,6 +670,7 @@ Requirements:
 - You may group closely related target IDs into one locus only if the scene remains drawable and medicalMeaning explicitly covers every grouped target.
 - If grouping would hide or blur an exam-significant fact, split it into more loci.
 - Do not collapse enumerated lists into vague summaries. If the source names six complications separately, all six must remain individually covered in coveredTargetIds and in medicalMeaning.
+- When remembering classifications use memorable loci for the classification's name (e.g. Fontaine classification will be a fountain). Also have loci for each stage so user can look at what each stage of the classification is visually.
 - Number the loci sequentially starting from 1.
 - Each locus must be easy to sketch in a hand-drawn, sketchy educational style.
 - Design the palace as one unified environment with a single dominant setting.
@@ -722,6 +723,7 @@ Visual requirements:
 - No isolated stickers, floating icons, disconnected mini-scenes, empty-canvas scatter, worksheet layout, or separate poster blocks.
 - If comparison is needed, stage it within adjacent parts of the same environment, not in separate standalone panels.
 - Landscape composition with a roughly 4:3 feel.
+- Output in high quality, 4K resolution.
 - Arabic numerals must be clearly visible next to each locus.
 - Use a light paper or notebook-page background.
 - Keep it as one coherent memory palace, not a collage of unrelated panels.
