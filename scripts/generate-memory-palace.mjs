@@ -27,10 +27,12 @@ const KNOWN_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 const BLUEPRINT_SCHEMA = z.object({
   sceneTitle: z.string().min(1),
   sceneSetting: z.string().min(1),
+  sceneLayout: z.string().min(1),
   anchors: z.array(
     z.object({
       number: z.number().int().min(1).max(99),
       coveredTargetIds: z.array(z.number().int().min(1)).min(1),
+      placement: z.string().min(1),
       scene: z.string().min(1),
       visualCue: z.string().min(1),
       medicalMeaning: z.string().min(1),
@@ -600,6 +602,7 @@ function normalizeBlueprint(blueprint, recallTargets) {
     return {
       number: anchor.number,
       coveredTargetIds,
+      placement: anchor.placement.trim(),
       scene: anchor.scene.trim(),
       visualCue: anchor.visualCue.trim(),
       medicalMeaning: anchor.medicalMeaning.trim(),
@@ -632,6 +635,7 @@ function normalizeBlueprint(blueprint, recallTargets) {
   return {
     sceneTitle: blueprint.sceneTitle.trim(),
     sceneSetting: blueprint.sceneSetting.trim(),
+    sceneLayout: blueprint.sceneLayout.trim(),
     anchors: normalizedAnchors,
   };
 }
@@ -656,6 +660,10 @@ Mandatory recall targets (${recallTargets.length} total):
 ${formatRecallTargetsForPrompt(recallTargets)}
 
 Requirements:
+- sceneSetting must be one concrete place, not a theme or a collection of panels.
+- sceneLayout must describe one connected camera view and one shared physical layout, such as a cutaway building, isometric campus, continuous street, ward complex, tunnel, or museum hall.
+- The finished illustration must read as one traversable place with continuous ground, walls, corridors, stairs, roads, pipes, bridges, or landscape.
+- Every anchor must include placement describing exactly where it sits inside that shared environment.
 - Every target ID above is mandatory.
 - Every target ID must appear exactly once in anchors[].coveredTargetIds.
 - Use as many numbered loci as needed to cover all recall targets without dropping details.
@@ -665,15 +673,21 @@ Requirements:
 - Number the loci sequentially starting from 1.
 - Each locus must be easy to sketch in a hand-drawn, sketchy educational style.
 - Design the palace as one unified environment with a single dominant setting.
-- Do not create loci that feel like separate poster panels or disconnected mini-illustrations.
-- Keep the whole scene visually coherent as one memory palace.
+- Do not create loci that feel like separate poster panels, floating stickers, diagnostic thumbnails, blank-canvas islands, or disconnected mini-illustrations.
+- Prefer rooms, corners, hallways, stair landings, courtyards, roadsides, bedsides, walls, doorways, bridges, pipes, and fixtures that are structurally part of the same place.
+- Keep the whole scene visually coherent as one memory palace and one continuous journey through space.
 - If a concept can only be communicated by writing a word, use a pictorial metaphor instead.
+- Avoid charts, signboards, posters, labels, readable monitor screens, flow diagrams, and explanatory captions as primary carriers of meaning.
+- visualCue must be mostly pictorial and should not depend on readable text, except the small Arabic anchor numerals.
 - Prefer a complete palace over an over-compressed palace.
 - medicalMeaning must explicitly mention the facts represented by all coveredTargetIds for that locus.
 
 Output rules:
+- Include sceneLayout.
 - Include coveredTargetIds on every anchor.
+- Include placement on every anchor.
 - Keep scene and visualCue concrete and drawable.
+- Make visualCue pictorial rather than textual.
 - Keep medicalMeaning concise but complete.
 `,
   });
@@ -682,19 +696,10 @@ Output rules:
 }
 
 function buildImagePrompt({ title, description, blueprint, recallTargets }) {
-  const recallTargetMap = new Map(
-    recallTargets.map((target) => [target.id, target]),
-  );
   const anchorLines = blueprint.anchors
     .map(
       (anchor) =>
-        `${anchor.number}. Scene: ${anchor.scene}. Visual cue: ${
-          anchor.visualCue
-        }. Must visually encode: ${anchor.coveredTargetIds
-          .map((targetId) =>
-            formatRecallTargetForPrompt(recallTargetMap.get(targetId)),
-          )
-          .join(" | ")}. Meaning: ${anchor.medicalMeaning}.`,
+        `${anchor.number}. Placement: ${anchor.placement}. Scene: ${anchor.scene}. Visual cue: ${anchor.visualCue}. Must cover: ${anchor.medicalMeaning}.`,
     )
     .join("\n");
 
@@ -703,23 +708,33 @@ function buildImagePrompt({ title, description, blueprint, recallTargets }) {
 Topic description: ${description || "N/A"}
 Overall scene title: ${blueprint.sceneTitle}
 Overall scene setting: ${blueprint.sceneSetting}
+Required layout: ${blueprint.sceneLayout}
 
 Numbered loci to include exactly once each:
 ${anchorLines}
 
 Visual requirements:
+- Render this as ONE coherent wide-angle scene, not a collage.
+- Use a cutaway, isometric, side-view, or wide cinematic composition that shows one connected environment from edge to edge.
+- The environment must feel physically navigable: shared floor, walls, corridors, paths, stairs, bridges, roads, pipes, wards, or landscape should connect the loci.
+- Each locus must be embedded in its placement as part of the architecture or terrain.
+- Fill the page with the environment; avoid large blank paper areas between loci.
+- No isolated stickers, floating icons, disconnected mini-scenes, empty-canvas scatter, worksheet layout, or separate poster blocks.
+- If comparison is needed, stage it within adjacent parts of the same environment, not in separate standalone panels.
 - Landscape composition with a roughly 4:3 feel.
 - Arabic numerals must be clearly visible next to each locus.
 - Use a light paper or notebook-page background.
 - Keep it as one coherent memory palace, not a collage of unrelated panels.
 - No legend table, no paragraph text, no citations, no reference list.
-- Avoid dense prose labels; if text is used, keep it minimal and secondary to the drawing.
+- Avoid readable labels. Some tiny incidental text is acceptable, but keep it very sparse.
 - This must look like one sketchbook spread of a single imagined place, not a labeled medical infographic.
 - Use only the numbered markers for indexing. Do NOT render labels, captions, banners, titles, acronyms, scoreboards, arrows with words, section names, or explanatory text anywhere in the image.
 - Express concepts through visual metaphor, anatomy, props, pose, motion, costume, scale, and exaggeration, not through text.
 - Avoid boxed callout panels, comic-book frames, cutaway mini-scenes, or infographic layout blocks.
 - Avoid a classroom poster look. Prefer a hand-drawn panoramic sketch with one shared setting.
 - Keep the composition uncluttered but immersive, with continuous ground, walls, roads, pipes, or architectural structure tying the loci together.
+- Convert algorithms and classifications into environmental sequences such as staircases, branching corridors, gates, rooms, or progressive transformations instead of charts or boards.
+- Convert numeric facts into countable objects, grouped props, scale, distance, levels, or repeated items instead of writing the numbers as labels.
 - Arabic numerals should be present and readable near each locus, but they should be small secondary markers, not the main visual feature.
 - No legend table, no paragraph text, no citations, no reference list inside the image.`;
 }
