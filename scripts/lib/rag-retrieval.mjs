@@ -13,6 +13,10 @@ const SECTION_QUERY_MAP = {
   Dx: "diagnostic criteria diagnostic algorithm investigations interpretation findings",
   Mx: "management algorithm treatment indications contraindications supportive care",
   Complications: "complications sequelae prognosis prevention follow-up",
+  "History Taking":
+    "history taking presenting complaint symptoms review of systems risk factors red flags",
+  "Physical Exam":
+    "physical examination inspection palpation percussion auscultation special tests signs findings maneuvers",
 };
 
 export function buildSectionQuery(topic, sectionName) {

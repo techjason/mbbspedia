@@ -124,6 +124,8 @@ const DEFAULT_SECTION_PLAN = [
 const OPTIONAL_DOC_SECTION_PLAN = [
   { fileName: "summary", tabName: "Summary" },
   { fileName: "memory-palace", tabName: "Memory Palace" },
+  { fileName: "history-taking", tabName: "History Taking" },
+  { fileName: "physical-exam", tabName: "Physical Exam" },
 ];
 
 const HISTORY_TAKING_PROMPT_TEMPLATE = `You are a dedicated medical note-curation AI agent preparing HKUMed Clinical Medical School OSCEs.
@@ -182,6 +184,67 @@ Examples of Callouts:
 
 Chief Complaint: [{{condition}}]`;
 
+const PHYSICAL_EXAM_PROMPT_TEMPLATE = `You are a dedicated medical note-curation AI agent preparing HKUMed Clinical Medical School OSCEs.
+
+Task: Generate one-shot, comprehensive "physical examination" notes for the condition [{{condition}}].
+
+You are given sample notes file name(s): [{{sampleNotesFileName}}]
+Powerpoint attachment file name(s): [{{powerpointFileNames}}]
+
+Deliver a complete physical examination guide in ONE response only (no follow-up sections). Cover:
+- General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands.
+- General inspection: What to look for around the bedside and on first glance (e.g. drains, IV lines, body habitus, distress level, skin changes).
+- Systematic examination sequence relevant to this condition. Organize by the classical framework where applicable: Inspection → Palpation → Percussion → Auscultation. Include special tests and maneuvers specific to this condition.
+- For each examination step, explain: (a) how to perform it, (b) what normal vs abnormal findings look like, (c) the pathophysiological basis of abnormal findings (why this sign occurs).
+- Condition-specific special tests and named clinical signs (e.g. Trendelenburg test for varicose veins, Rovsing sign for appendicitis). For each test, describe the technique, what constitutes a positive result, sensitivity/specificity if high yield, and the underlying mechanism.
+- Relevant associated examinations to complete the assessment (e.g. examining the contralateral limb, performing a DRE, checking peripheral pulses).
+- Expected positive findings for this condition vs important negative findings to document.
+- Red-flag examination findings and escalation triggers.
+- This will be done in Hong Kong, so include relevant Cantonese translations for patient instructions used during the physical exam (e.g. "Please take a deep breath" 「請深呼吸」).
+- Common OSCE pitfalls in the physical examination for this condition.
+- High-yield exam-focused interpretation tips ("why this sign matters").
+- Include a model reporting script presenting physical exam findings to a clinician/surgeon. Follow the format: General appearance → Vital signs → System-specific findings (inspection, palpation, percussion, auscultation) → Special tests → Summary impression. Example: "On examination, Mr Chan appears comfortable at rest. Vitals are stable. On inspection of the lower limbs...".
+
+Tone: Down-to-earth, logical, slightly conversational, and authoritative, like a senior doctor teaching on a ward round.
+
+Formatting rules:
+- Explain why each examination step is performed, not just how to do it.
+- Use markdown headings and bullet points.
+- Include practical phrasing examples for patient instructions when useful.
+- Bold and italicize points mentioned on lecture slides.
+- Include a master mermaid diagram of the physical examination framework/sequence.
+- Include one final <Callout title="High Yield Summary"></Callout>.
+- Include exactly one <ActiveRecallQuiz /> block using this exact shape:
+  <ActiveRecallQuiz
+    title="Active Recall - Physical Exam"
+    items={[
+      {
+        question: "Question text commonly asked during OSCE Viva",
+        markscheme: "Concise answer used for OSCE Viva",
+      },
+    ]}
+  />
+- Include 3 to 6 high-yield questions that will be asked in the OSCE Viva in items.
+- Keep question and markscheme values as plain double-quoted strings that compile in MDX/JSX.
+- Do not add document-banner headings/subheadings such as "Comprehensive Notes on ...", "... - Part X", or any standalone "Part 1/2/3" line.
+- Mermaid syntax rule (for any diagrams): never put parentheses in an unquoted node label. Use quoted labels like A["Upper Endoscopy (OGD)"] whenever a label contains parentheses, <, >, or HTML tags.
+- In prose (e.g. "value > 5", "pH < 7"): always put a space after < and after > so the MDX parser does not treat them as JSX tags (write "> 5" and "< 7", not ">5" or "<7").
+${TOPIC_CITATION_RULES}
+
+Examples of Callouts:
+
+<Callout title="Title">Callout used to convey an important concept/message</Callout>
+
+<Callout title="Title" type="error">
+ Callout used to convey a usual mistake that medical students tend to make or overlook
+</Callout>
+
+<Callout title="Title" type="idea">
+  Callout used to convey an idea or suggestion
+</Callout>
+
+Condition: [{{condition}}]`;
+
 const PROMPT_PROFILES = {
   default: {
     template: PROMPT_1_TEMPLATE,
@@ -191,11 +254,22 @@ const PROMPT_PROFILES = {
     template: HISTORY_TAKING_PROMPT_TEMPLATE,
     oneShotSection: { fileName: "history-taking", tabName: "History Taking" },
   },
+  "physical-exam": {
+    template: PHYSICAL_EXAM_PROMPT_TEMPLATE,
+    oneShotSection: { fileName: "physical-exam", tabName: "Physical Exam" },
+  },
 };
 
 const DEFAULT_SPECIALTY = "general-surgery";
 const SURGERY_SAMPLE_NOTE_PATH = "scripts/SeniorNotes/felixlai.md";
 const SURGERY_SECONDARY_NOTE_PATH = "scripts/SeniorNotes/maxim.md";
+const RYANHO_FUNDAMENTALS_NOTE_PATH =
+  "scripts/SeniorNotes/Ryan Ho Fundamentals.pdf";
+const RYANHO_FUNDAMENTALS_NOTE = {
+  id: "ryanho-fundamentals",
+  path: RYANHO_FUNDAMENTALS_NOTE_PATH,
+  label: "Ryan Ho Fundamentals",
+};
 const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_FAMILY_MEDICINE_SOURCES_DIR =
@@ -315,6 +389,7 @@ Options:
   --slides "<path>"             Legacy slides text file (used with --no-context-scouts).
   --prompt-profile "<profile>"  Prompt preset: default | history-taking. Default: default
   --history-taking              Shortcut for --prompt-profile "history-taking" --one-shot
+  --physical-exam               Shortcut for --prompt-profile "physical-exam" --one-shot
   --prompt-file "<path>"        Custom initial prompt template file (supports {{condition}}, {{sampleNotesFileName}}, {{powerpointFileNames}}).
   --one-shot                    Generate only one section (skip follow-up prompts).
   --devtools                    Enable AI SDK DevTools middleware (default: enabled).
@@ -330,6 +405,7 @@ Examples:
   npm run generate:notes -- --family-medicine "hypertension"
   npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides" "major depressive disorder"
   npm run generate:notes -- --history-taking "chest pain"
+  npm run generate:notes -- --physical-exam "varicose veins"
 `);
 }
 
@@ -620,6 +696,16 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--physical-exam") {
+      options.promptProfile = "physical-exam";
+      options.oneShot = true;
+      options.seniorNotes = upsertSeniorNote(
+        options.seniorNotes,
+        RYANHO_FUNDAMENTALS_NOTE,
+      );
+      continue;
+    }
+
     if (arg === "--prompt-file") {
       options.promptFilePath = argv[i + 1];
       i += 1;
@@ -727,8 +813,15 @@ function parseArgs(argv) {
   }
   options.promptProfile = normalizedPromptProfile;
 
-  if (options.promptProfile === "history-taking") {
+  if (options.promptProfile === "history-taking" || options.promptProfile === "physical-exam") {
     options.oneShot = true;
+  }
+
+  if (options.promptProfile === "physical-exam") {
+    options.seniorNotes = upsertSeniorNote(
+      options.seniorNotes,
+      RYANHO_FUNDAMENTALS_NOTE,
+    );
   }
 
   return options;
