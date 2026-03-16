@@ -195,8 +195,9 @@ Deliver a complete physical examination guide in ONE response only (no follow-up
 - General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands.
 - General inspection: What to look for around the bedside and on first glance (e.g. drains, IV lines, body habitus, distress level, skin changes).
 - Systematic examination sequence relevant to this condition. Organize by the classical framework where applicable: Inspection → Palpation → Percussion → Auscultation. Include special tests and maneuvers specific to this condition.
-- For each examination step, explain: (a) how to perform it, (b) what normal vs abnormal findings look like, (c) the pathophysiological basis of abnormal findings (why this sign occurs).
+- For each examination step, explain: (a) how to perform it, (b) what normal vs abnormal findings look like, (c) the pathophysiological basis of abnormal findings (why this sign occurs), (d) a running commentary is needed for HKUMed exams so include a  model running commentary example in English
 - Condition-specific special tests and named clinical signs (e.g. Trendelenburg test for varicose veins, Rovsing sign for appendicitis). For each test, describe the technique, what constitutes a positive result, sensitivity/specificity if high yield, and the underlying mechanism.
+- Detail which steps are must do (or else will fail) and detail steps that might be optional (but state it might be good to do [e.g. for dinstinction level] or might need a lot of time to - hence might not be needed in quick exam context)
 - Relevant associated examinations to complete the assessment (e.g. examining the contralateral limb, performing a DRE, checking peripheral pulses).
 - Expected positive findings for this condition vs important negative findings to document.
 - Red-flag examination findings and escalation triggers.
@@ -564,7 +565,8 @@ function parseArgs(argv) {
       }
       options.specialty = DEFAULT_FAMILY_MEDICINE_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
+      options.seniorNotesDirs =
+        DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
       options.seniorNotesExplicit = true;
       options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
       options.slidesDirExplicit = false;
@@ -774,7 +776,8 @@ function parseArgs(argv) {
   if (normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY) {
     if (!options.seniorNotesExplicit) {
       options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
+      options.seniorNotesDirs =
+        DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
       options.seniorNotesExplicit = true;
     }
     if (!options.slidesDirExplicit) {
@@ -782,7 +785,10 @@ function parseArgs(argv) {
     }
   }
 
-  if (options.seniorNotes.length === 0 && options.seniorNotesDirs.length === 0) {
+  if (
+    options.seniorNotes.length === 0 &&
+    options.seniorNotesDirs.length === 0
+  ) {
     throw new Error(
       "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
     );
@@ -813,7 +819,10 @@ function parseArgs(argv) {
   }
   options.promptProfile = normalizedPromptProfile;
 
-  if (options.promptProfile === "history-taking" || options.promptProfile === "physical-exam") {
+  if (
+    options.promptProfile === "history-taking" ||
+    options.promptProfile === "physical-exam"
+  ) {
     options.oneShot = true;
   }
 
@@ -1199,7 +1208,9 @@ async function listSeniorNoteFiles(notesDir) {
       .filter((entry) => {
         if (!entry.isFile()) return false;
         const ext = path.extname(entry.name).toLowerCase();
-        return ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf";
+        return (
+          ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf"
+        );
       })
       .map((entry) => {
         const absolutePath = path.join(absoluteNotesDir, entry.name);
@@ -2394,7 +2405,9 @@ async function appendOptionalDocSections({ baseSectionPlan, fragmentsDir }) {
     : [];
 
   for (const optionalSection of OPTIONAL_DOC_SECTION_PLAN) {
-    if (sections.some((section) => section.fileName === optionalSection.fileName)) {
+    if (
+      sections.some((section) => section.fileName === optionalSection.fileName)
+    ) {
       continue;
     }
 
