@@ -190,6 +190,7 @@ Task: Generate one-shot, comprehensive "physical examination" notes for the cond
 
 You are given sample notes file name(s): [{{sampleNotesFileName}}]
 Powerpoint attachment file name(s): [{{powerpointFileNames}}]
+Ryan Ho Fundamentals is the gold standard for physical examination notes - use that as the baseline and steps needed for HKUMed exams.
 
 Deliver a complete physical examination guide in ONE response only (no follow-up sections). Cover:
 - General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands. (The 3Cs + 1H)
@@ -197,7 +198,6 @@ Deliver a complete physical examination guide in ONE response only (no follow-up
 - Systematic examination sequence relevant to this condition. Organize by the classical framework where applicable: Inspection → Palpation → Percussion → Auscultation. Include special tests and maneuvers specific to this condition.
 - For each examination step, explain: (a) how to perform it, (b) what normal vs abnormal findings look like, (c) the pathophysiological basis of abnormal findings (why this sign occurs), (d) a running commentary is needed for HKUMed exams so include a  model running commentary example in English
 - Condition-specific special tests and named clinical signs (e.g. Trendelenburg test for varicose veins, Rovsing sign for appendicitis). For each test, describe the technique, what constitutes a positive result, sensitivity/specificity if high yield, and the underlying mechanism.
-- Detail which steps are must do (or else will fail) and detail steps that might be optional (but state it might be good to do [e.g. for dinstinction level] or might need a lot of time to - hence might not be needed in quick exam context)
 - Relevant associated examinations to complete the assessment (e.g. examining the contralateral limb, performing a DRE, checking peripheral pulses).
 - Expected positive findings for this condition vs important negative findings to document.
 - Red-flag examination findings and escalation triggers.
