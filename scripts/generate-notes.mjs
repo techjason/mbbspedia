@@ -190,7 +190,7 @@ Task: Generate one-shot, comprehensive "physical examination" notes for the cond
 
 You are given sample notes file name(s): [{{sampleNotesFileName}}]
 Powerpoint attachment file name(s): [{{powerpointFileNames}}]
-Ryan Ho Fundamentals is the gold standard for physical examination notes - use that as the baseline and steps needed for HKUMed exams.
+"Ryan Ho Fundamentals" is the gold standard for physical examination notes - use that as the baseline and steps needed for HKUMed exams.
 
 Deliver a complete physical examination guide in ONE response only (no follow-up sections). Cover:
 - General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands. (The 3Cs + 1H)
