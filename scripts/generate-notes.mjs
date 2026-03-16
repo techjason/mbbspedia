@@ -192,7 +192,7 @@ You are given sample notes file name(s): [{{sampleNotesFileName}}]
 Powerpoint attachment file name(s): [{{powerpointFileNames}}]
 
 Deliver a complete physical examination guide in ONE response only (no follow-up sections). Cover:
-- General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands.
+- General approach: Introduce yourself, obtain consent, position and expose the patient appropriately, state that you would wash your hands. (The 3Cs + 1H)
 - General inspection: What to look for around the bedside and on first glance (e.g. drains, IV lines, body habitus, distress level, skin changes).
 - Systematic examination sequence relevant to this condition. Organize by the classical framework where applicable: Inspection → Palpation → Percussion → Auscultation. Include special tests and maneuvers specific to this condition.
 - For each examination step, explain: (a) how to perform it, (b) what normal vs abnormal findings look like, (c) the pathophysiological basis of abnormal findings (why this sign occurs), (d) a running commentary is needed for HKUMed exams so include a  model running commentary example in English
