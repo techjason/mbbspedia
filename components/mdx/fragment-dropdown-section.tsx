@@ -153,7 +153,7 @@ export function FragmentDropdownSection({
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const contentId = useId();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const nodes = Children.toArray(children);
   const [headingNode, ...contentNodes] = nodes;
   const hasCollapsibleSection =
