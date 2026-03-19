@@ -1,419 +1,405 @@
-## Diagnostic Criteria, Diagnostic Algorithm, and Investigations for Acute Retention of Urine
+## Diagnostic Criteria, Diagnostic Algorithm, and Investigation Modalities
 
 ---
 
-### 1. Diagnostic Criteria
+### 1. Diagnostic Criteria for AROU
 
-AROU does not have formal "diagnostic criteria" in the way that, say, rheumatoid arthritis or heart failure does. Instead, the diagnosis is **clinical + confirmatory**. Let me walk you through the logic:
+AROU does not have formal "diagnostic criteria" in the way that, say, rheumatoid arthritis or heart failure do. Instead, it is a **clinical diagnosis** confirmed by a simple objective measurement. The diagnosis rests on three pillars:
 
-#### 1.1 Clinical Diagnosis (Presumptive)
-
-The diagnosis of AROU is ***presumed*** when all three elements are present [2][3][4]:
-
-| Criterion | Explanation | How to Confirm |
+| Pillar | How to Confirm | Rationale |
 |---|---|---|
-| **1. Inability to void** | Patient reports they cannot pass urine at all, or can only pass tiny volumes | History |
-| **2. Sudden onset** | Distinguishes AROU from CROU — the patient was voiding normally (or with some difficulty) and then suddenly could not | History: ask when they last voided normally |
-| **3. Painful suprapubic distension** | The full bladder stretches the bladder wall → nociceptive C-fibre activation → suprapubic pain. This differentiates AROU (painful, normal innervation) from CROU (painless, often abnormal innervation) | History + examination (tender palpable suprapubic mass) |
+| **1. Inability to void** | Patient reports inability to pass urine despite urge | The defining symptom — urine is trapped |
+| **2. Full bladder** | ***Bladder scan ≥ 300 mL in a patient unable to void suggests urinary retention*** [2] | Confirms that the bladder is full (urine produced but not expelled) rather than empty (anuria/oliguria). This is THE key differentiator |
+| **3. Acute and painful** | Sudden onset + painful suprapubic distension | Distinguishes from CROU (painless, gradual, ***≥ 1 L suggests chronic retention***) [2] |
 
-#### 1.2 Confirmatory Diagnosis
+So in practical terms:
 
-Clinical suspicion must be **confirmed** by demonstrating a full bladder [2][3]:
-
-- ***Bladder scan (USG): ≥ 300 mL in a patient unable to void suggests urinary retention*** [2][3]
-- ***≥ 1 L suggests chronic retention of urine*** [2][3]
-- Alternatively: ***first catheterised urine volume*** — if you drain > 300–400 mL upon catheterisation, this confirms retention
+> **AROU is diagnosed when**: a patient presents with sudden painful inability to void **AND** the bladder is confirmed to be distended (bladder scan ≥ 300 mL, or palpable/percussible suprapubic mass, or first catheterised volume ≥ 300 mL).
 
 <Callout title="Can You Skip the Bladder Scan?">
-Yes — if the ***history and physical examination strongly suggest a diagnosis of AROU*** (i.e. classic story of sudden inability to void + painful palpable bladder), ***you can proceed to catheterisation directly*** [4]. The catheterised volume then serves as both confirmation and treatment. In practice, a bedside bladder scan takes seconds and is non-invasive, so it is usually done first in most Hong Kong hospitals.
+***Can proceed to catheterisation directly if history and physical examination strongly suggest a diagnosis of AROU*** [3]. In practice, if you have a distressed elderly man who cannot void, has a palpable tender suprapubic mass, and has known BPH, you do not need to wait for a bladder scan — go ahead and catheterise. But in ambiguous cases (post-operative patient, uncertain history, no palpable bladder), a quick bedside bladder scan takes 30 seconds and can save you from an unnecessary catheterisation in an anuric patient.
 </Callout>
-
-#### 1.3 What Does NOT Constitute AROU
-
-| Condition | Why It Is Not AROU |
-|---|---|
-| Oliguria/anuria (pre-renal or renal AKI) | Bladder is **empty** — the kidneys are not producing urine, not retaining it |
-| Chronic retention of urine | Painless, gradual onset, often with overflow incontinence; bladder often > 1 L |
-| Acute-on-chronic retention | Background CROU with acute exacerbation — may have features of both (large volume, some pain) |
-| Overactive bladder with urgency | Patient is voiding frequently (small volumes) — the opposite of retention |
 
 ---
 
-### 2. Diagnostic Algorithm
+### 2. The Diagnostic Algorithm — Step by Step
 
-The diagnostic approach to AROU follows a clear, stepwise logic. I'll present this as a flowchart and then explain each step:
+The approach to diagnosing and working up AROU happens in **two phases**: the **acute phase** (confirm diagnosis + immediate decompression) and the **subsequent workup** (identify the underlying cause).
+
+#### Phase 1: Acute Diagnosis and Immediate Management
 
 ```mermaid
-flowchart TD
-    A["Patient presents with\ninability to pass urine"] --> B["Step 1: Confirm full bladder\n(Bladder scan or palpation)"]
-    B -- "Bladder empty" --> C["NOT retention\nInvestigate for oliguria/anuria\n(Pre-renal, Renal, Bilateral ureteric obstruction)"]
-    B -- "Bladder full >= 300 mL" --> D["Step 2: Confirm AROU vs CROU\nPainful? Sudden onset?"]
-    D -- "Painless / gradual / >= 1 L" --> E["Likely CROU\nor Acute-on-Chronic"]
-    D -- "Painful + sudden onset" --> F["AROU confirmed"]
-    F --> G["Step 3: Immediate decompression\nUrethral catheterisation\n14-18 Fr Foley catheter"]
-    G -- "Contraindicated?\nBlood at meatus / high-riding prostate" --> H["Suprapubic catheterisation"]
-    G -- "Successful" --> I["Record catheterised volume\nSend catheterised urine for Ix"]
-    I --> J["Step 4: Subsequent workup\nto identify underlying cause"]
-    J --> J1["Bloods:\nCBC, RFT, LFT\n(Do NOT check PSA acutely)"]
-    J --> J2["Urine:\nBiochemistry, Microscopy, C/ST"]
-    J --> J3["Imaging:\nKUB (stones/faecal loading)\nUSG KUB (hydronephrosis)"]
-    J --> J4["Focused examination:\nDRE, neurological exam,\ngenital exam, drug chart review"]
-    J1 --> K["Step 5: Identify aetiology\nand plan definitive management"]
-    J2 --> K
-    J3 --> K
-    J4 --> K
-    K --> K1["BOO: BPH, CA prostate, stricture,\nstone, clot, phimosis, bladder tumour"]
-    K --> K2["Drug-induced: review and stop\noffending medications"]
-    K --> K3["Neurological: urgent MRI if\nspinal cord compression suspected"]
-    K --> K4["Overdistension: post-GA,\nalcohol, immobility"]
+graph TD
+    A["Patient: 'I cannot pass urine'"] --> B{"Assess: Is the bladder full?"}
+    B -->|"Palpable bladder or bladder scan >= 300 mL"| C["URINARY RETENTION confirmed"]
+    B -->|"Bladder empty on scan"| D["NOT retention — investigate for anuria/oliguria"]
+    D --> D1["Check RFT, fluid status, consider pre-renal / renal / bilateral ureteric obstruction"]
+    
+    C --> E{"Painful or painless?"}
+    E -->|"Painful + sudden onset"| F["AROU confirmed"]
+    E -->|"Painless + large volume >= 1L"| G["Likely CROU — different workup pathway"]
+    
+    F --> H{"Blood at urethral meatus or high-riding prostate?"}
+    H -->|"Yes"| I["Suspect URETHRAL TRAUMA — contraindication for urethral catheter"]
+    I --> I1["Retrograde urethrogram first, then suprapubic catheter"]
+    H -->|"No"| J["Proceed to urethral catheterisation"]
+    
+    J --> K["Insert 14-18Fr Foley catheter"]
+    K --> L{"Catheter passes successfully?"}
+    L -->|"Yes"| M["Record volume drained — confirms AROU"]
+    L -->|"No — cannot advance"| N{"Where is the obstruction?"}
+    N -->|"Stuck at prostatic urethra"| O["Try thicker catheter 20-22Fr"]
+    N -->|"Stuck at penile urethra or Hx instrumentation"| P["Try thinner catheter 10-12Fr"]
+    O --> Q{"Still fails?"}
+    P --> Q
+    Q -->|"Yes"| R["Suprapubic catheterisation"]
+    
+    M --> S["Phase 2: Subsequent workup to identify cause"]
 ```
 
-Let me now explain the rationale behind each step:
+#### Phase 2: Subsequent Workup to Identify the Underlying Cause
 
-#### Step 1: Confirm Full Bladder
-**Why?** Because the entire management diverges based on whether the bladder is full or empty. A patient with "no urine output" may have pre-renal AKI (dehydration, shock) or renal AKI (ATN) — both have an **empty** bladder and need entirely different management (fluid resuscitation, not catheterisation) [2][3].
-
-#### Step 2: Confirm Acute vs Chronic
-**Why?** Because CROU and AROU have different aetiologies, different urgency profiles, and different management pathways. CROU patients need cautious decompression (risk of post-obstructive diuresis is higher), and the underlying cause is more likely neurological [1][2][3].
-
-#### Step 3: Immediate Decompression
-**Why catheterise first, investigate later?** Because AROU is an emergency — the acutely distended bladder is painful, and prolonged distension damages the detrusor (overdistension injury → impaired contractility → more retention). Additionally, the back-pressure can cause bilateral hydronephrosis and post-renal AKI. Relief is both therapeutic and diagnostic (the catheterised volume confirms the diagnosis).
-
-#### Step 4: Subsequent Workup
-**Why investigate after decompression?** Because the emergency (pain, bladder distension) has been addressed. Now you need to find the *cause* to prevent recurrence and plan definitive treatment.
-
-#### Step 5: Identify Aetiology
-**Why does this matter?** Because a patient with drug-induced AROU needs drug cessation; a patient with BPH needs α-blockers ± TWOC ± surgery; a patient with spinal cord compression needs emergency MRI and neurosurgical decompression. The management is entirely cause-dependent.
+```mermaid
+graph TD
+    S["AROU confirmed and catheter in situ"] --> T["Baseline Investigations"]
+    T --> T1["Bloods: CBC, RFT, LFT"]
+    T --> T2["Catheterised urine: biochemistry, microscopy, C/ST"]
+    T --> T3["KUB X-ray: stones, faecal loading"]
+    T --> T4["DO NOT check PSA — defer 4-6 weeks"]
+    
+    S --> U["Bedside Assessment"]
+    U --> U1["DRE: prostate size/consistency, faecal loading, anal tone"]
+    U --> U2["Neurological exam: sensory level, lower limb power, perineal sensation"]
+    U --> U3["External genitalia: phimosis, meatal stenosis"]
+    
+    S --> V{"Suspected cause?"}
+    V -->|"BPH / BOO"| W["USG KUB, uroflowmetry after TWOC, IPSS, consider TRUS"]
+    V -->|"Neurological cause"| X["MRI spine urgently if red flags"]
+    V -->|"Malignancy suspected"| Y["PSA after 4-6 weeks, cystoscopy, imaging"]
+    V -->|"Stone / haematuria"| Z["USG KUB, CT KUB, cystoscopy"]
+```
 
 ---
 
-### 3. Investigation Modalities
+### 3. Investigation Modalities — Comprehensive Breakdown
 
-The investigations for AROU are divided into **immediate** (at presentation, before/during catheterisation) and **subsequent** (after decompression, to identify the cause) [2][3][4][5].
+Investigations in AROU serve two purposes: (A) **confirm the diagnosis** and (B) **identify the underlying cause and assess for complications**. Let's go through each modality systematically.
 
-#### 3.1 Immediate Investigations
+---
 
-##### A. Bladder Ultrasound Scan (Bedside)
+#### 3.1 Bedside Investigations
 
-| Aspect | Detail |
+##### Bladder Scan (Portable Ultrasound)
+
+- **What it does**: Non-invasive estimation of bladder volume using portable ultrasound
+- **Why it matters**: This is your **first-line diagnostic tool** — it instantly distinguishes retention (full bladder) from anuria (empty bladder)
+- ***≥ 300 mL in a patient unable to void suggests urinary retention; ≥ 1 L suggests chronic retention of urine*** [2]
+- **Interpretation**: If the bladder is distended (≥ 300 mL) and the patient is in pain and cannot void → AROU confirmed
+- **Caveat**: You can skip this if the clinical picture is unambiguous (palpable tender bladder + cannot void) → proceed directly to catheterisation [3]
+
+##### First Catheterised Urine Volume
+
+- **What it does**: The volume of urine drained on initial catheterisation serves as both a diagnostic and therapeutic measure
+- **Why it matters**: Confirms the diagnosis objectively; the volume gives you a clue about acuity:
+  - 300–800 mL → typical AROU
+  - ***≥ 1 L → think CROU*** [2] (or acute-on-chronic)
+- Also: **send the catheterised urine sample for analysis** (see below)
+
+##### Digital Rectal Examination (DRE)
+
+- **When**: Should be done in ***both men and women*** [3]
+- **What you are assessing**:
+
+| Finding | Interpretation |
 |---|---|
-| **Purpose** | ***Confirmation of diagnosis*** [4][5] — demonstrates a full bladder |
-| **Findings** | ***≥ 300 mL = suggests urinary retention; ≥ 1 L = suggests chronic retention*** [2][3] |
-| **Advantages** | Non-invasive, bedside, rapid, no radiation, no contrast |
-| **When to skip** | ***Can proceed to catheterisation directly if history and physical examination strongly suggest AROU*** [4] |
+| ***Prostate: smooth, symmetrically enlarged > 3FB, no nodules, intact median groove, firm consistency*** [7] | BPH |
+| Hard, nodular, irregular, median sulcus obliterated | CA prostate |
+| Tender, boggy, warm | Acute prostatitis |
+| Faecal impaction / loaded rectum | Constipation as precipitant |
+| ***Anal sphincter tone + perineal sensation*** | Neurological integrity; ↓ tone suggests cauda equina / sacral nerve pathology [3][7] |
+| Pelvic mass | Rectal/pelvic tumour |
 
-**Why 300 mL?** Normal bladder capacity is ~400–600 mL. At 300 mL, most people feel a strong urge to void. If a patient cannot void despite having ≥ 300 mL, something is wrong. At ≥ 1 L, the bladder has far exceeded its normal capacity, suggesting it has been filling for a long time (chronic) or the patient has lost sensation (neurogenic).
+- **Precautions** [3]:
+  - ***Normal prostate examination does NOT exclude BPH as a cause of obstruction*** — BPH primarily involves the transition zone which is internal; DRE mainly palpates the posterior peripheral zone. A prostate can feel "normal" on DRE yet have significant transition zone enlargement compressing the urethra
+  - ***BPH does NOT necessarily cause outflow obstruction*** — prostate size alone does not predict symptoms; it is the relationship between prostate, urethra, and detrusor function that matters
 
-##### B. First Catheterised Volume
+##### Neurological Examination
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | Confirms retention and quantifies severity |
-| **Interpretation** | > 300–400 mL confirms significant retention; > 800 mL–1 L suggests acute-on-chronic or chronic retention |
-| **Why record it?** | The volume has prognostic significance — very large volumes suggest chronicity and higher risk of post-obstructive diuresis |
+- ***Mandatory in every patient with AROU*** [4]
+- Assess: ***sensory level*** [4], lower limb muscle tone, power, reflexes, perineal sensation (S2-4 dermatomes), bulbocavernosus reflex, anal tone
+- **Why**: To rule out spinal cord compression / cauda equina syndrome, which is a neurosurgical emergency. If a sensory level or new neurological deficit is found → **emergency MRI spine**
 
-#### 3.2 Subsequent Blood Investigations
+---
 
-##### A. Complete Blood Count (CBC)
+#### 3.2 Blood Investigations
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | ***Leukocytosis*** → suspected ***infection*** (UTI, prostatitis, urosepsis) [4][5] |
-| **Why?** | UTI is both a cause (painful urethritis → reflex retention) and complication (stasis → bacterial growth) of AROU |
-| **Other findings** | Anaemia may suggest chronic disease (CA prostate, CA bladder) or chronic renal failure |
+***Investigations after catheterisation*** [2]:
 
-##### B. Renal Function Test (RFT)
+| Test | What You Are Looking For | Why / Interpretation |
+|---|---|---|
+| ***CBC*** [2][4][8] | ***Leukocytosis*** | Suggests UTI, prostatitis, or urosepsis as a precipitant or complication. Anaemia may indicate chronic disease/malignancy |
+| ***Clotting profile*** [8] | Coagulopathy | ***To prepare for surgery*** [8] if intervention is anticipated; also relevant if considering suprapubic catheterisation |
+| ***RFT (Renal Function Test)*** [2][3][4][8] | Elevated creatinine, elevated urea, hyperkalaemia | ***Obstructive uropathy / obstructive nephropathy*** [2][8] — back-pressure from retention → bilateral hydronephrosis → post-renal AKI. A rising creatinine mandates urgent decompression and renal imaging. ***High serum creatinine can result from bladder outlet obstruction or underlying renal disease — should prompt USG*** [3] |
+| ***LFT*** [2] | Baseline | General workup; hepatorenal involvement in chronic disease |
+| ***PSA*** | **DO NOT CHECK** | ***Do NOT take PSA → AROU can cause false elevation (to be done 4–6 weeks later)*** [2][8]. Why? Prostatic distension and inflammation during AROU cause prostate cells to release PSA into the bloodstream artefactually. ***PSA: only for patients with life expectancy > 10 years and after detailed counselling. DO NOT CHECK PSA during retention or UTI*** [8]. The half-life of PSA is 2–3 days [3], so it takes weeks to normalise after the acute event |
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | ***Obstructive nephropathy*** [2][3][8][9] — detect post-renal AKI from bilateral back-pressure |
-| **Key findings** | ↑ Creatinine, ↑ Urea (disproportionate urea rise in post-renal obstruction), ↑ K⁺ |
-| **Why important?** | ***High serum creatinine level can result from bladder outlet obstruction or underlying renal disease which should prompt an USG*** [4]. If creatinine is elevated, you MUST check for bilateral hydronephrosis — it changes the urgency of intervention |
-| **In acute-on-chronic** | ***Indicated in patients with acute-on-chronic urinary retention to evaluate for renal failure*** [4] |
+<Callout title="PSA Trap — Extremely High Yield" type="error">
+***Do NOT check PSA during an episode of AROU*** [2][8]. This is a classic exam mistake. AROU causes false elevation of PSA due to prostatic distension and ischaemia. Checking it will give a misleadingly high value, causing unnecessary patient anxiety and potentially triggering invasive investigations (biopsy) for a falsely elevated result. **Defer PSA measurement to 4–6 weeks after the acute episode** [2].
 
-##### C. Liver Function Test (LFT)
+***Causes of elevated PSA*** [3]:
+- Prostatitis
+- BPH
+- Prostate cancer
+- Prostate biopsy
+- AROU (artefactual)
+- DRE (transiently, minimally)
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | Baseline assessment; part of pre-operative workup if surgery is anticipated |
-| **Relevance** | If CA prostate is suspected → liver metastases may cause deranged LFT |
-
-##### D. Serum PSA — ***Do NOT Check Acutely***
-
-This is a critical teaching point that appears in every source [2][3][4][5][8][9]:
-
-| Aspect | Detail |
-|---|---|
-| **Rule** | ***Do NOT take PSA → AROU can cause false elevation (to be done 4–6 weeks later)*** [2][3] |
-| **Why?** | PSA (Prostate-Specific Antigen) is released into the bloodstream when prostatic tissue is disrupted. AROU causes ↑ intravesical pressure → prostatic tissue compression → PSA leaks into the blood. Catheterisation itself also traumatises the prostate. The result is a falsely elevated PSA that might trigger unnecessary biopsy |
-| **Lecture slide** | ***DO NOT CHECK PSA during retention or UTI*** [8] |
-| **When to check** | ***4–6 weeks after the acute episode has resolved*** [2][3] |
-| **Additional notes** | PSA is ***prostate-specific but NOT prostate-cancer specific*** [4]. PSA is also elevated in BPH, prostatitis, vigorous cycling, recent ejaculation < 48h, DRE [5] |
-| **Interpretation** (when eventually checked) | ***PSA < 4 ng/mL = Normal; PSA ≥ 4 ng/mL = cutoff for diagnostic prostate biopsy; PSA 4–10 ng/mL = 20% chance of cancer; PSA ≥ 10 ng/mL = 50% chance of cancer*** [4] |
-
-<Callout title="Exam Trap: PSA in AROU" type="error">
-This is one of the most commonly tested points. If an exam question asks what investigation you should do in AROU and "serum PSA" is an option — it is a **wrong** answer in the acute setting. PSA should be **deferred 4–6 weeks**. Checking it acutely gives a **false positive** result that leads to unnecessary anxiety and invasive biopsy [2][3][8].
+***PSA is prostate-specific but NOT prostate-cancer-specific*** [3].
 </Callout>
 
-#### 3.3 Subsequent Urine Investigations
+---
 
-##### A. Catheterised Urine Sample
+#### 3.3 Urine Investigations
 
-Once the catheter is in, send the catheterised urine for [2][3][4][5]:
+***Catheterised urine: biochemistry, microscopy, C/ST*** [2][4]
 
-| Test | Purpose | Key Findings |
+| Test | What You Are Looking For | Why / Interpretation |
 |---|---|---|
-| ***Urinalysis (dipstick)*** | ***Detect presence of blood, bacteria and WBC*** [4] | Leucocyte esterase / nitrites → UTI; Blood → haematuria (stones, tumour, BPH) |
-| ***Urine microscopy*** | Quantify WBCs, RBCs, casts, crystals | Pyuria ( > 5 WBC/HPF) → UTI/prostatitis; RBC morphology → glomerular vs non-glomerular source |
-| ***Urine culture and sensitivity (C/ST)*** | ***Rule out UTI*** [5][8][9] | Identify organism and guide antibiotic therapy |
-| Urine biochemistry | Baseline; can calculate FENa if AKI suspected | Helps differentiate pre-renal from renal AKI |
+| ***Urinalysis (dipstick)*** [3][4] | Blood, WBCs, nitrites, protein, glucose | Quick screen for haematuria (stone, tumour, infection), pyuria (UTI), glycosuria (undiagnosed DM — relevant as DM neuropathy is a cause of detrusor underactivity) |
+| ***Urine microscopy*** [3][4] | WBC/HPF, RBC/HPF, casts, crystals, organisms | ***Detect presence of blood, bacteria and WBC*** [3]. Pyuria ( > 5 WBC/HPF) with significant bacteriuria → UTI as precipitant. RBC morphology can hint at glomerular vs non-glomerular source |
+| ***Urine C/ST (culture and sensitivity)*** [3][4] | Organisms and antibiotic sensitivities | Confirms UTI; guides antibiotic choice. Critical because UTI can be both a precipitant and complication of AROU |
+| ***Urine cytology*** [3] | Malignant cells | ***Indicated if bladder cancer is suspected in patients presenting with haematuria and predominantly irritative symptoms*** [3]. Sensitivity ~50%; highest for high-grade transitional cell carcinoma and carcinoma in situ; low detection rate for low-grade cancer |
 
-##### B. Urine Cytology (Selected Cases)
+---
 
-| Aspect | Detail |
-|---|---|
-| **When** | ***Indicated if bladder cancer is suspected in patients presenting with haematuria and predominantly irritative symptoms*** [4] |
-| **Purpose** | Detect malignant urothelial cells |
-| **Sensitivity** | Overall ~50%; highest for high-grade TCC and CIS; low for low-grade cancers [2] |
-| **Requirement** | Fresh urine sample |
+#### 3.4 Radiological Investigations
 
-#### 3.4 Subsequent Imaging Investigations
+##### KUB (Plain Radiograph of Kidneys, Ureters, and Bladder)
 
-##### A. KUB (Plain Radiograph of Kidneys, Ureters, Bladder)
+- ***KUB for stones or faecal loading*** [2][8]
+- **What it shows**: Radio-opaque calculi (calcium oxalate, calcium phosphate stones are visible; uric acid stones are radiolucent and will be missed), faecal loading in the rectosigmoid
+- **Why**: Identifies urolithiasis as a cause of obstruction; confirms constipation/faecal impaction as a precipitant
+- **Limitations**: Cannot detect radiolucent stones, soft tissue masses, or upper tract obstruction
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | ***KUB for stones or faecal loading*** [2][3] |
-| **Key findings** | Radio-opaque stones (calcium-containing stones are visible; uric acid stones are NOT); faecal loading in the colon/rectum (constipation as precipitant) |
-| **Why useful?** | Quick, cheap, readily available; identifies two common and treatable causes/precipitants of AROU |
-| **Limitations** | Cannot see uric acid stones, soft tissue masses, or hydronephrosis |
+##### USG Bladder + USG Kidney/Ureter
 
-##### B. USG Kidneys, Ureters, and Bladder (USG KUB)
+***USG bladder (confirm diagnosis) + USG kidney/ureter (hydronephrosis/hydroureter)*** [4]
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | ***USG kidney/ureter for hydronephrosis/hydroureter*** [5] |
-| **When indicated** | ***If large residual volume, haematuria, or history of stone*** [2][9]; If RFT is deranged (to check for bilateral hydronephrosis as cause of obstructive nephropathy) |
-| **Key findings** | **Hydronephrosis** (dilated renal pelvis/calyces) → indicates significant back-pressure from chronic/severe obstruction; **Hydroureter** → dilated ureter; Bladder wall thickening → chronic BOO; Intravesical mass → bladder tumour; Bladder stones |
-| **Why important?** | Hydronephrosis in the setting of AROU indicates that the obstruction has been significant enough to cause upper tract damage. This changes the urgency of management and necessitates monitoring for post-obstructive diuresis after catheterisation |
+| Component | What It Shows | Why It Matters |
+|---|---|---|
+| **USG bladder** | Bladder volume, wall thickness, intravesical masses, stones, post-void residual | Confirms retention; thick bladder wall (detrusor hypertrophy) suggests chronic obstruction; intravesical mass suggests tumour or large median lobe of prostate |
+| **USG kidney/ureter** | Hydronephrosis, hydroureter, renal cortical thinning, renal/ureteric stones | ***Upper tract imaging indicated if large residual volume, haematuria, or history of stone*** [7]. Hydronephrosis = back-pressure from obstruction → risk of obstructive nephropathy. Cortical thinning suggests chronic damage |
 
-##### C. Transrectal Ultrasound of Prostate (TRUS)
+##### CT KUB (Non-Contrast CT)
 
-| Aspect | Detail |
-|---|---|
-| **Purpose** | ***Assess size of prostate*** [5][9] |
-| **When indicated** | ***Before starting 5α-reductase inhibitors for prostate > 30–40cc; before surgery to decide modality of surgical intervention*** [8][9] |
-| **Not done acutely** | This is a planned investigation for definitive management, not for the emergency presentation |
-| **Key findings** | Prostate volume (mL); presence of intravesical prostatic protrusion (IPP) — protrusion of the median lobe into the bladder, which predicts poorer response to medical therapy and higher likelihood of needing surgery |
+- **When**: If stone disease is suspected and KUB is inconclusive
+- **What it shows**: Gold standard for detecting urinary stones (including radiolucent uric acid stones); also shows pelvic masses
+- **Not first-line** in straightforward AROU but important if stone is the suspected cause
 
-##### D. CT KUB / CT Urogram (Selected Cases)
+##### Intravenous Urogram (IVU) [9]
 
-| Aspect | Detail |
-|---|---|
-| **When** | If haematuria is a prominent feature (to evaluate for urothelial malignancy); if urolithiasis is suspected but KUB is inconclusive |
-| **Key findings** | Stones (including radiolucent uric acid stones); renal/ureteric/bladder masses; lymphadenopathy |
-| **CT urogram** | Includes delayed phase to opacify the collecting system — detects urothelial tumours |
+- ***IV non-ionic contrast injected → excreted by kidneys → opacifies and visualises urinary system*** [9]
+- **Common indications**: haematuria, loin pain
+- ***Post-micturition film can detect urinary retention*** [9]
+- Largely superseded by CT urogram in modern practice, but still used in some centres
+- ***Contraindications: pregnancy (radiation), previous serious contrast reactions, diabetes with renal insufficiency (risk of contrast-induced AKI)*** [9]
 
-##### E. Intravenous Urogram (IVU) — Largely Replaced by CT
+##### MRI Spine
 
-| Aspect | Detail |
-|---|---|
-| **Principle** | ***IV non-ionic contrast injected → excreted by kidneys → opacifies and visualises urinary system*** [10] |
-| **Historical use** | Haematuria workup, loin pain |
-| **Post-micturition film** | ***Can detect urinary retention*** [10] |
-| **Current status** | Largely replaced by CT urogram in most centres; still occasionally used |
-| **Contraindications** | ***Pregnancy (radiation); previous serious reaction to contrast media; diabetes with renal insufficiency (risk of AKI)*** [10] |
+- **When**: Urgently indicated if neurological red flags are present (new sensory level, lower limb weakness, saddle anaesthesia, ↓ anal tone)
+- **What it shows**: Spinal cord compression (disc, tumour, abscess, haematoma), cauda equina syndrome
+- **Why urgent**: Delay in decompression → permanent neurological damage and bladder dysfunction
 
-##### F. MRI Spine (If Neurological Red Flags)
+##### Transrectal Ultrasound of Prostate (TRUS) [8]
 
-| Aspect | Detail |
-|---|---|
-| **When** | ***Must rule out spinal cord compression*** [5] — any patient with AROU + new back pain + lower limb neurological deficit + saddle anaesthesia + reduced anal tone |
-| **Key findings** | Vertebral metastasis compressing the cord; epidural abscess; disc prolapse compressing the cauda equina |
-| **Urgency** | EMERGENCY — arrange within hours, not days |
+***TRUS*** [8]:
+- ***Before starting 5α-reductase inhibitors for prostate > 30–40cc***
+- ***Before surgery to decide modality of surgical intervention***
+- Measures prostate volume accurately; detects intravesical prostatic protrusion (IPP) which predicts treatment response
+- **Not done in the acute phase** — this is part of the subsequent elective workup
 
-#### 3.5 Specialised Urological Investigations (Not Done Acutely — For Subsequent Workup)
+---
 
-These are performed *after* the acute episode has been managed, typically in the outpatient urology clinic:
+#### 3.5 Specialised / Elective Investigations (After Acute Phase)
 
-##### A. International Prostate Symptom Score (IPSS)
+These are performed once the acute episode has resolved and the catheter has been managed, to determine the underlying cause and guide definitive treatment.
 
-| Aspect | Detail |
-|---|---|
-| **What it is** | A validated 7-question self-administered questionnaire that quantifies LUTS severity [2][3][4][8][9] |
-| **Components** | ***Voiding symptoms*** (incomplete emptying, intermittency, weak stream, straining) + ***Storage symptoms*** (frequency, urgency, nocturia) + ***Quality of life (QoL) measure*** [2][9] |
-| **Interpretation** | ***Mild: 1–7; Moderate: 8–19; Severe: 20–35*** [2][9] |
-| **Use** | ***Quantify severity of LUTS, predict treatment response, guide treatment decision, and monitor response to treatment*** [2][9]. ***NOT a diagnostic tool*** — it does not tell you *what* is causing the LUTS, only how bad it is |
-| **Role in AROU** | Retrospectively quantifies severity of pre-existing LUTS; helps guide definitive treatment after the acute episode |
-| **Lecture slide** | ***IPSS and QoL scores: assess severity (guide treatment); risk factor for progression*** [8] |
+##### International Prostate Symptom Score (IPSS)
 
-##### B. Voiding Diary / Frequency-Volume Chart
+***IPSS*** [2][7][8]:
+- ***Use: quantify severity of LUTS, predict treatment response, guide treatment decision and monitor response to treatment (NOT a diagnostic tool)*** [7]
+- ***Involves*** [7]:
+  - ***Voiding symptoms: incomplete emptying, intermittency, weak stream, straining***
+  - ***Storage symptoms: frequency, urgency, nocturia***
+  - ***Quality of life measure***
+- ***Interpretation: mild (1–7), moderate (8–19), severe (20–35)*** [7]
+- ***IPSS and QoL scores: assess severity (guide treatment); risk factor for progression*** [8]
+- **When to use**: After the acute episode; helps quantify baseline LUTS severity and guides whether patient needs watchful waiting, medical therapy, or surgery
 
-| Aspect | Detail |
-|---|---|
-| **What it is** | Patient records timing and volume of all fluid intake and all voids over ***at least 3 days*** [5] |
-| **Purpose** | Differentiates true frequency from polyuria; identifies nocturnal polyuria; assesses voiding pattern |
-| **When** | After AROU has resolved; especially useful if frequency/nocturia are prominent symptoms |
+##### Voiding Diary / Frequency-Volume Chart
 
-##### C. Uroflowmetry
+- Record time and volume of each void + fluid intake for ***at least 3 days*** [4]
+- Especially useful if frequency/nocturia are prominent features
+- Helps differentiate nocturnal polyuria (large volume, few voids) from overactive bladder (small volumes, many voids)
 
-| Aspect | Detail |
-|---|---|
-| **What it is** | ***Non-invasive investigation of maximal flow, voided volume, and residual volume (by USG)*** [4][2][3] |
-| **Procedure** | Patient urinates into a device that measures volume/time of urine accumulation → generates a flow curve [2][3] |
-| **Validity** | ***Voided volume must be > 150 mL to be representative of usual voiding habit*** [5][8] |
-| **Key findings** | |
+##### Uroflowmetry [3][7][8]
+
+***Uroflowmetry***: non-invasive investigation of maximal flow, voided volume, and residual volume [3]
 
 | Parameter | Normal | Abnormal | Interpretation |
 |---|---|---|---|
-| ***Flow pattern*** | ***Bell-shaped*** | ***↓ peak (BPH)***, ***plateaued (urethral stricture)***, ***multiple peaks (abdominal straining)*** [2][3] | Shape of the curve tells you about the nature of obstruction |
-| ***Peak flow rate (Qmax)*** | ***> 15 mL/s (male); > 30 mL/s (female)*** | ***< 15 mL/s = diagnostic of BOO; < 10 mL/s = better outcome after TURP (prognostic)*** [5] | Lower Qmax = more likely obstructed |
-| ***Post-void residual (PVR)*** | ***< 50 mL (normal); accept up to 100–200 mL in elderly*** [2][3] | ***< 150 mL (BPH context)*** [5]; > 200 mL is abnormal | High PVR = either BOO or detrusor underactivity |
+| ***Voided volume*** | ***> 150 mL to be representative*** [7] | < 150 mL | Invalid test if volume too low |
+| ***Peak flow rate (Qmax)*** | ***> 15 mL/s (male); > 30 mL/s (female)*** [7] | ***< 10 mL/s*** | ***< 10 mL/s: 90% obstructed; 10–15 mL/s: 60% obstructed; > 15 mL/s: only 30% obstructed*** [8] |
+| **Flow pattern** | Bell-shaped curve | ***↓ peak (BPH) vs plateaued (urethral stricture)*** [7] | Plateaued = fixed narrowing (stricture); ↓ peak = compressive obstruction (BPH) or detrusor underactivity |
+| ***Post-void residual (PVR)*** | ***< 50 mL (normal); up to 100–200 mL acceptable in elderly*** [7] | > 200 mL | Suggests either BOO or detrusor underactivity; large PVR → risk of UTI, stones, upper tract damage |
 
-**Correlation between Qmax and obstruction** (from lecture slides) [8]:
+**Critical caveats** [3][7]:
+- ***Normal maximal flow rate does NOT exclude outflow obstruction*** — 18% of patients with BOO have Qmax > 15 mL/s [7]
+- ***Uroflowmetry is NOT sufficient to diagnose outflow obstruction since it cannot distinguish between outflow obstruction and poor detrusor contractility*** [3] — both give ↓ Qmax. To distinguish them, you need urodynamics
 
-| ***Qmax*** | ***Probability of BOO*** |
-|---|---|
-| ***< 10 mL/s*** | ***~90% obstructed*** |
-| ***10–15 mL/s*** | ***~60% obstructed*** |
-| ***> 15 mL/s*** | ***~30% obstructed (i.e. 90% no BOO if > 15 mL/s)*** [2][3][8] |
+##### Urodynamic Study [3][7][8]
 
-<Callout title="Important Caveat About Uroflowmetry" type="error">
-***Uroflowmetry alone is NOT sufficient to diagnose outflow obstruction*** [4][2][3]. **Why?** Because a low Qmax can result from either (a) outlet obstruction OR (b) poor detrusor contractility (detrusor underactivity, DUA). Both produce a weak stream. ***It cannot distinguish between outflow obstruction and poor detrusor contractility*** [4]. Additionally, ***a normal maximal flow rate does NOT exclude outflow obstruction*** — ***18% have obstruction despite Qmax > 15 mL/s*** [2][3]. To definitively diagnose BOO, you need **urodynamic studies**.
-</Callout>
+***Urodynamics: gold-standard for diagnosis of BOO*** [7]
 
-##### D. Urodynamic Study (Gold Standard for Diagnosing BOO)
+***Investigation of*** [3]:
+- ***Uroflow rate***
+- ***Bladder volume***
+- ***Intravesical and rectal pressure*** (to calculate detrusor pressure = P_ves − P_abd)
+- ***Sphincter function*** (EMG)
 
-| Aspect | Detail |
-|---|---|
-| **What it is** | The gold standard for diagnosing bladder outlet obstruction [2][3][9] |
-| **What it measures** | ***Uroflow rate, bladder volume, intravesical and rectal pressure, sphincter function*** [4] |
-| **How it works** | A catheter with a pressure transducer is placed in the bladder, and another in the rectum. The bladder is slowly filled with saline while pressures are continuously recorded. Then the patient voids while pressures and flow are simultaneously measured |
-| **Key finding** | ***Outflow obstruction is characterised by HIGH pressure LOW flow*** [4] — the detrusor is generating high pressure (trying to push past the obstruction) but flow is still low (because the outlet is blocked) |
-| **Detrusor underactivity** | LOW pressure LOW flow — the detrusor cannot generate enough pressure, so flow is low even though the outlet may be open |
-| **Why not done routinely?** | Invasive, uncomfortable, time-consuming, expensive |
-| **Indications** | ***Atypical age, suspected neurogenic bladder, history of spinal/pelvic surgery, failed intervention*** [9]; uncertain diagnosis where uroflowmetry is equivocal; before surgery in equivocal cases |
+***Outflow obstruction is characterised by high pressure, low flow*** [3]
 
-**Interpretation matrix:**
-
-| | High Pdet (detrusor pressure) | Low Pdet |
-|---|---|---|
-| **Low Qmax** | ***BOO*** (high pressure, low flow) | ***DUA*** (low pressure, low flow) |
-| **Normal/High Qmax** | Normal or compensated obstruction | Normal |
-
-> **Why is this the gold standard?** Because it simultaneously measures *both* the "push" (detrusor pressure) and the "flow" (uroflow rate). This is the only way to distinguish BOO from DUA — uroflowmetry only measures flow and cannot tell you *why* the flow is low.
-
-##### E. Flexible Cystoscopy (Selected Cases)
-
-| Aspect | Detail |
-|---|---|
-| **When** | ***Haematuria*** (to visualise the bladder mucosa and urethra); suspected bladder tumour; suspected urethral stricture; recurrent UTI [8][9] |
-| **Key findings** | Bladder tumour, CIS, bladder stones, urethral stricture, bladder trabeculation (chronic BOO), intravesical prostatic protrusion |
-| **Not done acutely** | Usually planned after the acute episode |
-
-#### 3.6 Summary Table of Investigations — Timing and Purpose
-
-| Timing | Investigation | Purpose | Key Findings / Interpretation |
+| Pattern | Detrusor Pressure | Flow Rate | Diagnosis |
 |---|---|---|---|
-| **Immediate** | ***Bladder USG (scan)*** | ***Confirm diagnosis*** | ***≥ 300 mL = retention; ≥ 1 L = chronic*** |
-| **Immediate** | First catheterised volume | Confirm + quantify | > 300–400 mL = retention confirmed |
-| **After catheterisation** | ***CBC*** | ***Infection*** | ***Leukocytosis*** |
-| **After catheterisation** | ***RFT*** | ***Obstructive nephropathy*** | ↑ Cr, ↑ Urea, ↑ K⁺ |
-| **After catheterisation** | LFT | Baseline / metastatic workup | Deranged → liver mets (CA prostate) |
-| **After catheterisation** | ***Catheterised urine: urinalysis, microscopy, C/ST*** | ***Rule out UTI*** | Pyuria, bacteriuria, organisms |
-| **After catheterisation** | ***KUB*** | ***Stones or faecal loading*** | Radio-opaque calculi; faecal loading |
-| **After catheterisation** | ***USG KUB*** | ***Hydronephrosis/hydroureter*** | Dilated calyces/pelvis; hydroureter |
-| **DO NOT check acutely** | ***PSA*** | ***False elevation in AROU*** | ***Check 4–6 weeks later*** |
-| **Outpatient** | ***IPSS*** | ***Quantify LUTS severity*** | ***Mild 1–7; Moderate 8–19; Severe 20–35*** |
-| **Outpatient** | Voiding diary | Characterise voiding pattern | At least 3 days |
-| **Outpatient** | ***Uroflowmetry + PVR*** | ***Screen for BOO*** | ***Qmax < 10 = 90% obstructed*** |
-| **Outpatient** | ***TRUS*** | ***Prostate size*** | ***Before 5-ARI or surgery planning*** |
-| **Selected** | ***Urodynamic study*** | ***Gold standard for BOO*** | ***High pressure low flow = BOO*** |
-| **Selected** | ***Cystoscopy*** | ***Haematuria workup*** | Bladder tumour, stones, stricture |
-| **EMERGENCY** | MRI spine | Rule out spinal cord compression | Cord compression, cauda equina |
+| **High pressure, low flow** | ↑↑ (detrusor working hard) | ↓↓ | **BOO** — detrusor is trying to push through an obstruction |
+| **Low pressure, low flow** | ↓ | ↓↓ | **Detrusor underactivity (DUA)** — the problem is not obstruction but a weak pump |
+| **Normal pressure, normal flow** | Normal | Normal | No BOO, no DUA (consider other causes of symptoms) |
+
+Why does this matter? Because the treatment is completely different. BOO → relieve obstruction (α-blockers, 5-ARI, TURP). DUA → improve detrusor function (cholinergics, intermittent self-catheterisation). If you do TURP on a patient with DUA, you will not fix anything — the obstruction was never the problem.
+
+***Indications for urodynamics*** [8]:
+- ***Atypical age*** for BPH
+- ***Suspected neurogenic bladder***
+- ***History of spinal/pelvic surgery***
+- ***Failed intervention*** (e.g., persistent symptoms after TURP)
+- Uncertain diagnosis where uroflowmetry alone cannot distinguish BOO from DUA
+
+##### Cystoscopy [7][8]
+
+***Flexible cystoscopy*** [8]:
+- **Indications**: ***Haematuria*** [8] (to rule out bladder tumour), suspected urethral stricture, bladder stones, bladder cancer
+- **What it shows**: Direct visualisation of urethra, prostate (median lobe protrusion), bladder mucosa (tumours, trabeculation from chronic obstruction, diverticula, stones)
+- Bladder trabeculation = thickened detrusor muscle bundles visible as ridges — indicates chronic BOO with compensatory hypertrophy
+
+##### CT Urogram / USG Urogram [8]
+
+***USG / CT urogram: haematuria*** [8]
+- Indicated when haematuria is present — to evaluate the entire urinary tract for tumour, stone, or other pathology
+- CT urogram = CT with IV contrast in nephrographic and excretory phases → visualises kidneys, ureters, bladder
 
 ---
 
-### 4. Special Considerations During Investigation
+### 4. Investigation Summary Table — What, When, Why
 
-#### 4.1 DRE Findings and Their Interpretation
-
-***DRE is part of the physical examination, not a "lab test," but its findings directly guide investigations*** [4][5]:
-
-| DRE Finding | Suggests | Next Step |
+| Timing | Investigation | Key Findings / Interpretation |
 |---|---|---|
-| ***Smooth, enlarged > 3FB, non-tender, median sulcus present*** | BPH | IPSS, uroflowmetry, consider TRUS |
-| Hard, irregular, nodular; loss of median sulcus | CA Prostate | PSA (after 4–6 weeks), MRI prostate, TRUS biopsy |
-| Tender, boggy, swollen | Acute prostatitis | Urine C/ST, blood cultures; AVOID prostate massage/biopsy |
-| Faecal loading | Constipation (precipitant) | Disimpaction, laxatives |
-| ***Reduced anal tone, loss of perineal sensation*** | ***Neurological cause (cauda equina)*** | ***Urgent MRI spine*** |
-| Rectal mass | Rectal carcinoma compressing urethra | CT abdomen/pelvis, biopsy |
+| **ACUTE** | **Bladder scan** | ***≥ 300 mL = retention; ≥ 1 L = chronic*** [2] |
+| | **Catheterisation** (diagnostic + therapeutic) | Volume drained confirms diagnosis; send urine for analysis |
+| | **DRE** | Prostate (size/consistency/tenderness), faecal loading, anal tone |
+| | **Neurological exam** | Sensory level, perineal sensation, lower limb power/reflexes |
+| **AFTER CATHETERISATION** | ***CBC*** | Leukocytosis (infection/urosepsis) |
+| | ***RFT*** | Elevated creatinine → obstructive nephropathy |
+| | ***LFT*** | Baseline |
+| | ***Catheterised urine: biochemistry, microscopy, C/ST*** | UTI, haematuria, crystals |
+| | ***KUB*** | ***Stones or faecal loading*** [2] |
+| | **DO NOT** check PSA | ***False elevation during AROU — defer 4–6 weeks*** [2][8] |
+| **ELECTIVE (after acute episode)** | ***IPSS*** | Quantify LUTS severity; guide treatment |
+| | ***Uroflowmetry + PVR*** | Screen for BOO; ***Qmax < 10 = 90% obstructed*** [8] |
+| | **USG kidney/ureter** | ***If large PVR, haematuria, or Hx stone*** [7] |
+| | ***TRUS*** | ***Before 5-ARI or surgery*** [8] |
+| | ***Cystoscopy*** | ***Haematuria, suspected stricture/tumour*** [8] |
+| | ***Urodynamics*** | ***Gold-standard for BOO; atypical cases, suspected neurogenic bladder, failed intervention*** [7][8] |
+| | **PSA** (4–6 weeks later) | ***Only if life expectancy > 10 years + counselled*** [8]; r/o CA prostate |
+| | **MRI spine** | ***Urgently if neurological red flags*** |
 
-<Callout title="DRE Pitfalls" type="error">
-Two important caveats from the senior notes [4]:
-1. ***A normal prostate examination does NOT exclude BPH as a cause of obstruction*** — the prostate may enlarge predominantly into the bladder (median lobe / intravesical prostatic protrusion) without being palpable on DRE.
-2. ***BPH does NOT necessarily cause outflow obstruction*** — many men have enlarged prostates on DRE but never develop significant BOO. The correlation between prostate size and symptom severity is imperfect.
+<Callout title="Investigation Pitfalls to Remember" type="error">
+
+1. ***PSA during AROU = false elevation*** → defer 4–6 weeks [2][8]
+2. ***Normal uroflowmetry does NOT exclude BOO*** — 18% still obstructed despite Qmax > 15 mL/s [7]
+3. ***Uroflowmetry cannot distinguish BOO from DUA*** — both give low Qmax; need urodynamics to differentiate [3][7]
+4. ***Normal DRE does NOT exclude BPH*** — transition zone enlargement is not palpable from the rectum [3]
+5. ***Uroflowmetry requires voided volume > 150 mL*** to be a valid test [7]
+6. ***BPH does NOT necessarily cause outflow obstruction*** — size alone doesn't determine symptoms [3]
 </Callout>
 
-#### 4.2 Contraindications to Urethral Catheterisation
+---
 
-Before attempting catheterisation (which is also part of the diagnostic workup since it gives you the catheterised volume and urine for analysis), check for contraindications [2][3][5]:
+### 5. PSA — A Deeper Dive (Elective Context)
 
-- ***Blood at urethral meatus*** → suspect urethral injury
-- ***High-riding prostate on DRE*** → suspect urethral disruption (posterior urethral injury)
-- Recent urological surgery
+Since PSA is so commonly tested in exams and frequently misunderstood, here is a comprehensive summary for the elective workup phase:
 
-If any contraindication is present → proceed to ***suprapubic catheterisation (SPC)*** instead [2][3].
+***PSA (Prostate-Specific Antigen)*** [3]:
+- ***Prostate-specific but NOT prostate-cancer-specific*** [3]
+- ***Half-life = 2–3 days*** [3]
+- ***PSA > 1.5 ng/mL is a useful marker for prostatic enlargement and predicts increased risk of BPH progression*** [3]
+
+***Interpretation*** [3]:
+- ***PSA < 4 ng/mL = Normal***
+- ***PSA ≥ 4 ng/mL = Cutoff for diagnostic prostate biopsy***
+- ***PSA 4–10 ng/mL = 20% chance of cancer*** (the "grey zone")
+- ***PSA ≥ 10 ng/mL = 50% chance of cancer***
+
+***When NOT to check PSA*** [3][8]:
+- During AROU or UTI (false elevation)
+- ***If patients have < 10 years of life expectancy*** (unless clinically obvious disease like palpable nodule on DRE) [3]
 
 ---
 
 <Callout title="High Yield Summary">
 
-**Diagnostic approach to AROU — key points:**
-
-1. **Diagnosis is clinical + confirmatory:** inability to void + painful suprapubic distension + full bladder on scan (≥ 300 mL)
-2. **Always confirm full bladder** before diagnosing AROU — rule out oliguria/anuria (empty bladder = AKI, not retention)
-3. **≥ 1 L on bladder scan** suggests chronic retention
-4. **Immediate management = catheterisation** (14–18 Fr Foley) → simultaneously confirms diagnosis (catheterised volume) and provides treatment
-5. **Subsequent bloods:** CBC (infection), RFT (obstructive nephropathy), LFT (baseline)
-6. **DO NOT CHECK PSA ACUTELY** — false elevation; check 4–6 weeks later
-7. **Subsequent urine:** urinalysis, microscopy, C/ST → rule out UTI
-8. **Subsequent imaging:** KUB (stones, faecal loading); USG KUB (hydronephrosis) especially if RFT deranged or large residual
-9. **Outpatient investigations:** IPSS (quantify LUTS severity), uroflowmetry (screen for BOO), TRUS (prostate size for surgery planning), voiding diary
-10. **Uroflowmetry caveat:** cannot distinguish BOO from DUA; Qmax < 10 = 90% obstructed; Qmax > 15 = 90% NOT obstructed
-11. **Urodynamic study** is the gold standard for diagnosing BOO: **high pressure + low flow = BOO**
-12. **Urgent MRI spine** if any neurological red flags (back pain, sensory level, ↓ anal tone)
+1. **AROU is a clinical diagnosis**: inability to void + full bladder (***scan ≥ 300 mL***) + painful + sudden onset
+2. **Bladder scan** is the first-line differentiator: full = retention; empty = anuria/oliguria
+3. ***≥ 1 L on catheterisation suggests CROU*** — look for neurological cause
+4. **Acute investigations**: CBC, RFT, LFT, catheterised urine (biochemistry, microscopy, C/ST), KUB
+5. ***DO NOT CHECK PSA during AROU*** — causes false elevation; defer 4–6 weeks
+6. **DRE**: must do in all patients; assesses prostate, faecal loading, anal tone; ***normal DRE does NOT exclude BPH***
+7. ***Uroflowmetry***: screening for BOO; valid only if voided > 150 mL; ***Qmax < 10 = 90% obstructed***; but ***cannot distinguish BOO from DUA***
+8. ***Urodynamics***: gold standard for BOO; **high pressure + low flow = BOO; low pressure + low flow = DUA**
+9. ***Outflow obstruction = high pressure, low flow*** on urodynamics [3]
+10. **TRUS**: before 5-ARI or surgical planning; **cystoscopy**: for haematuria, suspected stricture/tumour
+11. **MRI spine**: urgently if neurological red flags (sensory level, weakness, ↓ anal tone)
+12. ***IPSS***: quantifies LUTS severity (mild 1–7, moderate 8–19, severe 20–35); guides treatment but is NOT a diagnostic tool
 
 </Callout>
 
 ---
 
 <ActiveRecallQuiz
-  title="Active Recall - Diagnosis and Investigation of AROU"
+  title="Active Recall - Diagnosis and Investigations of AROU"
   items={[
     {
-      question: "What bladder scan volume suggests urinary retention, and what volume suggests chronic retention?",
-      markscheme: ">=300 mL in a patient unable to void suggests urinary retention. >=1 L suggests chronic retention of urine."
+      question: "What bladder scan volume threshold suggests urinary retention, and what volume suggests chronic retention?",
+      markscheme: ">=300 mL in a patient unable to void suggests urinary retention. >=1 L suggests chronic retention of urine. These thresholds help differentiate acute from chronic and retention from anuria."
     },
     {
-      question: "Why should PSA NOT be checked during an acute episode of AROU? When should it be checked instead?",
-      markscheme: "AROU causes raised intravesical pressure and catheterisation traumatises prostatic tissue, both leading to false elevation of PSA. PSA should be checked 4-6 weeks after the acute episode has resolved."
+      question: "Why should you NOT check PSA during an episode of AROU, and when should it be checked instead?",
+      markscheme: "AROU causes prostatic distension and ischaemia, leading to artefactual release of PSA into the bloodstream giving a falsely elevated result. PSA should be deferred 4-6 weeks after the acute episode. Also should not check during UTI. Only check in patients with life expectancy >10 years after counselling."
     },
     {
-      question: "What are the key subsequent blood and urine investigations after catheterisation for AROU, and what is each looking for?",
-      markscheme: "Bloods: CBC (leukocytosis for infection), RFT (obstructive nephropathy), LFT (baseline). Urine: urinalysis/dipstick (blood, WBC, nitrites), microscopy (pyuria, RBCs), C/ST (rule out UTI). Also KUB for stones and faecal loading."
+      question: "A patient with AROU has a uroflowmetry Qmax of 8 mL/s. Can you confidently diagnose BOO? Why or why not, and what investigation would confirm it?",
+      markscheme: "No, cannot confidently diagnose BOO from uroflowmetry alone. Uroflowmetry cannot distinguish BOO from detrusor underactivity (DUA) - both give low Qmax. Need urodynamic study (gold standard for BOO diagnosis). BOO = high detrusor pressure + low flow. DUA = low detrusor pressure + low flow."
     },
     {
-      question: "Why is uroflowmetry alone NOT sufficient to diagnose bladder outlet obstruction?",
-      markscheme: "Uroflowmetry measures flow rate only. Low Qmax can result from either BOO or detrusor underactivity (DUA) - it cannot distinguish between them. Also, 18% of patients with BOO have Qmax >15 mL/s (false negative). Urodynamic study (measuring both pressure and flow simultaneously) is the gold standard: high pressure + low flow = BOO."
+      question: "List two important caveats about DRE findings in the context of suspected BPH causing AROU.",
+      markscheme: "(1) Normal prostate on DRE does NOT exclude BPH as cause of obstruction - DRE palpates peripheral zone but BPH affects the transition zone which is internal and not readily palpable. (2) BPH does NOT necessarily cause outflow obstruction - prostate size alone does not predict symptoms; depends on relationship between prostate, urethra and detrusor function."
     },
     {
-      question: "What is the correlation between Qmax on uroflowmetry and the probability of BOO?",
-      markscheme: "Qmax <10 mL/s: approximately 90% obstructed. Qmax 10-15 mL/s: approximately 60% obstructed. Qmax >15 mL/s: approximately 30% obstructed (i.e. 90% NOT obstructed if >15 mL/s)."
+      question: "Name four indications for urodynamic study in the workup of LUTS/AROU.",
+      markscheme: "Four indications: (1) Atypical age for BPH. (2) Suspected neurogenic bladder. (3) History of spinal or pelvic surgery. (4) Failed previous intervention (e.g. persistent symptoms after TURP). Also: uncertain diagnosis where uroflowmetry cannot distinguish BOO from DUA; before major surgical intervention."
     },
     {
-      question: "What finding on urodynamic study is characteristic of bladder outlet obstruction vs detrusor underactivity?",
-      markscheme: "BOO: HIGH detrusor pressure + LOW flow rate (bladder pushing hard but flow is blocked). DUA: LOW detrusor pressure + LOW flow rate (bladder cannot generate enough force, outlet may be open)."
+      question: "What are the contraindications for urethral catheterisation in AROU, and what is the alternative?",
+      markscheme: "Contraindications: (1) Urethral trauma (signs: blood at urethral meatus, high-riding prostate on DRE). (2) Recent urological surgery. Alternative: suprapubic catheterisation (SPC). For suspected urethral trauma, a retrograde urethrogram should be performed first to assess urethral integrity before any instrumentation."
     }
   ]}
 />
@@ -422,11 +408,11 @@ If any contraindication is present → proceed to ***suprapubic catheterisation 
 
 ## References
 
-[1] Lecture slides: GC 180. Benign prostatic hyperplasia, bladder outlet obstruction and urinary retention.pdf (p23, p24, p30, p33)
-[2] Senior notes: Ryan Ho Urogenital.pdf (p161, p162, p164, p165, p167, p170, p171, p173)
-[3] Senior notes: Ryan Ho Fundamentals.pdf (p347, p349, p350, p352, p355, p356)
-[4] Senior notes: felixlai.md (Acute retention of urine section; BPH section)
-[5] Senior notes: maxim.md (AROU section; Prostate cancer section)
-[8] Lecture slides: Benign Prostatic Hyperplasia.pdf (p12, p18)
-[9] Lecture slides: Benign Prostatic Hyperplasia.pdf (p18 — optional investigations)
-[10] Senior notes: Ryan Ho Diagnostic Radiology.pdf (p17 — IVU)
+[1] Lecture slides: GC 180. Benign prostatic hyperplasia, bladder outlet obstruction and urinary retention.pdf (pp. 23, 24, 30, 33)
+[2] Senior notes: Ryan Ho Urogenital.pdf (pp. 164–167, 170–173); Ryan Ho Fundamentals.pdf (pp. 349–352, 355–356)
+[3] Senior notes: felixlai.md (AROU section – diagnosis, physical examination, biochemical tests, specific tests; BPH section – PSA interpretation)
+[4] Senior notes: maxim.md (AROU section – physical examination, investigations)
+[5] Senior notes: Ryan Ho Critical Care.pdf (p. 25 — AKI aetiology)
+[7] Senior notes: Ryan Ho Urogenital.pdf (pp. 170–173); Ryan Ho Fundamentals.pdf (pp. 355–356) — uroflowmetry, IPSS, urodynamics, BPH workup
+[8] Lecture slides: Benign Prostatic Hyperplasia.pdf (pp. 12, 18)
+[9] Senior notes: Ryan Ho Diagnostic Radiology.pdf (p. 17 — IVU)
