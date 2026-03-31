@@ -42,8 +42,9 @@ graph TD
     E1 -- T1b --> E3["Esophagectomy\n+ LN dissection"]
     
     F --> F1{"SCC or ADC?"}
-    F1 -- SCC --> F2["Neoadjuvant chemoRT\n(CROSS protocol)\n→ Esophagectomy"]
-    F1 -- ADC --> F3["Neoadjuvant chemoRT or\nperioperative chemo\n→ Esophagectomy"]
+    F1 -- SCC --> F2["Neoadjuvant chemoRT\n(CROSS: paclitaxel/carboplatin + 41.4 Gy)\n→ Esophagectomy"]
+    F1 -- ADC --> F3["Perioperative FLOT (preferred)\nor neoadjuvant chemoRT (CROSS)\n→ Esophagectomy"]
+    F3 --> F5["If PD-L1 CPS ≥1:\nconsider FLOT + durvalumab"]
     F2 --> F4["If inoperable SCC:\nDefinitive chemoRT\n± salvage surgery if downstaged"]
     
     G --> G1["Definitive chemoRT\n(radical RT is ALSO curative)"]
@@ -57,16 +58,19 @@ graph TD
     H1 --> H6["Best supportive care"]
 ```
 
-### Stage-by-Stage Treatment Summary [2]
+### Stage-by-Stage Treatment Summary [2][3]
 
 | Stage | TNM | Treatment |
 |---|---|---|
 | ***0*** | ***Tis, N0, M0*** | ***Tis/T1a (confined to mucosa): EMR / ESD*** [2] |
-| ***I*** | ***T1, N0, M0*** | ***T1b (invades submucosa): esophagectomy*** [2] |
-| ***II*** | ***T2–3, N0, M0 or T1–2, N1, M0*** | ***Operable SCC: neoadjuvant chemoRT + esophagectomy*** [2] |
+| ***I*** | ***T1, N0, M0*** | ***T1b (invades submucosa): esophagectomy*** [2]; low-risk cT1b–T2 N0 may proceed directly to surgery [3] |
+| ***II*** | ***T2–3, N0, M0 or T1–2, N1, M0*** | ***Operable SCC: neoadjuvant chemoRT (CROSS) + esophagectomy*** [2][3] |
+| | | ***Operable ADC: perioperative FLOT (preferred) or neoadjuvant chemoRT (CROSS) + esophagectomy*** [3] |
 | | | ***Inoperable SCC: upfront chemoRT ± esophagectomy (if downstaged)*** [2] |
-| ***III*** | ***T3, any N, M0*** | ***Operable ADC: esophagectomy*** (with perioperative chemotherapy) [2] |
-| | | ***Inoperable ADC: chemoRT*** [2] |
+| ***III*** | ***T3–T4a, any N, M0*** | ***Operable ADC: perioperative FLOT ± durvalumab (if PD-L1+) → esophagectomy*** [3] |
+| | | ***Operable SCC: neoadjuvant chemoRT (CROSS) → esophagectomy*** [3] |
+| | | ***Inoperable: definitive chemoRT*** [2] |
+| | | ***Adjuvant nivolumab if residual pathologic disease after neoadjuvant chemoRT + R0 resection*** [3] |
 | ***IV*** | ***any T, any N, M1*** | ***Esophageal balloon dilation ± stenting; Palliative chemoRT*** [2] |
 
 ---
@@ -162,25 +166,88 @@ After removing the esophagus, you need to reconstruct the alimentary tract. The 
 
 ---
 
-#### C. Chemotherapy and Radiotherapy [1][2]
+#### C. Chemotherapy and Radiotherapy [1][2][3]
 
-##### Neoadjuvant ChemoRT — The CROSS Protocol [2]
+##### Neoadjuvant / Perioperative Therapy — NCCN v2.2026 Update
 
-This is the landmark trial that established the current standard of care for locally advanced esophageal cancer:
+Neoadjuvant therapy is indicated for **locally advanced, resectable esophageal cancer**. The approach differs by **histologic subtype** (adenocarcinoma vs SCC) and clinical stage [3]:
 
-| Feature | Detail |
-|---|---|
-| ***Indication*** | ***Locally advanced SCC — T2N1, T3N0, T3N1*** [2]; also used for locally advanced ADC |
-| ***Regimen*** | ***5-fluorouracil + cisplatin + 40 Gy RT*** [2] |
-| ***Schedule*** | ***6–8 weeks for 2 courses → wait 4 weeks and repeat PET-CT + OGD → wait 4 weeks for surgery*** [2] |
-| **Rationale** | ***Neoadjuvant chemotherapy: (1) downstage and shrink the tumour to increase chance of operability; (2) eradicate occult or silent micrometastasis next to primary tumour*** — based on the observation that ***most patients develop postoperative systemic metastasis without local recurrences*** [1] |
-| ***Side effects*** | ***RT-induced fibrosis, worsened dysphagia*** [2] |
+**Indications for neoadjuvant therapy** [3][4]:
+- **Adenocarcinoma**: cT2 N0 with high-risk features (LVI, ≥ 3 cm, poorly differentiated), cT1b–T2 N+, or cT3–T4a any N
+- **SCC**: cT2 N0 with high-risk features, cT1b–T2 N+, or cT3–T4a any N
+- Low-risk cT1b–T2 N0 lesions may proceed directly to surgery [4]
 
 **Why "neoadjuvant" (before surgery) rather than "adjuvant" (after surgery)?**
 - Post-operatively, the patient is recovering from a massive operation → may not tolerate chemotherapy
 - The tumour has its own blood supply intact pre-operatively → chemotherapy drugs reach the tumour more effectively
 - Neoadjuvant treatment can shrink the tumour → making surgery technically easier with better resection margins
 - The pathological response to neoadjuvant therapy provides prognostic information (complete pathological response = excellent prognosis)
+
+---
+
+###### Adenocarcinoma — Perioperative Systemic Therapy (Preferred) [3]
+
+| Regimen | Detail |
+|---|---|
+| ***FLOT (preferred)*** | ***Fluorouracil + leucovorin + oxaliplatin + docetaxel*** — category 1 [3]. Pre-op FLOT × 4 cycles → surgery → post-op FLOT × 4 cycles. The **FLOT4 trial** demonstrated a ***9% improvement in 3- and 5-year overall survival*** over ECF/ECX [3][4]. Now the standard perioperative regimen for esophageal and EGJ ADC |
+| ***FLOT + durvalumab*** | For ***PD-L1 CPS ≥ 1 or TAP ≥ 1%*** — category 1 for EGJ ADC; category 2A for esophageal ADC [3] |
+| **Other recommended** | Fluorouracil/cisplatin (category 1); fluoropyrimidine/oxaliplatin [3] |
+
+<Callout title="FLOT — The New Standard for Adenocarcinoma">
+***FLOT is the preferred perioperative chemotherapy regimen for esophageal and EGJ adenocarcinoma*** [3]. It is a triplet cytotoxic regimen that should be ***reserved for medically fit patients with excellent performance status*** and access to frequent toxicity evaluations, as grade 3–4 neutropenia occurs in up to 85% of patients [5]. For less fit patients, doublet regimens (fluoropyrimidine/oxaliplatin or fluoropyrimidine/cisplatin) are recommended alternatives.
+</Callout>
+
+###### Preoperative Chemoradiation — Both Histologies [3]
+
+| Regimen | Detail |
+|---|---|
+| ***Paclitaxel + carboplatin + RT (preferred)*** | ***41.4–50.4 Gy*** concurrent radiation — category 1 [3]. This is the ***CROSS regimen***, which showed significant OS benefit (***HR 0.73 for adenocarcinoma; HR 0.48 for SCC***) [4] |
+| ***Fluorouracil + oxaliplatin + RT*** | Category 1 [3] |
+| **Other recommended** | Fluorouracil/cisplatin + RT (category 1); irinotecan/cisplatin + RT (category 2B) [3] |
+
+<Callout title="CROSS Protocol — Key Details">
+The CROSS trial (van Hagen et al.) established neoadjuvant chemoradiation as standard of care for locally advanced esophageal cancer. ***Regimen: paclitaxel + carboplatin weekly × 5 weeks with concurrent 41.4 Gy radiation → surgery***. Median OS was 49.4 months (chemoRT + surgery) vs 24.0 months (surgery alone). The benefit was ***especially pronounced for SCC*** (HR 0.48), but also significant for ADC (HR 0.73) [4].
+</Callout>
+
+###### SCC-Specific Considerations [3][5]
+
+- ***Preoperative chemoradiation is preferred*** over perioperative chemotherapy alone for SCC [3]
+- The ***JCOG1109 (NExT) trial*** compared neoadjuvant cisplatin/5-FU (CF) vs CF + docetaxel (DCF) vs CF + radiation (CF-RT) for esophageal SCC. ***DCF showed the most favourable outcomes*** [5]
+- SCC is more radiosensitive than ADC → chemoRT achieves higher pathological complete response rates in SCC
+
+<Callout title="SCC vs ADC — Treatment Strategy Difference">
+***SCC is more sensitive to chemoRT; ADC is less sensitive to chemoRT → surgery is the backbone for ADC*** [2]. For SCC, neoadjuvant chemoradiation (CROSS) is preferred. For ADC, perioperative chemotherapy (FLOT) is the preferred approach, though neoadjuvant chemoRT (CROSS) is an acceptable alternative [3]. Recent data from the ***ESOPEC trial*** suggests FLOT may be superior to CROSS for ADC, and the ***Neo-AEGIS trial*** adds further evidence to this comparison.
+</Callout>
+
+###### MSI-H/dMMR Tumours — Useful in Certain Circumstances [3]
+
+For tumours with ***microsatellite instability-high (MSI-H) or mismatch repair deficiency (dMMR)***, neoadjuvant immunotherapy options include:
+- Dostarlimab
+- Nivolumab + ipilimumab
+- Pembrolizumab
+- Tremelimumab + durvalumab
+
+###### Adjuvant After Neoadjuvant Chemoradiation [3]
+
+| Feature | Detail |
+|---|---|
+| **Regimen** | ***Nivolumab*** — category 1 [3] |
+| **Indication** | After preoperative chemoradiation → R0 resection with ***residual pathologic disease*** (i.e., did NOT achieve complete pathological response) |
+| **Trial** | ***CheckMate 577*** — significantly improved disease-free survival with adjuvant nivolumab for 1 year post-esophagectomy [3] |
+
+---
+
+##### Toxicity of Neoadjuvant Regimens [3][5][6]
+
+| Regimen | Key Toxicities | Grade ≥ 3 Rate | Notes |
+|---|---|---|---|
+| ***FLOT*** | Neutropenia, febrile neutropenia (~16%), nausea/vomiting, diarrhoea, peripheral neuropathy (oxaliplatin), mucositis | ***~85% grade 3–4 neutropenia*** with triplet docetaxel [5] | Treatment discontinuation in ~9%; reserve for fit patients [3][5] |
+| ***CROSS (paclitaxel/carboplatin + RT)*** | Radiation esophagitis (up to 84%, mostly grade 1–2), leukopenia (~57%), anaemia (~68%), nausea/vomiting (~64%), anorexia (~57%) | ~45% neutropenia; ~61% esophagitis [6] | Post-op pulmonary complications ~21%, anastomotic leakage ~12% [6]; increased chylothorax risk vs chemo alone [7] |
+| ***CRT + immunotherapy*** | All CRT toxicities + rash (~25%), fatigue (~16%), thyroid dysfunction, immune-mediated pneumonitis/hepatitis/colitis | ~20% grade 3–4 [6] | Potentially serious immune-mediated AEs require monitoring |
+
+**Long-term sequelae** include chemotherapy-induced neuropathy, radiation-induced cardiotoxicity, and fatigue [3].
+
+---
 
 ##### Adjuvant ChemoRadiation [1]
 
@@ -198,11 +265,7 @@ This is the landmark trial that established the current standard of care for loc
 | ***Regimen*** | ***Cisplatin + 5-fluorouracil + > 50 Gy RT*** [2] |
 | **SCC vs ADC** | ***SCC is more sensitive to chemoRT*** [2]; ***ADC is less sensitive to chemoRT → surgery is preferred*** [2] |
 
-<Callout title="SCC vs ADC — Treatment Sensitivity Difference">
-***SCC is more sensitive to chemoRT; ADC is less sensitive to chemoRT → surgery is preferred for ADC*** [2]. This is a key exam point. The biological basis: SCC cells have higher proliferative rates and are more susceptible to radiation-induced DNA damage. ADC cells tend to be more radiation-resistant, so surgical resection remains the backbone of ADC management.
-</Callout>
-
-##### Targeted Therapy and Immunotherapy (Current Practice, 2024–2026)
+##### Targeted Therapy and Immunotherapy (Current Practice, 2025–2026)
 
 These are increasingly important, especially for advanced/metastatic disease:
 
@@ -210,9 +273,9 @@ These are increasingly important, especially for advanced/metastatic disease:
 |---|---|---|
 | **Trastuzumab** (Herceptin) | HER2 receptor | HER2-positive ADC (overexpressed in ~20% of esophageal/EGJ ADC); added to first-line chemotherapy |
 | **Ramucirumab** | VEGFR-2 | Second-line for advanced ADC; anti-angiogenic |
-| **Nivolumab / Pembrolizumab** | PD-1 | PD-L1-positive or MSI-high tumours; now part of first-line treatment (CheckMate 649, KEYNOTE-590 trials); also adjuvant nivolumab post-neoadjuvant chemoRT + surgery (CheckMate 577) |
-
-> In the current era (2025–2026), **adjuvant nivolumab** for 1 year post-esophagectomy after neoadjuvant chemoRT in patients who did NOT achieve complete pathological response is standard of care per the **CheckMate 577 trial** — this significantly improves disease-free survival.
+| **Nivolumab / Pembrolizumab** | PD-1 | PD-L1-positive or MSI-high tumours; first-line treatment (CheckMate 649, KEYNOTE-590); adjuvant nivolumab post-neoadjuvant chemoRT + surgery (CheckMate 577) [3] |
+| **Durvalumab** | PD-L1 | Added to perioperative FLOT for PD-L1 CPS ≥ 1 or TAP ≥ 1% in EGJ/esophageal ADC [3] |
+| **Dostarlimab / Tremelimumab** | PD-1 / CTLA-4 | Neoadjuvant options for MSI-H/dMMR tumours [3] |
 
 ---
 
@@ -296,16 +359,19 @@ Understanding complications is essential because they are commonly tested and be
 
 1. **T1a (mucosal)** → EMR/ESD (endoscopic therapy); organ-preserving; 90% survival.
 2. **T1b (submucosal)** → Esophagectomy + LN dissection (20–25% LN metastasis even without visible LN involvement).
-3. **Locally advanced, resectable (T2–3, N0–N+, M0)** → Neoadjuvant chemoRT (CROSS: 5-FU + cisplatin + 40 Gy) → esophagectomy.
-4. **Inoperable / unfit** → Definitive chemoRT (radical RT is also curative, especially for SCC).
-5. **SCC is more sensitive to chemoRT; ADC is less sensitive → surgery is the backbone for ADC.**
-6. **Stage IV (M1) / T4b** → Palliative: stenting, endoluminal ablation, RT/brachytherapy, chemotherapy, nutritional support (PEG/jejunostomy).
-7. **Esophagectomy approaches**: Ivor-Lewis (2-stage, intrathoracic anastomosis), McKeown (3-stage, cervical anastomosis), Transhiatal (no thoracotomy, limited LN dissection).
-8. **LN dissection is mandatory in ALL approaches**; resection margin generous due to submucosal spread.
-9. **Gastric conduit** — survives on right gastroepiploic artery; routine pyloroplasty for vagal denervation; feeding jejunostomy.
-10. **Major complications**: pneumonia (20%), anastomotic leak (10%), RLN injury (20%), chylothorax, conduit ischaemia.
-11. **Barrett's management**: PPI for all; surveillance stratified by dysplasia grade; EMR + RFA for dysplastic Barrett's.
-12. **Adjuvant nivolumab** (CheckMate 577) — for patients without complete pathological response after neoadjuvant chemoRT + surgery.
+3. **Locally advanced ADC (T2–T4a, N0–N+, M0)** → ***Perioperative FLOT (preferred)*** or neoadjuvant chemoRT (CROSS) → esophagectomy. Consider FLOT + durvalumab if PD-L1 CPS ≥ 1.
+4. **Locally advanced SCC (T2–T4a, N0–N+, M0)** → ***Neoadjuvant chemoRT (CROSS: paclitaxel/carboplatin + 41.4 Gy) is preferred*** → esophagectomy.
+5. **Inoperable / unfit** → Definitive chemoRT (radical RT is also curative, especially for SCC).
+6. **SCC is more sensitive to chemoRT; ADC is less sensitive → surgery is the backbone for ADC.**
+7. **Stage IV (M1) / T4b** → Palliative: stenting, endoluminal ablation, RT/brachytherapy, chemotherapy, nutritional support (PEG/jejunostomy).
+8. **Esophagectomy approaches**: Ivor-Lewis (2-stage, intrathoracic anastomosis), McKeown (3-stage, cervical anastomosis), Transhiatal (no thoracotomy, limited LN dissection).
+9. **LN dissection is mandatory in ALL approaches**; resection margin generous due to submucosal spread.
+10. **Gastric conduit** — survives on right gastroepiploic artery; routine pyloroplasty for vagal denervation; feeding jejunostomy.
+11. **Major complications**: pneumonia (20%), anastomotic leak (10%), RLN injury (20%), chylothorax, conduit ischaemia.
+12. **Barrett's management**: PPI for all; surveillance stratified by dysplasia grade; EMR + RFA for dysplastic Barrett's.
+13. **Adjuvant nivolumab** (CheckMate 577) — category 1 after neoadjuvant chemoRT + R0 resection with residual pathologic disease.
+14. **MSI-H/dMMR tumours** — consider neoadjuvant immunotherapy (dostarlimab, nivolumab + ipilimumab, pembrolizumab, or tremelimumab + durvalumab).
+15. **FLOT toxicity** — ~85% grade 3–4 neutropenia; reserve for fit patients with good PS. **CROSS toxicity** — radiation esophagitis (up to 84%), leukopenia, post-op pulmonary complications.
 
 </Callout>
 
@@ -319,8 +385,12 @@ Understanding complications is essential because they are commonly tested and be
       markscheme: "Treatment: EMR or ESD (endoscopic therapy). T1a is confined to the mucosa (lamina propria or muscularis mucosae). The risk of lymph node metastasis is very low (<2%) because tumour has not reached the submucosal lymphatic plexus. Esophagectomy would be overtreatment with unnecessary morbidity and mortality.",
     },
     {
-      question: "What is the CROSS neoadjuvant protocol? State the regimen, indication, and schedule.",
-      markscheme: "Indication: locally advanced resectable SCC (T2N1, T3N0, T3N1), also used for ADC. Regimen: 5-fluorouracil + cisplatin + 40 Gy radiotherapy. Schedule: 6-8 weeks for 2 courses, wait 4 weeks, repeat PET-CT and OGD for response assessment, wait 4 weeks, then proceed to surgery.",
+      question: "What is the CROSS neoadjuvant protocol? State the regimen, indication, and key survival data.",
+      markscheme: "Indication: locally advanced resectable esophageal cancer (both SCC and ADC), specifically cT2 N+ or cT3–T4a any N. Regimen: paclitaxel + carboplatin weekly × 5 weeks with concurrent 41.4 Gy radiotherapy, followed by surgery. Key data: median OS 49.4 months (chemoRT + surgery) vs 24.0 months (surgery alone). Benefit especially pronounced for SCC (HR 0.48) but also significant for ADC (HR 0.73). Preferred neoadjuvant approach for SCC.",
+    },
+    {
+      question: "What is the FLOT regimen? When is it preferred over the CROSS protocol?",
+      markscheme: "FLOT = fluorouracil + leucovorin + oxaliplatin + docetaxel. It is perioperative chemotherapy (4 cycles pre-op → surgery → 4 cycles post-op). FLOT is preferred over CROSS for locally advanced esophageal/EGJ ADENOCARCINOMA (category 1 per NCCN v2.2026). The FLOT4 trial showed 9% improvement in 3- and 5-year OS over ECF/ECX. For PD-L1 CPS ≥1, FLOT + durvalumab may be added. Major toxicity: ~85% grade 3–4 neutropenia — reserve for fit patients. For SCC, preoperative chemoradiation (CROSS) remains preferred over perioperative chemotherapy alone.",
     },
     {
       question: "Compare the Ivor-Lewis and McKeown esophagectomy approaches. Which has a higher anastomotic leak rate and why?",
@@ -345,3 +415,8 @@ Understanding complications is essential because they are commonly tested and be
 
 [1] Senior notes: felixlai.md (Esophageal cancer — Treatment sections: General principles, Medical treatment, Surgical treatment, Palliative treatment, Prevention of complications; Barrett's esophagus — Management; Siewert classification)
 [2] Senior notes: maxim.md (CA esophagus — Management table, Endoscopic therapy, Esophagectomy, Neoadjuvant therapy CROSS, Complications of esophagectomy, Primary chemoRT, Palliative treatments; Barrett's oesophagus — Management)
+[3] Esophageal and Esophagogastric Junction Cancers. National Comprehensive Cancer Network (NCCN) Guidelines v2.2026. Updated 2026-01-21.
+[4] Yang H, Wang F, Hallemeier CL, Lerut T, Fu J. Oesophageal Cancer. *Lancet*. 2024;404(10466):1991-2005. doi:10.1016/S0140-6736(24)02226-8.
+[5] Kato K, Machida R, Ito Y, et al. Doublet Chemotherapy, Triplet Chemotherapy, or Doublet Chemotherapy Combined With Radiotherapy as Neoadjuvant Treatment for Locally Advanced Oesophageal Cancer (JCOG1109 NExT). *Lancet*. 2024;404(10447):55-66. doi:10.1016/S0140-6736(24)00745-1.
+[6] Chen R, Liu Q, Li Q, et al. A Phase II Clinical Trial of Toripalimab Combined With Neoadjuvant Chemoradiotherapy in Locally Advanced Esophageal Squamous Cell Carcinoma (NEOCRTEC1901). *EClinicalMedicine*. 2023;62:102118. doi:10.1016/j.eclinm.2023.102118.
+[7] Koyanagi K, Kato K, Ito Y, et al. Impact of preoperative therapy for locally advanced thoracic esophageal cancer on the risk of perioperative complications: Results from multicenter phase III trial JCOG 1109. *J Clin Oncol*. 2021;39(Suppl 3):162. doi:10.1200/JCO.2021.39.3_suppl.162.
