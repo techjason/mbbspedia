@@ -38,7 +38,12 @@ const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_FAMILY_MEDICINE_SOURCES_DIR =
   "/Users/jason/Documents/FamilyMedicineSources";
+const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
+const DEFAULT_PAEDIATRICS_SLIDES_DIR = "PaediatricsLectures";
 const DEFAULT_SURGERY_SENIOR_NOTES_DIR = "scripts/SeniorNotes";
+const DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS = [
+  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
+];
 const DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS = [
   DEFAULT_FAMILY_MEDICINE_SOURCES_DIR,
   DEFAULT_SURGERY_SENIOR_NOTES_DIR,
@@ -83,6 +88,10 @@ Options:
                                slides-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
                                senior-notes-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
                                senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
+  --paediatrics                Shortcut preset:
+                               specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
+                               slides-dir=${DEFAULT_PAEDIATRICS_SLIDES_DIR}
+                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
   --slides-dir "<path>"         Default: ${DEFAULT_SLIDES_DIR}
   --embedding-model "<id>"      Default: ${DEFAULT_EMBEDDING_MODEL}
   --cache-dir "<path>"          Default: ${DEFAULT_SURGERY_CACHE_DIR}
@@ -95,6 +104,7 @@ Examples:
   npm run index:rag -- --notes-only --senior-notes-dir "/Users/jason/Documents/SeniorNotes"
   npm run index:rag -- --psychiatry
   npm run index:rag -- --family-medicine
+  npm run index:rag -- --paediatrics
   npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides"
   npm run index:rag -- --force --ocr-policy always
 `);
@@ -218,6 +228,16 @@ function parseArgs(argv) {
       options.seniorNotesExplicit = true;
       options.seniorNotesDirs = DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
       options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
+      options.slidesDirExplicit = false;
+      continue;
+    }
+
+    if (arg === "--paediatrics" || arg === "-paediatrics") {
+      options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
+      options.seniorNotes = [];
+      options.seniorNotesExplicit = true;
+      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
+      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
       options.slidesDirExplicit = false;
       continue;
     }
@@ -346,9 +366,21 @@ function parseArgs(argv) {
     }
   }
 
+  if (normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY) {
+    if (!options.seniorNotesExplicit) {
+      options.seniorNotes = [];
+      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
+      options.seniorNotesExplicit = true;
+    }
+    if (!options.slidesDirExplicit) {
+      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
+    }
+  }
+
   const hasBuiltInPresetDefaults =
     normalizedSpecialty === "psychiatry" ||
-    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY;
+    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY ||
+    normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY;
 
   if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
     if (!hasBuiltInPresetDefaults && !options.seniorNotesExplicit) {

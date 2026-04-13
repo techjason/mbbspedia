@@ -275,6 +275,8 @@ const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_FAMILY_MEDICINE_SOURCES_DIR =
   "/Users/jason/Documents/FamilyMedicineSources";
+const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
+const DEFAULT_PAEDIATRICS_SLIDES_DIR = "PaediatricsLectures";
 const DEFAULT_SENIOR_NOTES = [
   { id: "felix", path: SURGERY_SAMPLE_NOTE_PATH, label: "Felix Lai" },
   { id: "maxim", path: SURGERY_SECONDARY_NOTE_PATH, label: "Maxim" },
@@ -290,6 +292,9 @@ const DEFAULT_SLIDES_DIR = "/Users/jason/Documents/BlockBSlides";
 const DEFAULT_SURGERY_SENIOR_NOTES_DIR = "scripts/SeniorNotes";
 const DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS = [
   DEFAULT_FAMILY_MEDICINE_SOURCES_DIR,
+  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
+];
+const DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS = [
   DEFAULT_SURGERY_SENIOR_NOTES_DIR,
 ];
 const DEFAULT_CACHE_ROOT = ".cache/rag";
@@ -373,6 +378,10 @@ Options:
                                slides-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
                                senior-notes-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
                                senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
+  -paediatrics, --paediatrics   Shortcut preset:
+                               specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
+                               slides-dir=${DEFAULT_PAEDIATRICS_SLIDES_DIR}
+                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
   --model "<provider/model>"   Generation model. Default: anthropic/claude-opus-4.6
   --selection-model "<provider/model>" Selection model for scouts/slides. Default: anthropic/claude-opus-4.6
   --specialty "<folder-name>"  Default: ${DEFAULT_SPECIALTY}
@@ -404,6 +413,7 @@ Examples:
   npm run generate:notes -- --senior-notes-dir "scripts/SeniorNotes" --history-taking "lower gi bleed"
   npm run generate:notes -- --psychiatry "major depressive disorder"
   npm run generate:notes -- --family-medicine "hypertension"
+  npm run generate:notes -- --paediatrics "paediatric asthma"
   npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides" "major depressive disorder"
   npm run generate:notes -- --history-taking "chest pain"
   npm run generate:notes -- --physical-exam "varicose veins"
@@ -569,6 +579,16 @@ function parseArgs(argv) {
         DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
       options.seniorNotesExplicit = true;
       options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
+      options.slidesDirExplicit = false;
+      continue;
+    }
+
+    if (arg === "-paediatrics" || arg === "--paediatrics") {
+      options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
+      options.seniorNotes = [];
+      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
+      options.seniorNotesExplicit = true;
+      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
       options.slidesDirExplicit = false;
       continue;
     }
@@ -785,6 +805,17 @@ function parseArgs(argv) {
     }
   }
 
+  if (normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY) {
+    if (!options.seniorNotesExplicit) {
+      options.seniorNotes = [];
+      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
+      options.seniorNotesExplicit = true;
+    }
+    if (!options.slidesDirExplicit) {
+      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
+    }
+  }
+
   if (
     options.seniorNotes.length === 0 &&
     options.seniorNotesDirs.length === 0
@@ -796,7 +827,8 @@ function parseArgs(argv) {
 
   const hasBuiltInPresetDefaults =
     normalizedSpecialty === "psychiatry" ||
-    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY;
+    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY ||
+    normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY;
 
   if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
     if (!hasBuiltInPresetDefaults && !options.seniorNotesExplicit) {
@@ -1089,6 +1121,14 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
+}
+
+function getSpecialtyClinicalContext(specialty) {
+  const slug = slugify(String(specialty ?? ""));
+  if (slug === DEFAULT_PAEDIATRICS_SPECIALTY) {
+    return `Clinical setting (mandatory): PAEDIATRICS. All teaching is for assessment and clinical care of infants, children, and adolescents. Emphasise age-appropriate physiology, normal values for age, growth and development, family-centred care, communication with child and caregivers, consent/assent as appropriate, and paediatric formulations and dosing. Where adult and paediatric practice differ, prioritise paediatric guidance. For neonatal-only or mixed-age topics, name the age group explicitly in each section.`;
+  }
+  return "";
 }
 
 function toTitleCase(value) {
@@ -2271,6 +2311,7 @@ function buildPromptOne({
   powerpointFileNames,
   sampleNotesContent,
   slidesContent,
+  clinicalContextPrefix,
 }) {
   let prompt = template
     .replaceAll("{{condition}}", condition)
@@ -2283,6 +2324,10 @@ function buildPromptOne({
 
   if (slidesContent) {
     prompt += `\n\nLecture slides content (treat as high yield and mark those points with bold + italics):\n\n${slidesContent}`;
+  }
+
+  if (clinicalContextPrefix) {
+    prompt = `${clinicalContextPrefix.trim()}\n\n${prompt}`;
   }
 
   return prompt;
@@ -2312,8 +2357,11 @@ const TOPIC_DESCRIPTION_PROMPT = `You are a medical education assistant. Given a
 Topic: {{topic}}
 One-line definition:`;
 
-async function generateTopicDescription({ topic, title, model }) {
-  const prompt = TOPIC_DESCRIPTION_PROMPT.replace("{{topic}}", title || topic);
+async function generateTopicDescription({ topic, title, model, specialty }) {
+  let prompt = TOPIC_DESCRIPTION_PROMPT.replace("{{topic}}", title || topic);
+  if (slugify(String(specialty ?? "")) === DEFAULT_PAEDIATRICS_SPECIALTY) {
+    prompt += `\n\nPaediatric context: phrase the definition for children or adolescents (or state the typical age range if the condition is age-specific).`;
+  }
   try {
     const result = await generateText({
       model,
@@ -2541,6 +2589,7 @@ async function generateTopic({
 }) {
   const slug = slugify(topic);
   const title = toTitleCase(topic);
+  const clinicalContextPrefix = getSpecialtyClinicalContext(specialty);
 
   if (!slug) {
     throw new Error(`Could not generate slug for topic: "${topic}"`);
@@ -2572,11 +2621,17 @@ async function generateTopic({
       powerpointFileNames,
       sampleNotesContent,
       slidesContent,
+      clinicalContextPrefix,
     }),
   ];
 
   if (!oneShot) {
-    prompts.push(...FOLLOW_UP_PROMPTS);
+    const followUps = FOLLOW_UP_PROMPTS.map((p) =>
+      clinicalContextPrefix
+        ? `${clinicalContextPrefix.trim()}\n\n${p}`
+        : p,
+    );
+    prompts.push(...followUps);
   }
 
   if (prompts.length !== generationSectionPlan.length) {
@@ -2617,7 +2672,12 @@ async function generateTopic({
   }
 
   console.log(`[${topic}] Generating one-line description...`);
-  const description = await generateTopicDescription({ topic, title, model });
+  const description = await generateTopicDescription({
+    topic,
+    title,
+    model,
+    specialty,
+  });
   const docSectionPlan = await appendOptionalDocSections({
     baseSectionPlan: generationSectionPlan,
     fragmentsDir,
