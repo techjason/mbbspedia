@@ -217,6 +217,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_SPECIALTY;
       options.seniorNotes = DEFAULT_SENIOR_NOTES.slice();
       options.seniorNotesExplicit = false;
+      options.seniorNotesDirs = [DEFAULT_SURGERY_SENIOR_NOTES_DIR];
       options.slidesDir = DEFAULT_SLIDES_DIR;
       options.slidesDirExplicit = false;
       continue;
