@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/cn";
 import { MessageCircleIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { getSiteUrl } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +32,44 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const siteUrl = getSiteUrl();
+const defaultDescription =
+  "MBBS revision notes with structured sections, citations, and active recall — a medical student knowledge base.";
+
 export const metadata: Metadata = {
-  title: "MBBSPedia",
-  description: "MBBSPedia",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "MBBSPedia",
+    template: "%s | MBBSPedia",
+  },
+  description: defaultDescription,
+  applicationName: "MBBSPedia",
+  openGraph: {
+    type: "website",
+    locale: "en",
+    url: siteUrl,
+    siteName: "MBBSPedia",
+    title: "MBBSPedia",
+    description: defaultDescription,
+    images: [
+      {
+        url: "/favicon/android-chrome-192x192.png",
+        width: 192,
+        height: 192,
+        alt: "MBBSPedia",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "MBBSPedia",
+    description: defaultDescription,
+    images: ["/favicon/android-chrome-192x192.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

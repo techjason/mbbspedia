@@ -8,6 +8,7 @@ import {
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/mdx-components";
 import type { Metadata } from "next";
+import { getSiteUrl } from "@/lib/site-config";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { TabAwareTOC } from "@/components/mdx/tab-aware-toc";
 import {
@@ -130,8 +131,39 @@ export async function generateMetadata(
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const title = page.data.title;
+  const description =
+    typeof page.data.description === "string" && page.data.description.trim()
+      ? page.data.description.trim()
+      : `MBBS revision notes: ${title}.`;
+  const canonicalUrl = new URL(page.url, getSiteUrl()).toString();
+
   return {
-    title: page.data.title,
-    description: page.data.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "article",
+      url: canonicalUrl,
+      siteName: "MBBSPedia",
+      title,
+      description,
+      images: [
+        {
+          url: "/favicon/android-chrome-192x192.png",
+          width: 192,
+          height: 192,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      images: ["/favicon/android-chrome-192x192.png"],
+    },
   };
 }
