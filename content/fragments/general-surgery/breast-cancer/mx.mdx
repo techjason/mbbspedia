@@ -43,7 +43,7 @@ graph TD
     G -->|"Yes"| H["BCS + Whole breast RT\n+ Axillary surgery"]
     G -->|"No (C/I to BCS)"| I["Mastectomy\n± Reconstruction\n+ Axillary surgery"]
     
-    E --> J["Neoadjuvant chemo\n± Herceptin if HER2+\n± Hormonal if HR+"]
+    E --> J["Neoadjuvant systemic therapy\nTNBC: chemo + pembrolizumab\nHER2+: chemo + anti-HER2\nHR+: selected endocrine/chemo"]
     J --> K["Re-assess response"]
     K -->|"Operable"| G
     K -->|"Still inoperable"| F
@@ -52,9 +52,9 @@ graph TD
     I --> L
     
     L --> M{"Receptor\nstatus?"}
-    M -->|"ER/PR +"| N["Hormonal therapy\n(5-10 years)\n± Chemo if high RS"]
-    M -->|"HER2 +"| O["Trastuzumab x 12mo\n+ Chemo"]
-    M -->|"Triple negative"| P["Chemotherapy\n± PARP inhibitor\n± Immunotherapy"]
+    M -->|"ER/PR +"| N["Endocrine therapy\n(5-10 years)\n± Chemo if high genomic risk\n± CDK4/6 if high risk"]
+    M -->|"HER2 +"| O["Anti-HER2 therapy\n+ Chemo\nT-DM1 if residual post-NACT"]
+    M -->|"Triple negative"| P["Chemo\n± Pembrolizumab\n± Capecitabine / PARP inhibitor"]
     
     F --> Q["Hormonal / Chemo /\nTargeted / Palliative RT\n/ Bone therapy"]
 ```
@@ -301,7 +301,13 @@ graph TD
 - ***No proven overall survival benefit compared to adjuvant therapy*** (same drugs, different timing)
 - ***May upstage if no response to treatment*** (tumour grows during treatment → opportunity for surgery may be lost)
 
-***Regimen:*** ***Anthracycline-based: Doxorubicin + Cyclophosphamide + Paclitaxel (ACT)*** [1] ± ***Herceptin if HER2+*** [2]
+***Current subtype-specific approach*** [19][20]:
+- ***TNBC stage II–III***: pembrolizumab with neoadjuvant chemotherapy, followed by adjuvant pembrolizumab after surgery. Immune-related adverse events can be severe/permanent, and there are no data supporting routine pembrolizumab combined with adjuvant capecitabine or olaparib.
+- ***TNBC cT1a/bN0***: do not routinely offer neoadjuvant therapy outside a clinical trial.
+- ***HER2-positive, node-positive or high-risk node-negative***: neoadjuvant chemotherapy plus trastuzumab; pertuzumab may be added with trastuzumab.
+- ***HR-positive / HER2-negative***: neoadjuvant chemotherapy can be used when chemotherapy is already indicated; post-menopausal patients may receive neoadjuvant aromatase inhibitor therapy to improve local treatment options.
+
+***Traditional chemotherapy backbone:*** anthracycline/taxane-based regimens such as doxorubicin + cyclophosphamide followed by paclitaxel remain common where appropriate [1][19].
 
 ##### 5.1.2 Adjuvant Chemotherapy
 
@@ -314,8 +320,8 @@ graph TD
 | Subtype | Indication for Adjuvant Chemo |
 |---|---|
 | ***ER/PR+, HER2−*** | ***High recurrence score (RS) by Gene Expression Profiling*** (OncotypeDX) — chemo benefit likely outweighs risk; see below |
-| ***ER/PR−, HER2−*** (triple negative) | ***Chemotherapy is the ONLY form of treatment*** — not candidates for hormonal or targeted therapy [1] |
-| ***HER2+*** | Chemo typically given with anti-HER2 therapy |
+| ***ER/PR−, HER2−*** (triple negative) | Chemotherapy backbone; add pembrolizumab for stage II–III disease when eligible, and consider capecitabine for residual HER2-negative/TNBC disease after standard neoadjuvant therapy [19][20] |
+| ***HER2+*** | Chemo with anti-HER2 therapy; residual invasive disease after neoadjuvant chemo + HER2 therapy should receive adjuvant T-DM1 [19] |
 
 ***Regimens*** [1]:
 
@@ -327,19 +333,21 @@ graph TD
 
 ##### 5.1.3 Gene Expression Profiling — OncotypeDX (21-Gene Recurrence Score)
 
-This deserves special mention because it is the key tool that determines whether ER+ patients benefit from chemotherapy [1]:
+This deserves special mention because it is the key tool that determines whether many ER+/HER2− patients benefit from chemotherapy [1][21]:
 
 - ***Well-validated gene expression profile to predict chemotherapy benefit for women with ER+ breast cancer and either limited or no nodal involvement***
 - Performed on ***formalin-fixed, paraffin-embedded*** tissue of the excised invasive component
-- Provides a ***Recurrence Score (RS)***:
+- Provides a ***Recurrence Score (RS)***. Older cutoffs used low/intermediate/high groupings, but current practice is more nuanced after TAILORx/RxPONDER:
 
-| RS | Risk Category | Implication |
-|---|---|---|
-| ***RS < 18*** | ***Low risk*** | Chemo benefit ***will NOT outweigh*** risk of side effects; tamoxifen alone sufficient |
-| ***RS 18–31*** | ***Intermediate risk*** | Unclear whether chemo benefit outweighs risk; benefit ***does not appear to be large*** |
-| ***RS > 31*** | ***High risk*** | Chemo benefit ***likely outweighs*** risk; ***↓ recurrence rate with tamoxifen + chemo vs. tamoxifen alone*** |
+| Patient group | OncotypeDX implication |
+|---|---|
+| ***Node-negative, age > 50*** | RS < 26: little/no chemotherapy benefit; endocrine therapy alone is usually appropriate. RS ≥ 26: offer chemoendocrine therapy [21] |
+| ***Node-negative, age ≤ 50*** | RS < 16: little/no chemotherapy benefit. RS 16–25: chemoendocrine therapy may be offered. RS ≥ 26: offer chemoendocrine therapy [21] |
+| ***Post-menopausal, 1–3 positive nodes*** | OncotypeDX may guide decisions; RS 0–25 generally no chemotherapy benefit, RS ≥ 26 → chemoendocrine therapy [21] |
+| ***Pre-menopausal, 1–3 positive nodes*** | Do ***not*** use OncotypeDX to withhold chemotherapy; RxPONDER showed chemotherapy benefit even with RS 0–25 [21] |
+| ***≥ 4 positive nodes*** | Evidence is insufficient to use OncotypeDX routinely to decide against chemotherapy [21] |
 
-> **Why is this important?** Without genomic profiling, many ER+ patients received chemotherapy "just in case." OncotypeDX allows us to identify the ~70% of ER+ patients who do NOT benefit from chemo (low RS) — sparing them unnecessary toxicity. Only those with high RS derive meaningful benefit.
+> **Why is this important?** Without genomic profiling, many ER+ patients received chemotherapy "just in case." OncotypeDX can spare many post-menopausal node-negative or limited node-positive ER+/HER2− patients unnecessary chemotherapy. In pre-menopausal node-positive disease, however, chemotherapy benefit cannot be safely excluded using a low RS alone.
 
 #### 5.2 Radiotherapy
 
@@ -379,22 +387,27 @@ This deserves special mention because it is the key tool that determines whether
 
 ##### 5.4.1 Anti-HER2 Therapy
 
-***Trastuzumab (Herceptin)*** [1][2]:
-- ***IV infusion monthly (Q1mo) × 12 months*** [2]
-- ***Indicated in ALL patients with HER2+ breast cancer*** [1] — defined by IHC 3+ or FISH-amplified
+***Trastuzumab (Herceptin)*** [1][2][19]:
+- ***Total duration: 1 year*** with regular cardiac function monitoring [19]
+- ***Indicated for HER2+ breast cancer*** — defined by IHC 3+ or ISH/FISH-amplified. Strongly recommended with chemotherapy for node-positive disease and node-negative tumours > 1 cm [19]
 - Mechanism: Monoclonal antibody targeting the extracellular domain of HER2 receptor → blocks downstream signalling (RAS-MAPK, PI3K-Akt) → also triggers antibody-dependent cellular cytotoxicity (ADCC)
 - ***Side effects: Cardiotoxicity*** [2] — ***not used concurrently with anthracyclines*** (both are cardiotoxic; sequential use reduces cardiac risk); ***hypersensitivity reactions*** [2]
 
-> ***Lapatinib: NOT to be administered in adjuvant setting*** — lack of demonstrated benefit in trials; no role in routine HER2+ adjuvant therapy [1].
+***Additional HER2-directed options*** [19]:
+- ***Pertuzumab*** may be added to trastuzumab-based chemotherapy, especially for node-positive HER2+ disease.
+- ***T-DM1 (trastuzumab emtansine)*** for 14 cycles should be offered if residual invasive HER2+ disease remains after standard neoadjuvant chemotherapy plus HER2-targeted therapy.
+- ***Neratinib*** may be used as extended adjuvant therapy in selected early-stage HER2+ patients, particularly HR-positive and node-positive patients, but diarrhoea prophylaxis is essential and no OS benefit has been shown.
+- ***Lapatinib*** is not used routinely in the adjuvant setting.
 
 ##### 5.4.2 PARP Inhibitors
 
-- ***Olaparib*** — indicated for ***high-risk BRCA carriers*** [2]
+- ***Olaparib*** — indicated for selected ***high-risk germline BRCA1/2 carriers*** with HER2-negative early breast cancer after completion of local therapy and chemotherapy [2][18]
 - Mechanism: BRCA-mutant cells are already deficient in homologous recombination DNA repair. PARP inhibitors block the remaining base excision repair pathway → ***synthetic lethality*** (cancer cells cannot repair DNA by any mechanism → accumulation of lethal DNA damage → apoptosis). Normal cells with one functioning BRCA allele survive.
 
 ##### 5.4.3 CDK4/6 Inhibitors
 
-- ***Abemaciclib*** — for ***high-risk ER+ breast cancer*** [2]
+- ***Abemaciclib*** for 2 years plus endocrine therapy may be offered to ***HR+/HER2−, node-positive, high-risk*** early breast cancer meeting monarchE-type criteria: ≥ 4 positive axillary nodes, or 1–3 positive nodes plus grade 3 disease, tumour ≥ 5 cm, or Ki-67 ≥ 20% [19].
+- ***Ribociclib*** for 3 years plus endocrine therapy may be offered to selected anatomic stage II–III HR+/HER2− patients at high risk of recurrence based on NATALEE; benefits, toxicity, cost, and patient preference should be weighed, especially in lower-risk node-negative disease [19].
 - Mechanism: CDK4/6 drive G1→S cell cycle progression; inhibiting them arrests proliferation of ER+ cancer cells (which are particularly dependent on cyclin D-CDK4/6 pathway)
 
 #### 5.5 Other Systemic Therapies
@@ -415,8 +428,8 @@ This deserves special mention because it is the key tool that determines whether
 |---|---|---|---|---|
 | ***DCIS (Stage 0)*** | None | ***Van Nuys Index***: Low = WLE; Intermediate = WLE + RT; High = Mastectomy + SLNB [1]. Margin ≥ 2 mm [1]. ALND ***NOT*** indicated for pure DCIS [1] | ***ER/PR+ DCIS → Tamoxifen/AI*** (reduces recurrence/contralateral cancer, no survival benefit) [1]. ***No chemo. No targeted therapy*** [1] | If intermediate score + BCT [1] |
 | ***LCIS*** | None | ***Prophylaxis: Bilateral simple mastectomy + reconstruction*** (selected high-risk); otherwise ***close surveillance*** [1] | ***Chemoprevention: Tamoxifen*** [1] | — |
-| ***Early (Stage I–II)*** | Consider if ***large tumour convertible from mastectomy to BCS*** [2]; ***HER2+ or TNBC*** (will need chemo anyway, better to give upfront) [1] | ***BCS + SLNB*** (preferred if eligible) ***OR Mastectomy ± reconstruction + SLNB/ALND*** [1] | ***± Chemo*** (based on OncotypeDX for ER+, mandatory for TNBC), ***± Hormonal therapy*** (all ER/PR+), ***± Trastuzumab*** (all HER2+), ***± PARP inhibitor*** (BRCA+) [1][2] | After BCS (WBRT) [1]; after mastectomy if high-risk features [1] |
-| ***Locally advanced (Stage III)*** | ***Neoadjuvant chemo ± Herceptin*** [1][2] | ***BCS or Mastectomy*** (depending on response) + ***SLNB or ALND*** [1] | As per receptor status | ***Post-mastectomy RT*** (high-risk); post-BCS WBRT [1] |
+| ***Early (Stage I–II)*** | Consider if ***large tumour convertible from mastectomy to BCS*** [2]; offer neoadjuvant systemic therapy for high-risk HER2+ or TNBC when residual disease would guide adjuvant therapy [19] | ***BCS + SLNB*** (preferred if eligible) ***OR Mastectomy ± reconstruction + SLNB/ALND*** [1] | ***± Chemo*** (genomic assay/clinical risk for ER+/HER2−), ***endocrine therapy*** (all ER/PR+), ***anti-HER2 therapy*** (HER2+), ***± pembrolizumab*** (eligible TNBC), ***± olaparib*** (high-risk gBRCA HER2−), ***± CDK4/6 inhibitor*** (high-risk HR+/HER2−) [1][2][19][20][21] | After BCS (WBRT) [1]; after mastectomy if high-risk features [1] |
+| ***Locally advanced (Stage III)*** | ***Neoadjuvant systemic therapy***: TNBC chemo + pembrolizumab; HER2+ chemo + trastuzumab ± pertuzumab; HR+/HER2− chemo or selected endocrine therapy [19][20] | ***BCS or Mastectomy*** (depending on response) + ***SLNB or ALND*** [1] | Response-adapted: T-DM1 for residual HER2+; pembrolizumab continuation for eligible TNBC; capecitabine for selected residual HER2−/TNBC; olaparib for selected high-risk gBRCA HER2−; endocrine/CDK4/6 for high-risk HR+/HER2− | ***Post-mastectomy RT*** (high-risk); post-BCS WBRT [1] |
 | ***Metastatic (Stage IV)*** | — | ***Palliative*** — surgery not for cure; may be used for local symptom control (e.g., fungating tumour) | ***Hormonal therapy*** (ER/PR+), ***Chemo*** (organ metastasis: liver, lung), ***Targeted therapy*** (HER2), ***Bone therapy*** (bisphosphonates/denosumab for bone mets), ***± Immunotherapy*** (TNBC PD-L1+) [2] | ***Palliative RT*** — brain metastasis, cord compression, SVCO, painful bone mets [2]; ***steroids for brain met*** [2] |
 
 ---
@@ -444,13 +457,13 @@ This deserves special mention because it is the key tool that determines whether
 
 4. ***ALND:*** Clinically positive nodes, ≥ 3 positive SLN, IBC. Standard = Level I + II. Level III only if grossly positive.
 
-5. ***Neoadjuvant chemo:*** Locally advanced/inoperable; downstage to enable BCS; mark tumour with clip/seed. Especially effective in HER2+ and TNBC (high pCR rate).
+5. ***Neoadjuvant systemic therapy:*** Locally advanced/inoperable; downstage to enable BCS; mark tumour with clip/seed. Stage II–III TNBC should receive chemo + pembrolizumab followed by adjuvant pembrolizumab; high-risk HER2+ should receive chemo + trastuzumab ± pertuzumab.
 
-6. ***Adjuvant chemo:*** High OncotypeDX RS for ER+/HER2−; all TNBC; with trastuzumab for HER2+.
+6. ***Adjuvant chemo/response-adapted therapy:*** Use OncotypeDX carefully for ER+/HER2− decisions; residual HER2+ after neoadjuvant therapy → T-DM1; residual HER2−/TNBC may receive capecitabine; high-risk gBRCA HER2− → olaparib.
 
 7. ***Hormonal therapy (5–10 years):*** All ER/PR+. Tamoxifen (pre/post-menopausal); AI (post-menopausal only, more effective); GnRH agonist (pre-menopausal). NOT concurrent with chemo.
 
-8. ***Trastuzumab:*** All HER2+; IV Q1mo × 12mo. S/E = cardiotoxicity (not concurrent with anthracyclines).
+8. ***HER2 therapy:*** Trastuzumab-based therapy for HER2+ disease, usually total 1 year with cardiac monitoring; add pertuzumab for selected higher-risk disease; T-DM1 if residual invasive disease after neoadjuvant HER2 therapy.
 
 9. ***Palliative:*** Bone mets → bisphosphonates/denosumab. Brain mets/cord compression/SVCO → RT ± steroids.
 
@@ -503,3 +516,6 @@ This deserves special mention because it is the key tool that determines whether
 [16] Image credit: Cleveland Clinic (Jackson-Pratt drain image)
 [17] Image credit: Christiana Care (TRAM flap image)
 [18] Image credit: National Cancer Institute (SLNB image)
+[19] ASCO Guideline: Selection of Optimal Adjuvant Chemotherapy and Targeted Therapy for Early Breast Cancer, rapid updates through 2024; reviewed 2026.
+[20] ASCO Guideline: Neoadjuvant Chemotherapy, Endocrine Therapy, and Targeted Therapy for Breast Cancer, including pembrolizumab rapid update; reviewed 2026.
+[21] ASCO Guideline: Biomarkers for Adjuvant Endocrine and Chemotherapy in Early-Stage Breast Cancer.
