@@ -6,9 +6,9 @@
 
 Before we walk through the algorithm, let's establish the fundamental principles that make RCC management unique among solid cancers:
 
-1. **Surgery is the only curative treatment for localised RCC** — there is no effective adjuvant chemotherapy, and the role of adjuvant immunotherapy/targeted therapy remains limited [2][3].
+1. **Surgery is the main curative treatment for localised RCC** — there is no effective adjuvant chemotherapy, but adjuvant pembrolizumab is now recommended for selected high-risk clear-cell RCC after nephrectomy (KEYNOTE-564 criteria) [10][12].
 2. ***RCC is classically resistant to conventional chemotherapy*** — **NO role of chemotherapy** in treatment of RCC. The reason: the kidney tubular epithelium from which RCC arises is rich in **P-glycoprotein (MDR1)**, a drug efflux pump that actively pumps out chemotherapeutic agents. Additionally, RCC's disordered vasculature (from VEGF overexpression) paradoxically limits effective drug delivery [2].
-3. ***Radiotherapy is ONLY indicated for palliation*** — specifically for **brain or bone metastasis** [2]. RCC is considered a "radioresistant" tumour (though stereotactic radiosurgery has shown some efficacy).
+3. ***Radiotherapy is selective, not routine*** — stereotactic radiotherapy is used for clinically relevant brain/bone metastases and may be offered as stereotactic ablative radiotherapy (SABR/SBRT) for selected cT1 lesions in patients unfit for surgery [10].
 4. **The immune system matters in RCC** — RCC is one of the most "immunogenic" solid tumours. Historically it was one of the few cancers that responded to IL-2 and IFN-α. This immune sensitivity is why modern **checkpoint inhibitors** (anti-PD-1, anti-CTLA-4) have revolutionised metastatic RCC management.
 5. **The VHL/HIF/VEGF pathway is druggable** — loss of VHL → HIF-α accumulation → VEGF overexpression → angiogenesis. This is the rational basis for **anti-VEGF TKIs** and **mTOR inhibitors**.
 6. **Even in metastatic disease, surgery often has a role** — "cytoreductive nephrectomy" (removing the primary tumour even when metastases are present) and "metastasectomy" (removing isolated metastases) can improve survival in selected patients [3].
@@ -21,7 +21,7 @@ Before we walk through the algorithm, let's establish the fundamental principles
 graph TD
     A["RCC Diagnosed and Staged"] --> B{"Stage?"}
     B -->|"T1 - confined, ≤ 7 cm"| C["Partial Nephrectomy (standard)"]
-    C --> C1["Alternatives: RFA / Cryo / Active surveillance if frail"]
+    C --> C1["Alternatives: RFA / Cryo / SABR / Active surveillance if frail"]
     B -->|"T2 - confined, > 7 cm"| D["Laparoscopic Radical Nephrectomy"]
     B -->|"T3 - locally advanced"| E["Open Radical Nephrectomy"]
     E --> E1["+ Thrombectomy if IVC extension"]
@@ -29,11 +29,11 @@ graph TD
     B -->|"T4 - beyond Gerota's"| F["Radical Nephrectomy ± Adrenalectomy"]
     B -->|"Metastatic (M1)"| G["IMDC Risk Stratification"]
     G --> H{"IMDC Risk?"}
-    H -->|"Favourable (0 RF)"| I["Sunitinib or Pazopanib (1st line)"]
-    H -->|"Intermediate/Poor (≥ 1 RF)"| J["Ipilimumab + Nivolumab (1st line)"]
-    I --> K["2nd line: Cabozantinib or Nivolumab"]
-    J --> L["2nd line: Cabozantinib or anti-VEGF TKI"]
-    G --> M["± Cytoreductive nephrectomy if IMDC < 4"]
+    H -->|"Favourable (0 RF)"| I["IO-TKI / Nivo+Ipi / Sunitinib or Pazopanib"]
+    H -->|"Intermediate/Poor (≥ 1 RF)"| J["IO combination: Nivo+Ipi, Pembro+Axi, Pembro+Len, or Nivo+Cabo"]
+    I --> K["Later line: Cabozantinib, Nivolumab, VEGF-TKI; consider Belzutifan"]
+    J --> L["2nd line: Cabozantinib or other VEGF-TKI"]
+    G --> M["CN: immediate only if no systemic therapy needed or complete oligomet treatment; otherwise defer"]
     G --> N["± Metastasectomy if oligometastatic + resectable"]
     
     style C fill:#90EE90
@@ -162,10 +162,14 @@ This escalating complexity is why accurate preoperative staging with MRI is esse
 | **Rationale** | ***Improved imaging modalities led to increased detection of small renal masses, of which many are slow-growing*** [3] |
 | ***Indication*** | ***Elderly patients with significant comorbidities or short life-expectancy + tumour < 4 cm*** [3] |
 | **Protocol** | Serial imaging (CT or USG) at regular intervals; intervene if growth > 3–4 mm/year or > 4 cm |
-| **Pre-requirement** | ***Percutaneous renal biopsy should be done to confirm diagnosis*** [3] |
+| **Biopsy** | Consider renal mass biopsy if the result would change counselling or treatment; biopsy is mandatory before thermal ablation because there will be no surgical specimen [10] |
 | ***Outcome*** | ***Slow growth in most cases (mean 3 mm/year); progression to metastatic disease only in 1–2%*** [3] |
 
 **Why is this safe?** Small renal masses (< 4 cm, T1a) have a very low rate of metastasis. In elderly patients with competing comorbidities (heart failure, COPD, etc.), the risk of dying FROM the kidney cancer is lower than the risk of dying WITH it from something else. Surgery carries operative risks that may outweigh the oncological benefit.
+
+##### C. ***Stereotactic Ablative Radiotherapy (SABR/SBRT)*** [10]
+
+SABR/SBRT is no longer just "palliation" in RCC. It may be offered to patients with **cT1 renal tumours** who have an indication for treatment but are **unfit for surgery**. Evidence is still less mature than for surgery, so patients should be counselled about uncertainty in long-term oncological outcomes.
 
 ---
 
@@ -173,15 +177,14 @@ This escalating complexity is why accurate preoperative staging with MRI is esse
 
 > ***NO role of adjuvant chemotherapy following complete resection of localised RCC*** [2].
 
-> ***Role of adjuvant therapy: NOT proven to show survival benefit*** [3].
-
-This is critical and often tested. After a complete resection (R0) of localised RCC, there is currently **no standard adjuvant systemic therapy**:
+Current guidelines separate **chemotherapy/targeted therapy** from **adjuvant PD-1 therapy**:
 
 - **Adjuvant chemotherapy** — no benefit (RCC is chemo-resistant)
-- **Adjuvant targeted therapy** (sunitinib, sorafenib) — trials (S-TRAC, ASSURE, PROTECT) showed either no benefit or marginal DFS improvement without OS benefit, with significant toxicity
-- **Adjuvant immunotherapy** — pembrolizumab (KEYNOTE-564 trial) showed improved DFS in high-risk patients post-nephrectomy and received regulatory approval in some settings (2021–2023). However, the overall survival benefit remains debated, and adoption is not yet universal. This is an evolving area.
+- **Adjuvant targeted therapy** (sunitinib, sorafenib, pazopanib, everolimus, axitinib) — not recommended after nephrectomy because OS benefit has not been shown and toxicity is significant [10].
+- **Adjuvant pembrolizumab** — offer to selected **clear-cell RCC** patients, preferably within 12–16 weeks post-nephrectomy after restaging, if they match KEYNOTE-564 recurrence-risk groups: pT2 grade 4 or sarcomatoid, pT3 any grade, pT4, pN+, or M1 no evidence of disease after complete metastasectomy within one year [10][12].
+- **Other adjuvant/perioperative ICI strategies** — atezolizumab, nivolumab, nivolumab + ipilimumab, and perioperative nivolumab have not shown consistent benefit and should not be treated as equivalent to pembrolizumab [10].
 
-**The standard after complete resection is surveillance imaging alone.**
+For lower-risk resected RCC, the standard remains surveillance. For high-risk clear-cell RCC, use shared decision-making because pembrolizumab reduces recurrence risk but can cause immune-related toxicity and overtreatment [10].
 
 ---
 
@@ -216,11 +219,11 @@ Even in metastatic disease, surgery can play a role. This is unusual for most so
 
 | Aspect | Details |
 |--------|---------|
-| **Definition** | Removal of the primary kidney tumour in the setting of metastatic disease — not curative on its own |
-| ***Indication*** | ***IMDC < 4 risk factors (i.e., favourable or intermediate risk); oligometastasis; symptomatic primary lesion*** [3] |
-| **Rationale** | Reduces tumour burden → improves efficacy of subsequent systemic therapy; removes source of immune-modulating cytokines; ***the primary tumour may act as an "immunological sink" for activated immune cells***, so removing it may enhance systemic immunotherapy responses [3] |
-| **Contraindication** | Poor-risk patients (IMDC ≥ 4); high tumour burden with rapidly progressive disease; poor performance status |
-| **Evidence** | CARMENA trial (2018) showed that in intermediate/poor-risk patients, sunitinib alone was non-inferior to cytoreductive nephrectomy + sunitinib. However, in favourable-risk patients and those with low metastatic burden, cytoreductive nephrectomy still provides benefit |
+| **Definition** | Removal of the primary kidney tumour in the setting of metastatic disease — not curative unless all disease can be cleared |
+| ***Indication*** | Good performance status with no immediate need for systemic therapy, symptomatic primary tumour, or oligometastatic disease where complete local treatment of metastases is achievable [10] |
+| **Rationale** | Can reduce tumour burden and delay systemic therapy in highly selected patients; complete resection of primary + oligometastases may be potentially disease-controlling |
+| **Contraindication** | IMDC/MSKCC poor risk, high metastatic volume, rapidly progressive disease, poor performance status, or asymptomatic synchronous primary tumour that requires immediate systemic therapy |
+| **Evidence** | CARMENA showed sunitinib alone was non-inferior to immediate cytoreductive nephrectomy + sunitinib in intermediate/poor-risk patients. Current guidance favours upfront IO-based systemic therapy for intermediate/poor-risk patients who need treatment, with delayed CN considered only if they derive clinical benefit [10] |
 
 ##### B. ***Metastasectomy*** [3]
 
@@ -268,15 +271,16 @@ RCC is one of the most immunogenic solid tumours. Evidence:
 
 | IMDC Risk | ***First-Line Regimen*** | Rationale |
 |-----------|------------------------|-----------|
-| ***Favourable (0 RF)*** | ***Sunitinib or pazopanib*** [1][3] (TKI monotherapy); or pembrolizumab + lenvatinib/axitinib (IO-TKI) | Indolent disease; IO-IO combination (ipilimumab + nivolumab) did not show benefit in favourable-risk subgroup in CheckMate-214 |
-| ***Intermediate/Poor (≥ 1 RF)*** | ***Ipilimumab + nivolumab*** [1][3] (IO-IO); or pembrolizumab + lenvatinib/axitinib (IO-TKI) | ***39% response rate in nivolumab + ipilimumab*** [3]; superior OS over sunitinib in intermediate/poor risk |
+| ***Favourable (0 RF)*** | ***Pembrolizumab + axitinib, lenvatinib + pembrolizumab, nivolumab + cabozantinib, nivolumab + ipilimumab, or sunitinib/pazopanib*** [10][11] | IO-TKI combinations improve PFS/response; OS advantage over sunitinib is less clear in favourable-risk disease, so TKI monotherapy remains acceptable when appropriate |
+| ***Intermediate/Poor (≥ 1 RF)*** | ***Nivolumab + ipilimumab, pembrolizumab + axitinib, lenvatinib + pembrolizumab, or nivolumab + cabozantinib*** [10][11][12] | IO-based combinations are standard; VEGFR-TKI monotherapy is reserved for patients who cannot receive or tolerate immune checkpoint inhibition |
 
 **Second-line and beyond:**
 
 | Line | ***Options*** |
 |------|-------------|
-| ***2nd line*** | ***Cabozantinib or nivolumab*** [3] (if TKI first-line); ***cabozantinib or anti-VEGF TKI*** [3] (if IO-IO first-line) |
-| ***3rd line*** | ***Cabozantinib or alternative targeted therapy*** [3] |
+| ***After IO-based first-line*** | ***Cabozantinib or another VEGF-TKI*** [10] |
+| ***After VEGF-TKI monotherapy first-line*** | ***Nivolumab or cabozantinib*** [10] |
+| ***Later lines*** | Sequence an active agent not previously used; ***belzutifan*** is an alternative to everolimus after second- to fourth-line therapy for clear-cell metastatic RCC [10] |
 
 ##### B. ***Targeted Therapy***
 
@@ -284,9 +288,10 @@ These drugs target the VHL/HIF/VEGF axis and the mTOR pathway:
 
 | Class | Examples | Mechanism | Key Points |
 |-------|---------|-----------|------------|
-| ***Tyrosine kinase inhibitors (TKIs)*** | ***Sunitinib, pazopanib, axitinib, sorafenib, cabozantinib*** [1][2][3] | Block VEGF receptor (and other kinases) → inhibit tumour angiogenesis and proliferation. Since RCC is VEGF-driven (VHL loss → HIF → VEGF), cutting off the blood supply starves the tumour | ***Sunitinib*** and ***pazopanib*** are workhorse first-line TKIs. ***Cabozantinib*** also inhibits MET and AXL (additional oncogenic pathways) → used in second line or beyond |
+| ***Tyrosine kinase inhibitors (TKIs)*** | ***Sunitinib, pazopanib, axitinib, sorafenib, cabozantinib, lenvatinib, tivozanib*** [1][2][3][10] | Block VEGF receptor (and other kinases) → inhibit tumour angiogenesis and proliferation. Since RCC is VEGF-driven (VHL loss → HIF → VEGF), cutting off the blood supply starves the tumour | Single-agent VEGF-TKI first-line therapy has largely been superseded by IO-based combinations, except in favourable-risk disease or when ICI cannot be used. ***Cabozantinib*** has the strongest later-line data after IO-based therapy [10] |
 | ***Anti-VEGF monoclonal antibody*** | ***Bevacizumab*** [1][2] | "Bevacizumab" → "beva" (from "beverage"? No — named by Genentech). It's a humanised monoclonal antibody that binds circulating VEGF → prevents VEGF from binding its receptor → anti-angiogenic | Usually combined with IFN-α; less commonly used now with the advent of IO combinations |
-| ***mTOR inhibitors*** | ***Temsirolimus, everolimus*** [2][3] | mTOR (mechanistic target of rapamycin) is a kinase in the PI3K/AKT/mTOR pathway that promotes cell growth and proliferation. In RCC, this pathway is often upregulated. Inhibiting mTOR → reduces cell growth, angiogenesis, and metabolism | ***Temsirolimus*** — shown benefit in poor-risk patients (first-line). ***Everolimus*** — used in later lines after TKI failure |
+| ***mTOR inhibitors*** | ***Temsirolimus, everolimus*** [2][3] | mTOR (mechanistic target of rapamycin) is a kinase in the PI3K/AKT/mTOR pathway that promotes cell growth and proliferation. In RCC, this pathway is often upregulated. Inhibiting mTOR → reduces cell growth, angiogenesis, and metabolism | Their front-line role has been superseded. Everolimus may be used later line, but belzutifan and VEGF-targeted options are often preferred when available [10] |
+| ***HIF-2α inhibitor*** | ***Belzutifan*** [10] | Blocks HIF-2α transcriptional signalling downstream of VHL loss | Later-line option for previously treated clear-cell metastatic RCC; also relevant in VHL-associated disease |
 
 **Drug name breakdown:**
 - "Suni-**tinib**" → "-tinib" = tyrosine kinase inhibitor
@@ -299,16 +304,17 @@ These drugs target the VHL/HIF/VEGF axis and the mTOR pathway:
 
 | Subtype | Recommended Approach |
 |---------|---------------------|
-| ***Non-ccRCC*** | ***Sunitinib (1st line)*** [3] — this is based on limited evidence; non-ccRCC was excluded from most pivotal trials |
-| Collecting duct / medullary carcinoma | May respond better to platinum-based chemotherapy (behaves more like urothelial carcinoma) |
-| Sarcomatoid differentiation | Responds well to ipilimumab + nivolumab (IO-IO) |
+| ***Papillary RCC*** | Cabozantinib has randomised phase II evidence over sunitinib; lenvatinib + pembrolizumab or nivolumab + cabozantinib are options based on smaller studies [10] |
+| ***Other non-ccRCC*** | Sunitinib, lenvatinib + pembrolizumab, nivolumab + ipilimumab, or cabozantinib + nivolumab (except chromophobe RCC for the latter) may be offered, recognising weaker evidence [10] |
+| Collecting duct / medullary carcinoma | May respond better to platinum-based chemotherapy (behaves more like urothelial carcinoma); renal medullary carcinoma is an exception where cytotoxic combinations remain important [10] |
+| Sarcomatoid differentiation | Treat as high-priority for immune checkpoint combination therapy |
 
 ##### D. ***Chemotherapy and Radiotherapy***
 
 | Modality | Role in RCC |
 |----------|------------|
-| ***Chemotherapy*** | ***NO role in treatment of RCC due to low response rate and most responses are short-lived. Chemotherapeutic agents administered are easily excreted by kidneys*** [2]. The P-glycoprotein drug efflux pump in renal tubular cells (from which RCC arises) actively pumps out cytotoxic drugs |
-| ***Radiotherapy*** | ***ONLY indicated for patients with brain or bone metastasis for palliation*** [2]. Stereotactic radiosurgery (SRS) for brain metastases and SBRT for oligometastatic disease are exceptions with growing evidence |
+| ***Chemotherapy*** | ***NO role for typical clear-cell metastatic RCC*** due to low response rate and short-lived responses [2][10]. Exceptions include collecting duct and medullary carcinoma, where platinum-based cytotoxic regimens may be used [10] |
+| ***Radiotherapy*** | Not routine adjuvant therapy after nephrectomy, but stereotactic radiotherapy is used for brain/bone metastases for local control and symptom relief. SABR/SBRT can be considered for selected cT1 renal tumours when patients are unfit for surgery [10] |
 
 ---
 
@@ -316,11 +322,11 @@ These drugs target the VHL/HIF/VEGF axis and the mTOR pathway:
 
 | ***Stage*** | ***T Classification*** | ***Standard Treatment*** | ***Alternatives*** |
 |---|---|---|---|
-| ***T1 (≤ 7 cm)*** | T1a ≤ 4 cm; T1b 4–7 cm | ***Partial nephrectomy*** [1] | ***Cryotherapy/RFA; active surveillance (watchful waiting) for frail patients*** [1] |
+| ***T1 (≤ 7 cm)*** | T1a ≤ 4 cm; T1b 4–7 cm | ***Partial nephrectomy*** [1] | ***Cryotherapy/RFA; SABR/SBRT; active surveillance or watchful waiting for selected frail/comorbid patients*** [10] |
 | ***T2 (> 7 cm, confined)*** | T2a 7–10 cm; T2b > 10 cm | ***Laparoscopic/open radical nephrectomy*** [1] | — |
 | ***T3 (locally advanced)*** | Renal vein/IVC/perinephric invasion | ***Radical nephrectomy + thrombectomy*** [1] | ± LN dissection if N+ |
 | ***T4 (beyond Gerota's)*** | Including ipsilateral adrenal | ***Radical nephrectomy ± adrenalectomy*** [1] | — |
-| ***Metastatic (M1)*** | Any T, any N | ***Systemic therapy (IO ± TKI based on IMDC risk)*** [1] | ***± Cytoreductive nephrectomy; ± metastasectomy*** |
+| ***Metastatic (M1)*** | Any T, any N | ***IO-based systemic therapy for most clear-cell RCC, based on IMDC risk and patient factors*** [10][11][12] | ***± delayed cytoreductive nephrectomy; ± metastasectomy/SBRT for selected oligometastatic disease*** |
 
 ---
 
@@ -347,16 +353,16 @@ After curative-intent surgery, patients need follow-up to detect recurrence:
 2. ***Absolute indications for partial nephrectomy***: solitary kidney, bilateral tumours, multiple small tumours [2].
 3. ***Early ligation of the vascular pedicle*** during radical nephrectomy is crucial to prevent haemorrhage and tumour dissemination [2][3].
 4. ***IVC tumour thrombus above hepatic veins requires cardiopulmonary bypass ± hypothermic circulatory arrest*** [2][3].
-5. ***NO role for adjuvant chemotherapy*** after complete resection of localised RCC [2][3]. Adjuvant pembrolizumab is an emerging option for high-risk disease.
+5. ***NO role for adjuvant chemotherapy*** after complete resection of localised RCC [2][3]. ***Adjuvant pembrolizumab is now offered to selected high-risk clear-cell RCC patients*** after nephrectomy using KEYNOTE-564 criteria [10][12].
 6. ***Chemotherapy has NO role in RCC*** (P-glycoprotein efflux pump; chemo-resistant) [2].
-7. ***Radiotherapy is ONLY for palliation*** (brain/bone metastases) [2].
+7. ***Radiotherapy is selective***: stereotactic RT for brain/bone metastases and SABR/SBRT for selected cT1 patients unfit for surgery [10].
 8. ***Metastatic RCC management is guided by IMDC risk stratification*** [3]:
-   - Favourable: TKI monotherapy or IO-TKI
-   - Intermediate/poor: ***Ipilimumab + nivolumab*** (IO-IO) or IO-TKI
-9. ***Cytoreductive nephrectomy*** benefits favourable/intermediate-risk patients with oligometastatic disease [3].
+   - Favourable: IO-TKI, nivolumab + ipilimumab, or TKI monotherapy depending on patient factors
+   - Intermediate/poor: ***IO-based combination therapy*** (nivolumab + ipilimumab, pembrolizumab + axitinib, lenvatinib + pembrolizumab, or nivolumab + cabozantinib)
+9. ***Cytoreductive nephrectomy*** is not routine upfront therapy for intermediate/poor-risk patients needing systemic treatment; consider immediate CN only in selected patients or delayed CN after response [10].
 10. ***Metastasectomy*** improves survival in selected patients with oligometastatic, resectable disease [3].
 11. Active surveillance is safe for ***elderly/frail patients with tumours < 4 cm*** (mean growth 3 mm/year, 1–2% metastatic progression) [3].
-12. ***Biopsy before ablative therapy*** (RFA/cryo) is mandatory since no surgical specimen will be available [3].
+12. ***Biopsy before thermal ablative therapy*** (RFA/cryo) is mandatory since no surgical specimen will be available [3][10].
 
 </Callout>
 
@@ -375,11 +381,11 @@ After curative-intent surgery, patients need follow-up to detect recurrence:
     },
     {
       question: "A patient with metastatic clear cell RCC has IMDC intermediate risk (2 risk factors). What is the recommended first-line systemic therapy, and what is the mechanism of action of each drug in the combination?",
-      markscheme: "Ipilimumab plus nivolumab. Nivolumab is an anti-PD-1 monoclonal antibody that blocks PD-1 on T cells, preventing PD-L1 on tumour cells from suppressing T cell activity. Ipilimumab is an anti-CTLA-4 monoclonal antibody that blocks CTLA-4, another immune checkpoint, enhancing T cell priming and proliferation. Together they provide dual immune checkpoint blockade. Alternative: pembrolizumab plus lenvatinib or axitinib (IO-TKI combination)."
+      markscheme: "Recommended first-line options are IO-based combinations: nivolumab plus ipilimumab, pembrolizumab plus axitinib, lenvatinib plus pembrolizumab, or nivolumab plus cabozantinib. Nivolumab and pembrolizumab block PD-1; ipilimumab blocks CTLA-4; axitinib, lenvatinib, and cabozantinib are VEGF-pathway TKIs. VEGFR-TKI monotherapy is reserved for patients who cannot receive or tolerate immune checkpoint inhibition."
     },
     {
       question: "Explain why cytoreductive nephrectomy may benefit patients with metastatic RCC, and state when it is contraindicated.",
-      markscheme: "Benefits: reduces tumour bulk improving efficacy of subsequent systemic therapy, removes source of immunomodulating cytokines, and the primary tumour may act as an immunological sink for activated immune cells (removing it enhances immunotherapy response). Contraindicated in poor-risk patients (IMDC 4 or more risk factors), high tumour burden with rapidly progressive disease, and poor performance status. The CARMENA trial showed that in intermediate/poor-risk patients, upfront cytoreductive nephrectomy did not improve survival over sunitinib alone."
+      markscheme: "Benefits: can reduce tumour bulk, control symptoms, and in oligometastatic disease may allow complete local treatment. Contraindicated in poor-risk patients, high-volume or rapidly progressive metastatic disease, and poor performance status. In intermediate-risk patients with an asymptomatic synchronous primary tumour who require systemic therapy, start systemic therapy first and consider delayed cytoreductive nephrectomy only if there is clinical benefit."
     },
     {
       question: "A patient with RCC has IVC tumour thrombus extending above the diaphragm into the right atrium. What surgical approach is required, and why must MRI be done preoperatively?",
@@ -387,7 +393,7 @@ After curative-intent surgery, patients need follow-up to detect recurrence:
     },
     {
       question: "List 3 indications for active surveillance of a small renal mass, and state the expected natural history.",
-      markscheme: "Indications: elderly patients with significant comorbidities, patients with short life-expectancy, tumour less than 4 cm. Percutaneous biopsy should be done to confirm diagnosis. Natural history: slow growth in most cases (mean 3 mm per year), progression to metastatic disease in only 1-2%. Intervention is triggered if growth exceeds 3-4 mm per year or tumour reaches 4 cm."
+      markscheme: "Indications: elderly patients with significant comorbidities, patients with short life-expectancy, tumour less than 4 cm. Renal mass biopsy can be considered if it would change counselling or management, and is mandatory before thermal ablation. Natural history: slow growth in most cases (mean 3 mm per year), progression to metastatic disease in only 1-2%. Intervention is triggered if growth exceeds 3-4 mm per year or tumour reaches 4 cm."
     }
   ]}
 />
@@ -402,3 +408,6 @@ After curative-intent surgery, patients need follow-up to detect recurrence:
 [7] Senior notes: Ryan Ho Fundamentals.pdf (p. 345 — Management of urinary tumours)
 [8] Senior notes: Ryan Ho Neurology.pdf (pp. 164–165 — Brain metastasis management)
 [9] Senior notes: Ryan Ho Respiratory.pdf (p. 150 — Secondary tumours of the lungs)
+[10] European Association of Urology (EAU) Guidelines on Renal Cell Carcinoma, 2026 update.
+[11] NCCN Clinical Practice Guidelines in Oncology: Kidney Cancer, Version 1.2026.
+[12] ASCO Guideline: Management of Metastatic Clear Cell Renal Cell Carcinoma, published 2023, reviewed/updated 2026.
