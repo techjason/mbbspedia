@@ -18,6 +18,25 @@ There is no single "checklist" diagnostic criterion for achalasia like there is 
 
 ***IRP is the median of the maximal relaxation pressures of the EGJ measured across 4 seconds during the 10-second window of EGJ relaxation following a swallow*** [3]. In plain English: after you swallow, the system looks at a 10-second window and picks the 4 consecutive seconds where the EGJ pressure is lowest — the median of those pressures is the IRP.
 
+In simplified continuous form for a single swallow:
+
+$$
+\mathrm{IRP}_{4s}
+= \min_{\tau \in [t_0,\,t_0 + 6s]}
+\left(
+\frac{1}{4s}
+\int_{\tau}^{\tau + 4s} P_{\mathrm{EGJ}}(t)\,dt
+\right)
+$$
+
+$$
+\mathrm{IRP}
+= \operatorname{median}_{i=1,\dots,n}
+\left(\mathrm{IRP}_{4s,i}\right)
+$$
+
+where $P_{\mathrm{EGJ}}(t)$ is the pressure at the EGJ after a swallow at $t_0$. The integral adds up EGJ pressure over each possible 4-second relaxation window, the division by $4s$ converts it back to an average pressure in mmHg, and the minimum selects the best relaxation achieved after that swallow. HRM software repeats this across the standard series of swallows and reports the median value.
+
 ***Upper limit of IRP is usually identified as ≥ 15 mmHg*** [3]. If the IRP is ≥ 15 mmHg, the LES is NOT relaxing properly — this is the single most important number in diagnosing achalasia.
 
 Why is IRP better than just measuring "LES relaxation"? Because IRP accounts for the entire EGJ (including the crural diaphragm contribution) and is standardised — it's more reproducible and more specific than older measures.
