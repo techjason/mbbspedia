@@ -32,22 +32,22 @@
 
 ```mermaid
 flowchart TD
-    A["Suspected infection in surgical patient"] --> B["Screen: NEWS2, MEWS, SIRS, clinical concern"]
+    A["Suspected infection"] --> B["Screen: NEWS2, MEWS, SIRS"]
     B --> C{"Organ dysfunction or shock?"}
     C -->|"No"| D["Investigate and observe closely"]
     C -->|"Yes"| E["Sepsis pathway"]
     E --> E1["ABCDE, oxygen, IV access, lactate"]
     E --> E2["Cultures if no antibiotic delay"]
     E --> E3["Broad-spectrum IV antibiotics"]
-    E --> E4["Crystalloid resuscitation if hypoperfusion"]
-    E --> E5["Search for source control"]
+    E --> E4["Crystalloid if hypoperfused"]
+    E --> E5["Find source"]
     E4 --> F{"MAP < 65 or hypoperfusion persists?"}
-    F -->|"Yes"| G["Norepinephrine target MAP 65"]
-    G --> H["Add vasopressin if escalating norepinephrine"]
-    H --> I["Add epinephrine or inotrope if refractory or cardiac dysfunction"]
-    E5 --> J{"Drain, debride, remove, relieve obstruction?"}
-    J -->|"Yes"| K["Early source control ideally within 6 hours"]
-    J -->|"No"| L["Continue diagnostics and reassessment"]
+    F -->|"Yes"| G["Norepinephrine MAP 65"]
+    G --> H["Add vasopressin if needed"]
+    H --> I["Add epinephrine or inotrope"]
+    E5 --> J{"Source control needed?"}
+    J -->|"Yes"| K["Control source within 6h"]
+    J -->|"No"| L["Continue reassessment"]
     K --> M["Review cultures and de-escalate"]
     I --> M
     L --> M

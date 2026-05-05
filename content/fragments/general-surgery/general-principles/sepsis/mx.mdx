@@ -21,27 +21,27 @@ In surgical sepsis, ask: **Where is the source, and does it need drainage, decom
 
 ```mermaid
 flowchart TD
-    A["Suspected sepsis or septic shock"] --> B["ABCDE + oxygen if needed + IV access + senior help"]
-    B --> C["Cultures as soon as possible"]
-    C --> D["Measure lactate + FBC + renal + liver + coagulation + ABG or VBG"]
-    D --> E["Start empiric antimicrobials based on source and local resistance"]
+    A["Suspected sepsis"] --> B["ABCDE + IV access"]
+    B --> C["Blood cultures"]
+    C --> D["Lactate + organ bloods"]
+    D --> E["Empiric antibiotics"]
     E --> F{"Hypoperfusion or shock?"}
-    F -->|"Yes"| G["At least 30 mL/kg IV crystalloid in first 3 hours"]
-    G --> H["Prefer balanced crystalloid unless TBI or specific reason for saline"]
-    H --> I{"MAP still < 65 or poor perfusion?"}
-    I -->|"Yes"| J["Start norepinephrine first line"]
-    J --> K["Peripheral vasopressor acceptable initially if central line delayed"]
-    K --> L["Add vasopressin if escalating norepinephrine"]
-    L --> M["Add epinephrine if MAP inadequate on norepinephrine + vasopressin"]
+    F -->|"Yes"| G["30 mL/kg crystalloid"]
+    G --> H["Prefer balanced fluid"]
+    H --> I{"MAP < 65?"}
+    I -->|"Yes"| J["Norepinephrine"]
+    J --> K["Peripheral OK initially"]
+    K --> L["Add vasopressin"]
+    L --> M["Add epinephrine"]
     I -->|"No"| N["Continue reassessment"]
     F -->|"No"| N
-    N --> O["Find source: exam + imaging + microbiology"]
+    N --> O["Find source"]
     O --> P{"Source control needed?"}
-    P -->|"Yes"| Q["Early source control ideally within 6 hours"]
-    P -->|"No"| R["Medical source treatment and monitoring"]
-    Q --> S["Reassess: lactate, capillary refill, urine output, mental state, oxygenation"]
+    P -->|"Yes"| Q["Control within 6h"]
+    P -->|"No"| R["Medical treatment"]
+    Q --> S["Reassess perfusion"]
     R --> S
-    S --> T["De-escalate antibiotics when cultures and susceptibilities available"]
+    S --> T["De-escalate antibiotics"]
 ```
 
 ---
