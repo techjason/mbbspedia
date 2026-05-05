@@ -31,26 +31,16 @@
 ### One-Page Surgical Sepsis Algorithm
 
 ```mermaid
-flowchart TD
-    A["Suspected infection"] --> B["Screen: NEWS2, MEWS, SIRS"]
-    B --> C{"Organ dysfunction or shock?"}
-    C -->|"No"| D["Investigate and observe closely"]
-    C -->|"Yes"| E["Sepsis pathway"]
-    E --> E1["ABCDE, oxygen, IV access, lactate"]
-    E --> E2["Cultures if no antibiotic delay"]
-    E --> E3["Broad-spectrum IV antibiotics"]
-    E --> E4["Crystalloid if hypoperfused"]
-    E --> E5["Find source"]
-    E4 --> F{"MAP < 65 or hypoperfusion persists?"}
-    F -->|"Yes"| G["Norepinephrine MAP 65"]
-    G --> H["Add vasopressin if needed"]
-    H --> I["Add epinephrine or inotrope"]
-    E5 --> J{"Source control needed?"}
-    J -->|"Yes"| K["Control source within 6h"]
-    J -->|"No"| L["Continue reassessment"]
-    K --> M["Review cultures and de-escalate"]
-    I --> M
-    L --> M
+flowchart LR
+    A["Suspected infection"] --> B["Organ dysfunction?"]
+    B -->|"No"| C["Observe and investigate"]
+    B -->|"Yes"| D["Sepsis pathway"]
+    D --> E["Cultures + lactate"]
+    E --> F["Antibiotics"]
+    F --> G["Fluids if hypoperfused"]
+    G --> H["Norepinephrine if MAP low"]
+    H --> I["Source control"]
+    I --> J["De-escalate"]
 ```
 
 ---
