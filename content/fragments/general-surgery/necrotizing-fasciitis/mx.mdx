@@ -29,11 +29,11 @@ graph TD
     B5 --> C["PHASE 2: EMPIRICAL IV ANTIBIOTICS - Start IMMEDIATELY"]
     C --> C1{"What is the likely source/exposure?"}
     
-    C1 -- "Seawater / freshwater / seafood exposure" --> C2["IV fluoroquinolone + IV amoxicillin-clavulanate"]
-    C1 -- "Cuts / abrasion / chickenpox / IVDU / healthy adult" --> C3["IV penicillin G + IV linezolid"]
-    C1 -- "Post intra-abdominal / gynaecological / perineal surgery" --> C4["IV imipenem or IV meropenem"]
+    C1 -- "Seawater / freshwater / seafood exposure" --> C2["IV levofloxacin + IV amoxicillin-clavulanate"]
+    C1 -- "Cuts / abrasion / chickenpox / IVDU / healthy adult" --> C3["IV meropenem + IV/PO linezolid"]
+    C1 -- "Post intra-abdominal / gynaecological / perineal surgery" --> C4["IV meropenem + IV/PO linezolid"]
     C1 -- "Post-trauma suspected gas gangrene" --> C5["IV Augmentin + IV Flagyl"]
-    C1 -- "Unknown source / cannot determine" --> C6["Broad-spectrum: IV meropenem + IV clindamycin"]
+    C1 -- "Unknown source / cannot determine" --> C6["Broad-spectrum: IV meropenem + IV/PO linezolid"]
     
     C2 --> D["PHASE 3: EMERGENCY SURGICAL DEBRIDEMENT"]
     C3 --> D
@@ -93,9 +93,9 @@ Antibiotics must be started **immediately** — ideally within the first hour of
 
 | Clinical Scenario | Likely Organisms | ***First-Line Regimen*** | ***Alternative*** |
 |---|---|---|---|
-| ***1. Following exposure to freshwater, seawater or seafood*** [4] | ***Aeromonas hydrophila, A. caviae; Vibrio vulnificus*** | ***IV fluoroquinolone + IV amoxicillin-clavulanate*** [4] | — |
-| ***2. Following cuts and abrasion; recent chickenpox; IVDU; healthy adults*** [4] | ***Group A streptococci*** | ***IV penicillin G + IV linezolid*** [4] | — |
-| ***3. Following intra-abdominal, gynaecological or perineal surgery*** [4] | ***Polymicrobial: Enterobacteriaceae, streptococci, anaerobes*** | ***IV imipenem or IV meropenem*** [4] | ***IV amoxicillin-clavulanate + IV levofloxacin*** [4] |
+| ***1. Following exposure to freshwater, seawater or seafood*** [4][8] | ***Aeromonas hydrophila, A. caviae; Vibrio vulnificus*** | ***IV levofloxacin + IV amoxicillin-clavulanate*** [8] | Urgent microbiology/ID input; *Aeromonas* may carry chromosomal carbapenemase |
+| ***2. Following cuts and abrasion; recent chickenpox; IVDU; healthy adults*** [4][8] | ***Group A streptococci; may be polymicrobial depending on wound/context*** | ***IV meropenem + IV/PO linezolid*** [8] | Linezolid provides toxin suppression; IMPACT notes high local clindamycin resistance in *S. pyogenes* |
+| ***3. Following intra-abdominal, gynaecological or perineal surgery*** [4][8] | ***Polymicrobial: Enterobacteriaceae, streptococci, anaerobes*** | ***IV meropenem + IV/PO linezolid*** [8] | De-escalate once deep tissue cultures and sensitivities return |
 
 #### Gas Gangrene — Specific Antibiotic Regimen [5]
 
@@ -108,16 +108,16 @@ Antibiotics must be started **immediately** — ideally within the first hour of
 
 | Drug | Mechanism | Why Used in NF |
 |---|---|---|
-| **Penicillin G** | β-lactam → inhibits transpeptidase (PBP) → prevents cell wall synthesis → osmotic lysis of growing bacteria | Highly effective against GAS (*S. pyogenes*); excellent tissue penetration; bactericidal |
+| **Penicillin G** | β-lactam → inhibits transpeptidase (PBP) → prevents cell wall synthesis → osmotic lysis of growing bacteria | Highly effective against confirmed susceptible GAS (*S. pyogenes*); may be used after de-escalation with specialist input |
 | **Linezolid** | Oxazolidinone → binds 50S ribosomal subunit → inhibits protein synthesis → bacteriostatic | **Suppresses superantigen/exotoxin production** by GAS — this is the key reason it is added. In high-inoculum GAS infections, many organisms are in stationary phase (Eagle effect) where penicillin alone is less effective. Linezolid shuts off toxin production even without killing the bacteria directly |
 | **Fluoroquinolone** (e.g., levofloxacin, ciprofloxacin) | Inhibits DNA gyrase (topoisomerase II) and topoisomerase IV → prevents DNA replication → bactericidal | Excellent activity against Gram -ve rods including *Vibrio* spp. and *Aeromonas*; good tissue penetration; oral bioavailability allows step-down |
 | **Amoxicillin-clavulanate** (Augmentin) | Amoxicillin = β-lactam (cell wall synthesis inhibitor); clavulanate = β-lactamase inhibitor (protects amoxicillin from enzymatic destruction) | Broad-spectrum coverage: Gram +ve, Gram -ve, and anaerobes; the β-lactamase inhibitor is crucial because many organisms produce β-lactamases |
 | **Imipenem / Meropenem** | Carbapenems → broadest-spectrum β-lactams; resistant to most β-lactamases; cover Gram +ve, Gram -ve, and anaerobes | "Big guns" for polymicrobial NF — covers essentially everything except MRSA and some resistant pseudomonas; reserve for complex/post-surgical cases |
 | **Metronidazole** (Flagyl) | Prodrug activated inside anaerobic organisms → generates cytotoxic nitroso radicals → DNA damage | Specifically targets anaerobes (*Clostridium*, *Bacteroides*); synergistic with β-lactams in polymicrobial infections |
-| **Clindamycin** | Lincosamide → binds 50S ribosomal subunit → inhibits protein synthesis | Like linezolid, suppresses toxin production (both streptococcal and clostridial exotoxins); excellent tissue penetration including into abscesses; covers Gram +ve and anaerobes |
+| **Clindamycin** | Lincosamide → binds 50S ribosomal subunit → inhibits protein synthesis | Historically used for toxin suppression, but IMPACT 6th notes 50–80% local *S. pyogenes* clindamycin resistance and limited clinical data for resistant strains; linezolid is favoured for empirical toxin suppression [8] |
 
 <Callout title="Why Add a Protein Synthesis Inhibitor?">
-In severe GAS or clostridial NF, cell-wall-active antibiotics (penicillin, carbapenems) kill bacteria by preventing cell wall formation. But in high-inoculum infections, many bacteria are in **stationary phase** and not actively dividing — so cell-wall antibiotics are less effective (the "Eagle effect"). Adding a **protein synthesis inhibitor** (linezolid, clindamycin) directly suppresses the production of **exotoxins and superantigens** that are driving tissue destruction and systemic toxicity. It's not just about killing bacteria — it's about shutting off the toxin factory.
+In severe GAS or clostridial NF, cell-wall-active antibiotics (penicillin, carbapenems) kill bacteria by preventing cell wall formation. But in high-inoculum infections, many bacteria are in **stationary phase** and not actively dividing — so cell-wall antibiotics are less effective (the "Eagle effect"). Adding a **protein synthesis inhibitor** (linezolid preferred empirically in current IMPACT guidance; clindamycin only when appropriate) directly suppresses the production of **exotoxins and superantigens** that are driving tissue destruction and systemic toxicity. It's not just about killing bacteria — it's about shutting off the toxin factory.
 </Callout>
 
 #### When to Adjust Antibiotics
@@ -287,13 +287,13 @@ Hyperbaric oxygen is sometimes suggested as a treatment for NF, especially gas g
 
 **Two pillars**: ***Aggressive debridement + IV broad-spectrum antibiotics*** [3]
 
-**Antibiotic regimens** [4]:
-- Seawater/seafood → ***IV fluoroquinolone + IV amoxicillin-clavulanate***
-- Cuts/abrasion/healthy adults → ***IV penicillin G + IV linezolid***
-- Post-surgical polymicrobial → ***IV imipenem or IV meropenem***
+**Antibiotic regimens** [4][8]:
+- Seawater/seafood → ***IV levofloxacin + IV amoxicillin-clavulanate***
+- Cuts/abrasion/healthy adults → ***IV meropenem + IV/PO linezolid*** empirically; de-escalate after deep tissue cultures
+- Post-surgical polymicrobial → ***IV meropenem + IV/PO linezolid***
 - Gas gangrene → ***Augmentin + Flagyl*** [5]
 
-**Why add linezolid/clindamycin?** Suppresses superantigen and exotoxin production — shuts off the toxin factory, not just kills bacteria.
+**Why add linezolid?** Suppresses superantigen and exotoxin production — shuts off the toxin factory, not just kills bacteria. Current HK IMPACT guidance favours linezolid empirically because local *S. pyogenes* clindamycin resistance is high.
 
 **Amputation indications (3D)**: Dead, Damage, ***Danger (NF, gangrene, ascending sepsis)*** [6]
 
@@ -318,11 +318,11 @@ Hyperbaric oxygen is sometimes suggested as a treatment for NF, especially gas g
     },
     {
       question: "A fishmonger with liver cirrhosis presents with rapidly progressive leg swelling after a prawn injury. What is the first-line empirical antibiotic regimen?",
-      markscheme: "IV fluoroquinolone + IV amoxicillin-clavulanate. This covers Vibrio vulnificus and Aeromonas species which are the likely causative organisms following exposure to seawater, freshwater or seafood."
+      markscheme: "IV levofloxacin + IV amoxicillin-clavulanate, with urgent microbiology/ID input. This covers Vibrio vulnificus and Aeromonas species which are the likely causative organisms following exposure to seawater, freshwater or seafood."
     },
     {
       question: "Why is linezolid added to penicillin G in the management of Group A Streptococcal necrotizing fasciitis, rather than just using penicillin alone?",
-      markscheme: "In high-inoculum GAS infections, many bacteria are in stationary phase where penicillin is less effective (Eagle effect). Linezolid is a protein synthesis inhibitor that directly suppresses production of streptococcal superantigens and exotoxins, acting as a toxin shut-off valve, reducing both local tissue destruction and systemic toxicity."
+      markscheme: "In high-inoculum GAS infections, many bacteria are in stationary phase where cell-wall antibiotics are less effective (Eagle effect). Linezolid is a protein synthesis inhibitor that directly suppresses production of streptococcal superantigens and exotoxins, acting as a toxin shut-off valve, reducing both local tissue destruction and systemic toxicity. Current IMPACT guidance favours meropenem plus linezolid empirically for many NF presentations, with de-escalation after deep tissue cultures."
     },
     {
       question: "List the specific antibiotic regimen for gas gangrene as per the lecture slides, and explain why each component is needed.",
@@ -347,3 +347,4 @@ Hyperbaric oxygen is sometimes suggested as a treatment for NF, especially gas g
 [5] Lecture slides: GC 237. Musculoskeletal infection [Updated in 2025] (1).pdf (p51–52, Gas Gangrene management)
 [6] Senior notes: felixlai.md (Amputation indications 3D, types, complications, principles)
 [7] Senior notes: maxim.md (Amputation indications, principles, complications, rehabilitation)
+[8] IMPACT 6th edition (2025): Part IV empirical therapy, skin and soft tissue infections / necrotising fasciitis
