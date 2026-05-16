@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFile } from "node:child_process";
-import { readFile, readdir, unlink } from "node:fs/promises";
+import { readFile, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -29,41 +29,23 @@ import {
   embedSingleValue,
   embedValues,
 } from "./lib/rag-embed.mjs";
+import {
+  SOURCE_PDFS_ROOT,
+  getSpecialtySourcePdfDir,
+  listSourceNoteFiles,
+  listSourcePdfs,
+} from "./lib/source-pdfs.mjs";
 
 const execFileAsync = promisify(execFile);
 
 const DEFAULT_SPECIALTY = "general-surgery";
-const DEFAULT_SLIDES_DIR = "/Users/jason/Documents/BlockBSlides";
-const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
-const DEFAULT_FAMILY_MEDICINE_SOURCES_DIR =
-  "/Users/jason/Documents/FamilyMedicineSources";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
-const DEFAULT_PAEDIATRICS_SLIDES_DIR = "PaediatricsLectures";
-const DEFAULT_SURGERY_SENIOR_NOTES_DIR = "scripts/SeniorNotes";
-const DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS = [
-  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
-];
-const DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS = [
-  DEFAULT_FAMILY_MEDICINE_SOURCES_DIR,
-  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
-];
+const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
 const DEFAULT_CACHE_ROOT = ".cache/rag";
 const DEFAULT_SURGERY_CACHE_DIR = `${DEFAULT_CACHE_ROOT}/surgery`;
 const DEFAULT_OCR_POLICY = "smart";
 const SUMMARY_MAX_CHARS = 7000;
-
-const DEFAULT_SENIOR_NOTES = [
-  { id: "felix", path: "scripts/SeniorNotes/felixlai.md", label: "Felix Lai" },
-  { id: "maxim", path: "scripts/SeniorNotes/maxim.md", label: "Maxim" },
-];
-const DEFAULT_PSYCHIATRY_SENIOR_NOTES = [
-  {
-    id: "ryanho-psych",
-    path: "scripts/ryanho-psych.md",
-    label: "Ryan Ho (Psychiatry)",
-  },
-];
 
 function printUsage() {
   console.log(`Usage:
@@ -71,7 +53,7 @@ function printUsage() {
 
 Options:
   --specialty "<name>"         Default: ${DEFAULT_SPECIALTY}
-  --senior-note "<path>"       Add a senior note (repeatable).
+  --senior-note "<path>"       Add an optional senior note (repeatable).
                                Format: "<label>=<path>" or "<path>".
                                Supports .md/.mdx/.txt/.pdf.
   --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory
@@ -81,18 +63,17 @@ Options:
   --notes-only                 Skip slides and index only senior notes.
   --psychiatry                 Shortcut preset:
                                specialty=psychiatry
-                               slides-dir=${DEFAULT_PSYCHIATRY_SLIDES_DIR}
-                               senior-note=${DEFAULT_PSYCHIATRY_SENIOR_NOTES[0].path}
+                               slides-dir=${getSpecialtySourcePdfDir("psychiatry")}
   --family-medicine            Shortcut preset:
                                specialty=${DEFAULT_FAMILY_MEDICINE_SPECIALTY}
-                               slides-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
-                               senior-notes-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
-                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
+                               slides-dir=${getSpecialtySourcePdfDir(
+                                 DEFAULT_FAMILY_MEDICINE_SPECIALTY,
+                               )}
   --paediatrics                Shortcut preset:
                                specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
-                               slides-dir=${DEFAULT_PAEDIATRICS_SLIDES_DIR}
-                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
-  --slides-dir "<path>"         Default: ${DEFAULT_SLIDES_DIR}
+                               slides-dir=${getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY)}
+  --slides-dir "<path>"         Override source PDF directory.
+                               Default: ${SOURCE_PDFS_ROOT}/<specialty>
   --embedding-model "<id>"      Default: ${DEFAULT_EMBEDDING_MODEL}
   --cache-dir "<path>"          Default: ${DEFAULT_SURGERY_CACHE_DIR}
   --ocr-policy <smart|always|off> Default: ${DEFAULT_OCR_POLICY}
@@ -100,12 +81,12 @@ Options:
   --help                        Show this help
 
 Examples:
-  npm run index:rag -- --slides-dir "/Users/jason/Documents/BlockBSlides"
-  npm run index:rag -- --notes-only --senior-notes-dir "/Users/jason/Documents/SeniorNotes"
+  npm run index:rag
+  npm run index:rag -- --specialty medicine
   npm run index:rag -- --psychiatry
   npm run index:rag -- --family-medicine
   npm run index:rag -- --paediatrics
-  npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides"
+  npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md"
   npm run index:rag -- --force --ocr-policy always
 `);
 }
@@ -176,14 +157,14 @@ function upsertSeniorNoteByPath(notes, entry) {
 function parseArgs(argv) {
   const options = {
     specialty: DEFAULT_SPECIALTY,
-    slidesDir: DEFAULT_SLIDES_DIR,
+    slidesDir: DEFAULT_SOURCE_PDF_DIR,
     embeddingModel: DEFAULT_EMBEDDING_MODEL,
     cacheDir: DEFAULT_SURGERY_CACHE_DIR,
     cacheDirExplicit: false,
     slidesDirExplicit: false,
     seniorNotesExplicit: false,
     seniorNotesDirs: [],
-    seniorNotes: DEFAULT_SENIOR_NOTES.slice(),
+    seniorNotes: [],
     indexSlides: true,
     ocrPolicy: DEFAULT_OCR_POLICY,
     force: false,
@@ -206,19 +187,20 @@ function parseArgs(argv) {
 
     if (arg === "--psychiatry" || arg === "-psychiatry") {
       options.specialty = "psychiatry";
-      options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
+      options.seniorNotes = [];
+      options.seniorNotesDirs = [];
       options.seniorNotesExplicit = false;
-      options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
+      options.slidesDir = getSpecialtySourcePdfDir("psychiatry");
       options.slidesDirExplicit = false;
       continue;
     }
 
     if (arg === "--surgery" || arg === "-surgery") {
       options.specialty = DEFAULT_SPECIALTY;
-      options.seniorNotes = DEFAULT_SENIOR_NOTES.slice();
+      options.seniorNotes = [];
       options.seniorNotesExplicit = false;
-      options.seniorNotesDirs = [DEFAULT_SURGERY_SENIOR_NOTES_DIR];
-      options.slidesDir = DEFAULT_SLIDES_DIR;
+      options.seniorNotesDirs = [];
+      options.slidesDir = DEFAULT_SOURCE_PDF_DIR;
       options.slidesDirExplicit = false;
       continue;
     }
@@ -226,9 +208,11 @@ function parseArgs(argv) {
     if (arg === "--family-medicine" || arg === "-family-medicine") {
       options.specialty = DEFAULT_FAMILY_MEDICINE_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesExplicit = true;
-      options.seniorNotesDirs = DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
-      options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
+      options.seniorNotesExplicit = false;
+      options.seniorNotesDirs = [];
+      options.slidesDir = getSpecialtySourcePdfDir(
+        DEFAULT_FAMILY_MEDICINE_SPECIALTY,
+      );
       options.slidesDirExplicit = false;
       continue;
     }
@@ -236,9 +220,9 @@ function parseArgs(argv) {
     if (arg === "--paediatrics" || arg === "-paediatrics") {
       options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesExplicit = true;
-      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
-      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
+      options.seniorNotesExplicit = false;
+      options.seniorNotesDirs = [];
+      options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
       options.slidesDirExplicit = false;
       continue;
     }
@@ -347,53 +331,8 @@ function parseArgs(argv) {
         : `${DEFAULT_CACHE_ROOT}/${normalizedSpecialty}`;
   }
 
-  if (normalizedSpecialty === "psychiatry") {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
-    }
-  }
-
-  if (normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY) {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
-    }
-  }
-
-  if (normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY) {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
-    }
-  }
-
-  const hasBuiltInPresetDefaults =
-    normalizedSpecialty === "psychiatry" ||
-    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY ||
-    normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY;
-
-  if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
-    if (!hasBuiltInPresetDefaults && !options.seniorNotesExplicit) {
-      throw new Error(
-        `Specialty "${normalizedSpecialty}" requires explicit senior notes. Use --senior-note "<path>".`,
-      );
-    }
-    if (options.indexSlides && !hasBuiltInPresetDefaults && !options.slidesDirExplicit) {
-      throw new Error(
-        `Specialty "${normalizedSpecialty}" requires an explicit slides directory. Use --slides-dir "<path>".`,
-      );
-    }
+  if (!options.slidesDirExplicit) {
+    options.slidesDir = getSpecialtySourcePdfDir(normalizedSpecialty);
   }
 
   return options;
@@ -439,67 +378,11 @@ async function commandExists(command, versionArgs = ["--version"]) {
 }
 
 async function listSlidePdfs(slidesDir) {
-  const absoluteSlidesDir = path.resolve(process.cwd(), slidesDir);
-
-  try {
-    const entries = await readdir(absoluteSlidesDir, { withFileTypes: true });
-    return entries
-      .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".pdf"))
-      .map((entry) => ({
-        fileName: entry.name,
-        absolutePath: path.join(absoluteSlidesDir, entry.name),
-      }))
-      .sort((a, b) => a.fileName.localeCompare(b.fileName));
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      console.warn(`[Slides] Directory not found: ${absoluteSlidesDir}`);
-      return [];
-    }
-
-    throw error;
-  }
+  return listSourcePdfs(slidesDir, { missingLabel: "SourcePDFs" });
 }
 
 async function listSeniorNoteFiles(notesDir) {
-  const absoluteNotesDir = path.resolve(process.cwd(), notesDir);
-
-  try {
-    const entries = await readdir(absoluteNotesDir, { withFileTypes: true });
-    return entries
-      .filter((entry) => {
-        if (!entry.isFile()) return false;
-        const ext = path.extname(entry.name).toLowerCase();
-        return ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf";
-      })
-      .map((entry) => {
-        const absolutePath = path.join(absoluteNotesDir, entry.name);
-        const relativePath = path.relative(process.cwd(), absolutePath);
-        const label = path.basename(entry.name, path.extname(entry.name));
-        return {
-          id: slugify(relativePath) || slugify(entry.name) || "note",
-          path: absolutePath,
-          label: label || path.basename(entry.name),
-        };
-      })
-      .sort((a, b) => a.path.localeCompare(b.path));
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      console.warn(`[SeniorNotes] Directory not found: ${absoluteNotesDir}`);
-      return [];
-    }
-
-    throw error;
-  }
+  return listSourceNoteFiles(notesDir, { missingLabel: "SeniorNotes" });
 }
 
 function parsePagesCount(mutoolInfoOutput) {
@@ -894,14 +777,19 @@ async function main() {
     }
   }
 
-  if (options.seniorNotes.length === 0) {
+  const slides = options.indexSlides ? await listSlidePdfs(options.slidesDir) : [];
+
+  if (slides.length === 0 && options.seniorNotes.length === 0) {
     throw new Error(
-      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
+      [
+        "No source PDFs or senior notes found.",
+        `Add PDFs to ${options.slidesDir} or use --senior-note/--senior-notes-dir.`,
+      ].join(" "),
     );
   }
 
   console.log(`[Index] Specialty: ${options.specialty}`);
-  console.log(`[Index] Slides dir: ${options.slidesDir}`);
+  console.log(`[Index] Source PDF dir: ${options.slidesDir}`);
   console.log(`[Index] Index slides: ${options.indexSlides ? "yes" : "no"}`);
   if (options.seniorNotesDirs.length > 0) {
     console.log(`[Index] Senior note dirs: ${options.seniorNotesDirs.join(", ")}`);
@@ -916,7 +804,7 @@ async function main() {
     isPdfFilePath(note.path),
   );
 
-  if (options.indexSlides || hasPdfSeniorNotes) {
+  if (slides.length > 0 || hasPdfSeniorNotes) {
     const mutoolAvailable = await commandExists("mutool", ["-v"]);
     if (!mutoolAvailable) {
       throw new Error("mutool is required but not found on PATH");
@@ -934,8 +822,6 @@ async function main() {
   const manifest = await readManifest(manifestPath);
   manifest.chunkingVersion = CHUNKING_VERSION;
   manifest.embeddingModel = options.embeddingModel;
-
-  const slides = options.indexSlides ? await listSlidePdfs(options.slidesDir) : [];
 
   const report = {
     pdf: { indexed: 0, skipped: 0, chunks: 0 },

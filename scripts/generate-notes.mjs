@@ -10,7 +10,7 @@ import {
 } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { parseEnv, promisify } from "node:util";
@@ -35,6 +35,12 @@ import {
   rankChunksHybrid,
   rankSlideFilesByHybrid,
 } from "./lib/rag-retrieval.mjs";
+import {
+  SOURCE_PDFS_ROOT,
+  getSpecialtySourcePdfDir,
+  listSourceNoteFiles,
+  listSourcePdfs,
+} from "./lib/source-pdfs.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -263,7 +269,6 @@ const PROMPT_PROFILES = {
 
 const DEFAULT_SPECIALTY = "general-surgery";
 const SURGERY_SAMPLE_NOTE_PATH = "scripts/SeniorNotes/felixlai.md";
-const SURGERY_SECONDARY_NOTE_PATH = "scripts/SeniorNotes/maxim.md";
 const RYANHO_FUNDAMENTALS_NOTE_PATH =
   "scripts/SeniorNotes/Ryan Ho Fundamentals.pdf";
 const RYANHO_FUNDAMENTALS_NOTE = {
@@ -271,32 +276,9 @@ const RYANHO_FUNDAMENTALS_NOTE = {
   path: RYANHO_FUNDAMENTALS_NOTE_PATH,
   label: "Ryan Ho Fundamentals",
 };
-const DEFAULT_PSYCHIATRY_SLIDES_DIR = "/Users/jason/Documents/PyschiatrySlides";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
-const DEFAULT_FAMILY_MEDICINE_SOURCES_DIR =
-  "/Users/jason/Documents/FamilyMedicineSources";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
-const DEFAULT_PAEDIATRICS_SLIDES_DIR = "PaediatricsLectures";
-const DEFAULT_SENIOR_NOTES = [
-  { id: "felix", path: SURGERY_SAMPLE_NOTE_PATH, label: "Felix Lai" },
-  { id: "maxim", path: SURGERY_SECONDARY_NOTE_PATH, label: "Maxim" },
-];
-const DEFAULT_PSYCHIATRY_SENIOR_NOTES = [
-  {
-    id: "ryanho-psych",
-    path: "scripts/ryanho-psych.md",
-    label: "Ryan Ho (Psychiatry)",
-  },
-];
-const DEFAULT_SLIDES_DIR = "/Users/jason/Documents/BlockBSlides";
-const DEFAULT_SURGERY_SENIOR_NOTES_DIR = "scripts/SeniorNotes";
-const DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS = [
-  DEFAULT_FAMILY_MEDICINE_SOURCES_DIR,
-  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
-];
-const DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS = [
-  DEFAULT_SURGERY_SENIOR_NOTES_DIR,
-];
+const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
 const DEFAULT_CACHE_ROOT = ".cache/rag";
 const DEFAULT_SURGERY_CACHE_DIR = `${DEFAULT_CACHE_ROOT}/surgery`;
 
@@ -370,26 +352,26 @@ Options:
   -surgery, --surgery          Use surgery preset defaults.
   -psychiatry, --psychiatry    Shortcut preset:
                                specialty=psychiatry
-                               slides-dir=${DEFAULT_PSYCHIATRY_SLIDES_DIR}
-                               senior-note=${DEFAULT_PSYCHIATRY_SENIOR_NOTES[0].path}
+                               slides-dir=${getSpecialtySourcePdfDir("psychiatry")}
   -family-medicine, --family-medicine, --family
                                Shortcut preset:
                                specialty=${DEFAULT_FAMILY_MEDICINE_SPECIALTY}
-                               slides-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
-                               senior-notes-dir=${DEFAULT_FAMILY_MEDICINE_SOURCES_DIR}
-                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
+                               slides-dir=${getSpecialtySourcePdfDir(
+                                 DEFAULT_FAMILY_MEDICINE_SPECIALTY,
+                               )}
   -paediatrics, --paediatrics   Shortcut preset:
                                specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
-                               slides-dir=${DEFAULT_PAEDIATRICS_SLIDES_DIR}
-                               senior-notes-dir=${DEFAULT_SURGERY_SENIOR_NOTES_DIR}
+                               slides-dir=${getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY)}
   --model "<provider/model>"   Generation model. Default: anthropic/claude-opus-4.6
   --selection-model "<provider/model>" Selection model for scouts/slides. Default: anthropic/claude-opus-4.6
   --specialty "<folder-name>"  Default: ${DEFAULT_SPECIALTY}
-  --senior-note "<path>"       Add a senior note source (repeatable). Format: "<label>=<path>" or "<path>".
+  --senior-note "<path>"       Add an optional senior note source (repeatable).
+                               Format: "<label>=<path>" or "<path>".
   --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory as senior notes (repeatable).
   --felix-note "<path>"        Backward-compatible alias for senior note slot #1.
   --maxim-note "<path>"        Backward-compatible alias for senior note slot #2.
-  --slides-dir "<path>"         Default: /Users/jason/Documents/BlockBSlides
+  --slides-dir "<path>"         Override source PDF directory.
+                               Default: ${SOURCE_PDFS_ROOT}/<specialty>
   --top-slides <n>              Number of slide PDFs to select. Default: ${DEFAULT_TOP_SLIDES}
   --topic-concurrency <n>       Number of topics to generate in parallel. Default: 2
   --cache-dir "<path>"          Retrieval cache directory. Default: ${DEFAULT_SURGERY_CACHE_DIR}
@@ -410,11 +392,12 @@ Examples:
   npm run generate:notes -- "acute pancreatitis"
   npm run generate:notes -- --topic-concurrency 3 "acute pancreatitis" "appendicitis"
   npm run generate:notes -- --selection-model "anthropic/claude-opus-4.6" --top-slides 5 "acute pancreatitis"
-  npm run generate:notes -- --senior-notes-dir "scripts/SeniorNotes" --history-taking "lower gi bleed"
+  npm run generate:notes -- --specialty medicine "atrial fibrillation"
+  npm run generate:notes -- --senior-note "/path/to/senior-note.md" --history-taking "lower gi bleed"
   npm run generate:notes -- --psychiatry "major depressive disorder"
   npm run generate:notes -- --family-medicine "hypertension"
   npm run generate:notes -- --paediatrics "paediatric asthma"
-  npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md" --slides-dir "/path/to/psychiatry/slides" "major depressive disorder"
+  npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/senior.md" "major depressive disorder"
   npm run generate:notes -- --history-taking "chest pain"
   npm run generate:notes -- --physical-exam "varicose veins"
 `);
@@ -498,10 +481,10 @@ function parseArgs(argv) {
     contextScouts: true,
     sampleNotePath: SURGERY_SAMPLE_NOTE_PATH,
     slidesPath: undefined,
-    seniorNotes: DEFAULT_SENIOR_NOTES.slice(),
-    seniorNotesDirs: [DEFAULT_SURGERY_SENIOR_NOTES_DIR],
+    seniorNotes: [],
+    seniorNotesDirs: [],
     seniorNotesExplicit: false,
-    slidesDir: DEFAULT_SLIDES_DIR,
+    slidesDir: DEFAULT_SOURCE_PDF_DIR,
     slidesDirExplicit: false,
     topSlides: DEFAULT_TOP_SLIDES,
     topicConcurrency: 2,
@@ -544,20 +527,20 @@ function parseArgs(argv) {
     if (arg === "-surgery" || arg === "--surgery") {
       options.specialty = DEFAULT_SPECIALTY;
       options.sampleNotePath = SURGERY_SAMPLE_NOTE_PATH;
-      options.seniorNotes = DEFAULT_SENIOR_NOTES.slice();
-      options.seniorNotesDirs = [DEFAULT_SURGERY_SENIOR_NOTES_DIR];
+      options.seniorNotes = [];
+      options.seniorNotesDirs = [];
       options.seniorNotesExplicit = false;
-      options.slidesDir = DEFAULT_SLIDES_DIR;
+      options.slidesDir = DEFAULT_SOURCE_PDF_DIR;
       options.slidesDirExplicit = false;
       continue;
     }
 
     if (arg === "-psychiatry" || arg === "--psychiatry") {
       options.specialty = "psychiatry";
-      options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
+      options.seniorNotes = [];
       options.seniorNotesDirs = [];
       options.seniorNotesExplicit = false;
-      options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
+      options.slidesDir = getSpecialtySourcePdfDir("psychiatry");
       options.slidesDirExplicit = false;
       continue;
     }
@@ -575,10 +558,11 @@ function parseArgs(argv) {
       }
       options.specialty = DEFAULT_FAMILY_MEDICINE_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesDirs =
-        DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-      options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
+      options.seniorNotesDirs = [];
+      options.seniorNotesExplicit = false;
+      options.slidesDir = getSpecialtySourcePdfDir(
+        DEFAULT_FAMILY_MEDICINE_SPECIALTY,
+      );
       options.slidesDirExplicit = false;
       continue;
     }
@@ -586,9 +570,9 @@ function parseArgs(argv) {
     if (arg === "-paediatrics" || arg === "--paediatrics") {
       options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
+      options.seniorNotesDirs = [];
+      options.seniorNotesExplicit = false;
+      options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
       options.slidesDirExplicit = false;
       continue;
     }
@@ -783,64 +767,8 @@ function parseArgs(argv) {
         : `${DEFAULT_CACHE_ROOT}/${normalizedSpecialty}`;
   }
 
-  if (normalizedSpecialty === "psychiatry") {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = DEFAULT_PSYCHIATRY_SENIOR_NOTES.slice();
-      options.seniorNotesDirs = [];
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_PSYCHIATRY_SLIDES_DIR;
-    }
-  }
-
-  if (normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY) {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = [];
-      options.seniorNotesDirs =
-        DEFAULT_FAMILY_MEDICINE_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_FAMILY_MEDICINE_SOURCES_DIR;
-    }
-  }
-
-  if (normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY) {
-    if (!options.seniorNotesExplicit) {
-      options.seniorNotes = [];
-      options.seniorNotesDirs = DEFAULT_PAEDIATRICS_SENIOR_NOTES_DIRS.slice();
-      options.seniorNotesExplicit = true;
-    }
-    if (!options.slidesDirExplicit) {
-      options.slidesDir = DEFAULT_PAEDIATRICS_SLIDES_DIR;
-    }
-  }
-
-  if (
-    options.seniorNotes.length === 0 &&
-    options.seniorNotesDirs.length === 0
-  ) {
-    throw new Error(
-      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
-    );
-  }
-
-  const hasBuiltInPresetDefaults =
-    normalizedSpecialty === "psychiatry" ||
-    normalizedSpecialty === DEFAULT_FAMILY_MEDICINE_SPECIALTY ||
-    normalizedSpecialty === DEFAULT_PAEDIATRICS_SPECIALTY;
-
-  if (normalizedSpecialty !== DEFAULT_SPECIALTY) {
-    if (!hasBuiltInPresetDefaults && !options.seniorNotesExplicit) {
-      throw new Error(
-        `Specialty "${normalizedSpecialty}" requires explicit senior notes. Use --senior-note "<path>".`,
-      );
-    }
-    if (!hasBuiltInPresetDefaults && !options.slidesDirExplicit) {
-      throw new Error(
-        `Specialty "${normalizedSpecialty}" requires an explicit slides directory. Use --slides-dir "<path>".`,
-      );
-    }
+  if (!options.slidesDirExplicit) {
+    options.slidesDir = getSpecialtySourcePdfDir(normalizedSpecialty);
   }
 
   const normalizedPromptProfile = slugify(options.promptProfile) || "default";
@@ -1211,71 +1139,11 @@ async function readOptionalFile(filePath) {
 }
 
 async function listSlidePdfs(slidesDir) {
-  const absoluteSlidesDir = path.resolve(process.cwd(), slidesDir);
-
-  try {
-    const entries = await readdir(absoluteSlidesDir, { withFileTypes: true });
-    return entries
-      .filter(
-        (entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".pdf"),
-      )
-      .map((entry) => ({
-        fileName: entry.name,
-        absolutePath: path.join(absoluteSlidesDir, entry.name),
-      }))
-      .sort((a, b) => a.fileName.localeCompare(b.fileName));
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      console.warn(`[Slides] Directory not found: ${absoluteSlidesDir}`);
-      return [];
-    }
-
-    throw error;
-  }
+  return listSourcePdfs(slidesDir, { missingLabel: "SourcePDFs" });
 }
 
 async function listSeniorNoteFiles(notesDir) {
-  const absoluteNotesDir = path.resolve(process.cwd(), notesDir);
-
-  try {
-    const entries = await readdir(absoluteNotesDir, { withFileTypes: true });
-    return entries
-      .filter((entry) => {
-        if (!entry.isFile()) return false;
-        const ext = path.extname(entry.name).toLowerCase();
-        return (
-          ext === ".md" || ext === ".mdx" || ext === ".txt" || ext === ".pdf"
-        );
-      })
-      .map((entry) => {
-        const absolutePath = path.join(absoluteNotesDir, entry.name);
-        const relativePath = path.relative(process.cwd(), absolutePath);
-        const label = path.basename(entry.name, path.extname(entry.name));
-        return {
-          id: slugify(relativePath) || slugify(entry.name) || "note",
-          path: absolutePath,
-          label: label || path.basename(entry.name),
-        };
-      })
-      .sort((a, b) => a.path.localeCompare(b.path));
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      console.warn(`[SeniorNotes] Directory not found: ${absoluteNotesDir}`);
-      return [];
-    }
-
-    throw error;
-  }
+  return listSourceNoteFiles(notesDir, { missingLabel: "SeniorNotes" });
 }
 
 function parsePagesCount(mutoolInfoOutput) {
@@ -1969,13 +1837,40 @@ async function readIndexedSlideArtifacts(cacheBaseDir, artifactDir) {
 }
 
 function buildIndexCommandHint(options) {
-  const notesArgs = options.seniorNotes
-    .map((note) => `--senior-note ${JSON.stringify(note.path)}`)
-    .join(" ");
-  const notesDirArgs = options.seniorNotesDirs
-    .map((notesDir) => `--senior-notes-dir ${JSON.stringify(notesDir)}`)
-    .join(" ");
-  return `npm run index:rag -- --specialty "${options.specialty}" --slides-dir "${options.slidesDir}" --cache-dir "${options.cacheDir}" ${notesArgs} ${notesDirArgs}`.trim();
+  const args = [`--specialty ${JSON.stringify(options.specialty)}`];
+  if (options.slidesDirExplicit) {
+    args.push(`--slides-dir ${JSON.stringify(options.slidesDir)}`);
+  }
+  if (options.cacheDirExplicit) {
+    args.push(`--cache-dir ${JSON.stringify(options.cacheDir)}`);
+  }
+  args.push(
+    ...options.seniorNotes.map((note) => `--senior-note ${JSON.stringify(note.path)}`),
+  );
+  args.push(
+    ...options.seniorNotesDirs.map(
+      (notesDir) => `--senior-notes-dir ${JSON.stringify(notesDir)}`,
+    ),
+  );
+
+  return `npm run index:rag -- ${args.join(" ")}`.trim();
+}
+
+function hasIndexedContextSources(indexedContext) {
+  return (
+    indexedContext &&
+    (indexedContext.notes.length > 0 || indexedContext.slides.length > 0)
+  );
+}
+
+function buildPromptNoteFileNames(options, indexedContext) {
+  const explicitNoteNames = options.seniorNotes.map((note) => path.basename(note.path));
+  const indexedSourceNames =
+    indexedContext?.notes.flatMap((note) =>
+      Array.from(new Set(note.chunks.map((chunk) => chunk.sourceName))).filter(Boolean),
+    ) ?? [];
+
+  return Array.from(new Set([...explicitNoteNames, ...indexedSourceNames]));
 }
 
 async function listCacheReadinessIssues(options, manifest) {
@@ -2715,12 +2610,6 @@ async function main() {
     }
   }
 
-  if (options.seniorNotes.length === 0) {
-    throw new Error(
-      "At least one senior note is required. Use --senior-note or --senior-notes-dir.",
-    );
-  }
-
   const customPromptTemplate = await loadCustomPromptTemplate(
     options.promptFilePath,
   );
@@ -2748,7 +2637,7 @@ async function main() {
   console.log(
     `Context scouts: ${options.contextScouts ? "enabled" : "disabled"}`,
   );
-  console.log(`Slides dir: ${options.slidesDir}`);
+  console.log(`Source PDF dir: ${options.slidesDir}`);
   console.log(`Top slides: ${options.topSlides}`);
   console.log(`Topic concurrency: ${options.topicConcurrency}`);
   console.log(`Cache dir: ${options.cacheDir}`);
@@ -2761,10 +2650,6 @@ async function main() {
   console.log(`Topics: ${options.topics.join(", ")}`);
   console.log(
     `Senior notes: ${options.seniorNotes.map((note) => `${note.id}=${note.path}`).join(", ")}`,
-  );
-
-  const promptNoteFileNames = Array.from(
-    new Set(options.seniorNotes.map((note) => path.basename(note.path))),
   );
 
   if (!options.contextScouts) {
@@ -2797,7 +2682,9 @@ async function main() {
 
   const indexedContext = await prepareIndexedContextSources(options);
 
-  if (indexedContext) {
+  if (hasIndexedContextSources(indexedContext)) {
+    const promptNoteFileNames = buildPromptNoteFileNames(options, indexedContext);
+
     for (const note of indexedContext.notes) {
       console.log(`Indexed ${note.label} chunks: ${note.chunks.length}`);
     }
@@ -2845,6 +2732,7 @@ async function main() {
       "[Index] Indexed artifacts unavailable. Falling back to legacy retrieval pipeline because --allow-stale-index is enabled.",
     );
     const contextSources = await prepareContextSources(options);
+    const promptNoteFileNames = buildPromptNoteFileNames(options, null);
 
     for (const noteSource of contextSources.noteSources) {
       console.log(`${noteSource.label} chunks: ${noteSource.chunks.length}`);

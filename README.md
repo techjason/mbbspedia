@@ -32,6 +32,7 @@ This project is for education only. It is not medical advice, not a diagnostic t
 - `components/mdx/`: Custom MDX components, including citations.
 - `lib/mdx/remark-citations.ts`: Citation and references transform plugin.
 - `scripts/`: Content-generation and retrieval tooling.
+- `source-pdfs/`: Local ignored PDF drop folder for RAG and note generation.
 
 ## Development
 
@@ -55,6 +56,33 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build
 npm run start
 ```
+
+### Source PDFs for RAG
+
+Use `source-pdfs/<specialty>/` as the single local PDF drop folder for both
+RAG indexing and AI-assisted note generation. For example:
+
+```text
+source-pdfs/general-surgery/
+source-pdfs/medicine/
+source-pdfs/psychiatry/
+source-pdfs/paediatrics/
+```
+
+PDFs in `source-pdfs/` are ignored by git. Keep restricted or private source
+material local, and verify generated public content against permitted sources
+before publication.
+
+To index and generate from a specialty folder:
+
+```bash
+npm run index:rag -- --specialty medicine
+npm run generate:notes -- --specialty medicine "atrial fibrillation"
+```
+
+The specialty shortcuts use the same folders, e.g. `npm run index:rag:psychiatry`
+reads from `source-pdfs/psychiatry/`. Explicit `--slides-dir`, `--senior-note`,
+and `--senior-notes-dir` flags still work for one-off overrides.
 
 ### Mixedbread Search
 
