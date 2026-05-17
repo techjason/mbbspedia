@@ -3,6 +3,10 @@ import path from "node:path";
 import process from "node:process";
 
 export const SOURCE_PDFS_ROOT = "source-pdfs";
+export const COMMON_SENIOR_NOTES_DIR = path.join(
+  SOURCE_PDFS_ROOT,
+  "senior-notes",
+);
 
 export function slugifySourceSegment(value, fallback = "general-surgery") {
   const slug = String(value ?? "")
@@ -17,6 +21,10 @@ export function slugifySourceSegment(value, fallback = "general-surgery") {
 
 export function getSpecialtySourcePdfDir(specialty) {
   return path.join(SOURCE_PDFS_ROOT, slugifySourceSegment(specialty));
+}
+
+export function getCommonSeniorNotesDir() {
+  return COMMON_SENIOR_NOTES_DIR;
 }
 
 export async function listSourcePdfs(

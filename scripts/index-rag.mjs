@@ -31,6 +31,7 @@ import {
 } from "./lib/rag-embed.mjs";
 import {
   SOURCE_PDFS_ROOT,
+  getCommonSeniorNotesDir,
   getSpecialtySourcePdfDir,
   listSourceNoteFiles,
   listSourcePdfs,
@@ -42,10 +43,15 @@ const DEFAULT_SPECIALTY = "general-surgery";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
 const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
+const DEFAULT_COMMON_SENIOR_NOTES_DIR = getCommonSeniorNotesDir();
 const DEFAULT_CACHE_ROOT = ".cache/rag";
 const DEFAULT_SURGERY_CACHE_DIR = `${DEFAULT_CACHE_ROOT}/surgery`;
 const DEFAULT_OCR_POLICY = "smart";
 const SUMMARY_MAX_CHARS = 7000;
+
+function getDefaultSeniorNotesDirs() {
+  return [DEFAULT_COMMON_SENIOR_NOTES_DIR];
+}
 
 function printUsage() {
   console.log(`Usage:
@@ -58,6 +64,7 @@ Options:
                                Supports .md/.mdx/.txt/.pdf.
   --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory
                                as senior notes (repeatable).
+                               Default common dir: ${DEFAULT_COMMON_SENIOR_NOTES_DIR}
   --felix-note "<path>"        Backward-compatible alias for senior note slot #1.
   --maxim-note "<path>"        Backward-compatible alias for senior note slot #2.
   --notes-only                 Skip slides and index only senior notes.
@@ -163,7 +170,7 @@ function parseArgs(argv) {
     cacheDirExplicit: false,
     slidesDirExplicit: false,
     seniorNotesExplicit: false,
-    seniorNotesDirs: [],
+    seniorNotesDirs: getDefaultSeniorNotesDirs(),
     seniorNotes: [],
     indexSlides: true,
     ocrPolicy: DEFAULT_OCR_POLICY,
@@ -173,6 +180,10 @@ function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
+
+    if (arg === "--") {
+      continue;
+    }
 
     if (arg === "--help" || arg === "-h") {
       options.help = true;
@@ -188,7 +199,7 @@ function parseArgs(argv) {
     if (arg === "--psychiatry" || arg === "-psychiatry") {
       options.specialty = "psychiatry";
       options.seniorNotes = [];
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = getSpecialtySourcePdfDir("psychiatry");
       options.slidesDirExplicit = false;
@@ -199,7 +210,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_SPECIALTY;
       options.seniorNotes = [];
       options.seniorNotesExplicit = false;
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.slidesDir = DEFAULT_SOURCE_PDF_DIR;
       options.slidesDirExplicit = false;
       continue;
@@ -209,7 +220,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_FAMILY_MEDICINE_SPECIALTY;
       options.seniorNotes = [];
       options.seniorNotesExplicit = false;
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.slidesDir = getSpecialtySourcePdfDir(
         DEFAULT_FAMILY_MEDICINE_SPECIALTY,
       );
@@ -221,7 +232,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
       options.seniorNotes = [];
       options.seniorNotesExplicit = false;
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
       options.slidesDirExplicit = false;
       continue;

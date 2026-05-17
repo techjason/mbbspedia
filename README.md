@@ -59,19 +59,22 @@ pnpm start
 
 ### Source PDFs for RAG
 
-Use `source-pdfs/<specialty>/` as the single local PDF drop folder for both
-RAG indexing and AI-assisted note generation. For example:
+Use `source-pdfs/<specialty>/` as the local lecture-slide PDF drop folder for
+RAG indexing and AI-assisted note generation. Put common senior notes in
+`source-pdfs/senior-notes/`; those notes are automatically included for every
+specialty. For example:
 
 ```text
+source-pdfs/senior-notes/
 source-pdfs/general-surgery/
 source-pdfs/medicine/
 source-pdfs/psychiatry/
 source-pdfs/paediatrics/
 ```
 
-PDFs in `source-pdfs/` are ignored by git. Keep restricted or private source
-material local, and verify generated public content against permitted sources
-before publication.
+PDFs in `source-pdfs/` are ignored by git. Senior notes may be `.pdf`, `.md`,
+`.mdx`, or `.txt`. Keep restricted or private source material local, and verify
+generated public content against permitted sources before publication.
 
 To index and generate from a specialty folder:
 
@@ -81,8 +84,9 @@ pnpm run generate:notes -- --specialty medicine "atrial fibrillation"
 ```
 
 The specialty shortcuts use the same folders, e.g. `pnpm run index:rag:psychiatry`
-reads from `source-pdfs/psychiatry/`. Explicit `--slides-dir`, `--senior-note`,
-and `--senior-notes-dir` flags still work for one-off overrides.
+reads from `source-pdfs/psychiatry/` plus `source-pdfs/senior-notes/`. Explicit
+`--slides-dir`, `--senior-note`, and `--senior-notes-dir` flags still work for
+one-off additions.
 
 ### Mixedbread Search
 

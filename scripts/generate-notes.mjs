@@ -37,6 +37,7 @@ import {
 } from "./lib/rag-retrieval.mjs";
 import {
   SOURCE_PDFS_ROOT,
+  getCommonSeniorNotesDir,
   getSpecialtySourcePdfDir,
   listSourceNoteFiles,
   listSourcePdfs,
@@ -279,6 +280,7 @@ const RYANHO_FUNDAMENTALS_NOTE = {
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
 const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
+const DEFAULT_COMMON_SENIOR_NOTES_DIR = getCommonSeniorNotesDir();
 const DEFAULT_CACHE_ROOT = ".cache/rag";
 const DEFAULT_SURGERY_CACHE_DIR = `${DEFAULT_CACHE_ROOT}/surgery`;
 
@@ -308,6 +310,10 @@ const ERROR_CHAIN_LIMIT = 8;
 const LOG_VALUE_PREVIEW_CHARS = 3000;
 const LOG_OBJECT_KEY_LIMIT = 30;
 const LOG_ARRAY_ITEM_LIMIT = 10;
+
+function getDefaultSeniorNotesDirs() {
+  return [DEFAULT_COMMON_SENIOR_NOTES_DIR];
+}
 
 const CHUNK_SELECTION_SCHEMA = jsonSchema({
   type: "object",
@@ -368,6 +374,7 @@ Options:
   --senior-note "<path>"       Add an optional senior note source (repeatable).
                                Format: "<label>=<path>" or "<path>".
   --senior-notes-dir "<path>"  Add every .md/.mdx/.txt/.pdf file in directory as senior notes (repeatable).
+                               Default common dir: ${DEFAULT_COMMON_SENIOR_NOTES_DIR}
   --felix-note "<path>"        Backward-compatible alias for senior note slot #1.
   --maxim-note "<path>"        Backward-compatible alias for senior note slot #2.
   --slides-dir "<path>"         Override source PDF directory.
@@ -482,7 +489,7 @@ function parseArgs(argv) {
     sampleNotePath: SURGERY_SAMPLE_NOTE_PATH,
     slidesPath: undefined,
     seniorNotes: [],
-    seniorNotesDirs: [],
+    seniorNotesDirs: getDefaultSeniorNotesDirs(),
     seniorNotesExplicit: false,
     slidesDir: DEFAULT_SOURCE_PDF_DIR,
     slidesDirExplicit: false,
@@ -500,6 +507,10 @@ function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
+
+    if (arg === "--") {
+      continue;
+    }
 
     if (arg === "--help" || arg === "-h") {
       options.help = true;
@@ -528,7 +539,7 @@ function parseArgs(argv) {
       options.specialty = DEFAULT_SPECIALTY;
       options.sampleNotePath = SURGERY_SAMPLE_NOTE_PATH;
       options.seniorNotes = [];
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = DEFAULT_SOURCE_PDF_DIR;
       options.slidesDirExplicit = false;
@@ -538,7 +549,7 @@ function parseArgs(argv) {
     if (arg === "-psychiatry" || arg === "--psychiatry") {
       options.specialty = "psychiatry";
       options.seniorNotes = [];
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = getSpecialtySourcePdfDir("psychiatry");
       options.slidesDirExplicit = false;
@@ -558,7 +569,7 @@ function parseArgs(argv) {
       }
       options.specialty = DEFAULT_FAMILY_MEDICINE_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = getSpecialtySourcePdfDir(
         DEFAULT_FAMILY_MEDICINE_SPECIALTY,
@@ -570,7 +581,7 @@ function parseArgs(argv) {
     if (arg === "-paediatrics" || arg === "--paediatrics") {
       options.specialty = DEFAULT_PAEDIATRICS_SPECIALTY;
       options.seniorNotes = [];
-      options.seniorNotesDirs = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
       options.slidesDirExplicit = false;
@@ -597,7 +608,6 @@ function parseArgs(argv) {
     if (arg === "--senior-note") {
       if (!options.seniorNotesExplicit) {
         options.seniorNotes = [];
-        options.seniorNotesDirs = [];
         options.seniorNotesExplicit = true;
       }
       const note = parseSeniorNoteSpec(argv[i + 1], options.seniorNotes.length);
@@ -613,7 +623,6 @@ function parseArgs(argv) {
       }
       if (!options.seniorNotesExplicit) {
         options.seniorNotes = [];
-        options.seniorNotesDirs = [];
         options.seniorNotesExplicit = true;
       }
       options.seniorNotesDirs.push(rawDir);
@@ -624,7 +633,6 @@ function parseArgs(argv) {
     if (arg === "--felix-note") {
       if (!options.seniorNotesExplicit) {
         options.seniorNotes = [];
-        options.seniorNotesDirs = [];
       }
       options.seniorNotesExplicit = true;
       options.seniorNotes = upsertSeniorNote(options.seniorNotes, {
@@ -639,7 +647,6 @@ function parseArgs(argv) {
     if (arg === "--maxim-note") {
       if (!options.seniorNotesExplicit) {
         options.seniorNotes = [];
-        options.seniorNotesDirs = [];
       }
       options.seniorNotesExplicit = true;
       options.seniorNotes = upsertSeniorNote(options.seniorNotes, {
