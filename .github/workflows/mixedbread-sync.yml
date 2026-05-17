@@ -25,14 +25,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Validate secrets and resolve store
         id: config
@@ -53,13 +56,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if npx mxbai store get "$STORE_IDENTIFIER" >/dev/null 2>&1; then
+          if pnpm exec mxbai store get "$STORE_IDENTIFIER" >/dev/null 2>&1; then
             echo "Store exists: $STORE_IDENTIFIER"
           else
             echo "Creating store: $STORE_IDENTIFIER"
-            npx mxbai store create "$STORE_IDENTIFIER"
+            pnpm exec mxbai store create "$STORE_IDENTIFIER"
           fi
 
       - name: Sync changed content to Mixedbread
         if: steps.config.outputs.skip_sync != 'true'
-        run: npx mxbai store sync "$STORE_IDENTIFIER" "content/**/*.mdx" --strategy high_quality --yes
+        run: pnpm exec mxbai store sync "$STORE_IDENTIFIER" "content/**/*.mdx" --strategy high_quality --yes

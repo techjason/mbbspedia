@@ -49,7 +49,7 @@ const SUMMARY_MAX_CHARS = 7000;
 
 function printUsage() {
   console.log(`Usage:
-  npm run index:rag -- [options]
+  pnpm run index:rag -- [options]
 
 Options:
   --specialty "<name>"         Default: ${DEFAULT_SPECIALTY}
@@ -81,13 +81,13 @@ Options:
   --help                        Show this help
 
 Examples:
-  npm run index:rag
-  npm run index:rag -- --specialty medicine
-  npm run index:rag -- --psychiatry
-  npm run index:rag -- --family-medicine
-  npm run index:rag -- --paediatrics
-  npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md"
-  npm run index:rag -- --force --ocr-policy always
+  pnpm run index:rag
+  pnpm run index:rag -- --specialty medicine
+  pnpm run index:rag -- --psychiatry
+  pnpm run index:rag -- --family-medicine
+  pnpm run index:rag -- --paediatrics
+  pnpm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md"
+  pnpm run index:rag -- --force --ocr-policy always
 `);
 }
 

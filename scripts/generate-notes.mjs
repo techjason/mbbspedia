@@ -345,7 +345,7 @@ const SLIDE_SELECTION_SCHEMA = jsonSchema({
 
 function printUsage() {
   console.log(`Usage:
-  npm run generate:notes -- [options] <topic> [more-topics]
+  pnpm run generate:notes -- [options] <topic> [more-topics]
 
 Options:
   --topics "<topic1,topic2>"   Comma-separated topics.
@@ -389,17 +389,17 @@ Options:
   --help                        Show this help.
 
 Examples:
-  npm run generate:notes -- "acute pancreatitis"
-  npm run generate:notes -- --topic-concurrency 3 "acute pancreatitis" "appendicitis"
-  npm run generate:notes -- --selection-model "anthropic/claude-opus-4.6" --top-slides 5 "acute pancreatitis"
-  npm run generate:notes -- --specialty medicine "atrial fibrillation"
-  npm run generate:notes -- --senior-note "/path/to/senior-note.md" --history-taking "lower gi bleed"
-  npm run generate:notes -- --psychiatry "major depressive disorder"
-  npm run generate:notes -- --family-medicine "hypertension"
-  npm run generate:notes -- --paediatrics "paediatric asthma"
-  npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/senior.md" "major depressive disorder"
-  npm run generate:notes -- --history-taking "chest pain"
-  npm run generate:notes -- --physical-exam "varicose veins"
+  pnpm run generate:notes -- "acute pancreatitis"
+  pnpm run generate:notes -- --topic-concurrency 3 "acute pancreatitis" "appendicitis"
+  pnpm run generate:notes -- --selection-model "anthropic/claude-opus-4.6" --top-slides 5 "acute pancreatitis"
+  pnpm run generate:notes -- --specialty medicine "atrial fibrillation"
+  pnpm run generate:notes -- --senior-note "/path/to/senior-note.md" --history-taking "lower gi bleed"
+  pnpm run generate:notes -- --psychiatry "major depressive disorder"
+  pnpm run generate:notes -- --family-medicine "hypertension"
+  pnpm run generate:notes -- --paediatrics "paediatric asthma"
+  pnpm run generate:notes -- --specialty psychiatry --senior-note "/path/to/senior.md" "major depressive disorder"
+  pnpm run generate:notes -- --history-taking "chest pain"
+  pnpm run generate:notes -- --physical-exam "varicose veins"
 `);
 }
 
@@ -1853,7 +1853,7 @@ function buildIndexCommandHint(options) {
     ),
   );
 
-  return `npm run index:rag -- ${args.join(" ")}`.trim();
+  return `pnpm run index:rag -- ${args.join(" ")}`.trim();
 }
 
 function hasIndexedContextSources(indexedContext) {

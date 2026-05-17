@@ -17,6 +17,6 @@ git because they may be restricted or large.
 Typical workflow:
 
 ```bash
-npm run index:rag -- --specialty medicine
-npm run generate:notes -- --specialty medicine "atrial fibrillation"
+pnpm run index:rag -- --specialty medicine
+pnpm run generate:notes -- --specialty medicine "atrial fibrillation"
 ```
