@@ -9,7 +9,6 @@ import {
   getPageTitleForUrl,
   resolveChunkUrl,
 } from "@/lib/mixedbread/source-resolution";
-import type { SortedResult } from "fumadocs-core/search/server";
 
 export const runtime = "nodejs";
 
@@ -27,9 +26,16 @@ interface MixedbreadChunk {
   metadata?: unknown;
 }
 
+type SearchResult = {
+  id: string;
+  type: "page" | "heading" | "text";
+  content: string;
+  url: string;
+};
+
 type CachedSearchResult = {
   expiresAt: number;
-  data: SortedResult[];
+  data: SearchResult[];
 };
 
 const searchCache = new Map<string, CachedSearchResult>();
@@ -38,7 +44,7 @@ function getCacheKey(query: string, tag: string | undefined): string {
   return `${tag ?? ""}\u0000${query.toLowerCase()}`;
 }
 
-function readCachedSearch(key: string): SortedResult[] | null {
+function readCachedSearch(key: string): SearchResult[] | null {
   const cached = searchCache.get(key);
   if (!cached) return null;
   if (cached.expiresAt < Date.now()) {
@@ -48,7 +54,7 @@ function readCachedSearch(key: string): SortedResult[] | null {
   return cached.data;
 }
 
-function writeCachedSearch(key: string, data: SortedResult[]): void {
+function writeCachedSearch(key: string, data: SearchResult[]): void {
   searchCache.set(key, {
     expiresAt: Date.now() + SEARCH_CACHE_TTL_MS,
     data,
@@ -110,8 +116,8 @@ function snippetFromText(text?: string, heading?: string): string {
 function toResults(
   chunks: MixedbreadChunk[],
   fragmentToPageUrl: Map<string, string>,
-): SortedResult[] {
-  const results: SortedResult[] = [];
+): SearchResult[] {
+  const results: SearchResult[] = [];
   const seen = new Set<string>();
   const seenPages = new Set<string>();
 
