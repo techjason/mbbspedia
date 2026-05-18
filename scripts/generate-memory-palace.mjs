@@ -42,7 +42,7 @@ const BLUEPRINT_SCHEMA = z.object({
 
 function printUsage() {
   console.log(`Usage:
-  pnpm run generate:memory-palace -- [options]
+  npm run generate:memory-palace -- [options]
 
 Options:
   --article "<doc-stem>"       Use a specific article without interactive selection.
@@ -54,9 +54,9 @@ Options:
   --help                       Show this help.
 
 Examples:
-  pnpm run generate:memory-palace
-  pnpm run generate:memory-palace -- --article "general-surgery/lower-gi/acute-appendicitis"
-  pnpm run generate:memory-palace -- --article "family-medicine/chest-pain" --force
+  npm run generate:memory-palace
+  npm run generate:memory-palace -- --article "general-surgery/lower-gi/acute-appendicitis"
+  npm run generate:memory-palace -- --article "family-medicine/chest-pain" --force
 `);
 }
 

@@ -39,13 +39,13 @@ This project is for education only. It is not medical advice, not a diagnostic t
 ### Prerequisites
 
 - Node.js 20+
-- [pnpm](https://pnpm.io/installation)
+- npm
 
 ### Run locally
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -53,8 +53,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Build
 
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm run start
 ```
 
 ### Source PDFs for RAG
@@ -79,11 +79,11 @@ generated public content against permitted sources before publication.
 To index and generate from a specialty folder:
 
 ```bash
-pnpm run index:rag -- --specialty medicine
-pnpm run generate:notes -- --specialty medicine "atrial fibrillation"
+npm run index:rag -- --specialty medicine
+npm run generate:notes -- --specialty medicine "atrial fibrillation"
 ```
 
-The specialty shortcuts use the same folders, e.g. `pnpm run index:rag:psychiatry`
+The specialty shortcuts use the same folders, e.g. `npm run index:rag:psychiatry`
 reads from `source-pdfs/psychiatry/` plus `source-pdfs/senior-notes/`. Explicit
 `--slides-dir`, `--senior-note`, and `--senior-notes-dir` flags still work for
 one-off additions.
@@ -112,13 +112,13 @@ cleanly with a skip notice instead of failing the whole run.
 To upload docs and fragments from repo root:
 
 ```bash
-pnpm exec mxbai store upload "mbbspedia" "content/**/*.mdx" --strategy high_quality
+npx mxbai store upload "mbbspedia" "content/**/*.mdx" --strategy high_quality
 ```
 
 ### Lint
 
 ```bash
-pnpm lint
+npm run lint
 ```
 
 ## Content Editing Workflow
