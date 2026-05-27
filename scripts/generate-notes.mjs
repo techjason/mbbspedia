@@ -6,6 +6,7 @@ import {
   gateway,
   generateText,
   jsonSchema,
+  streamText,
   wrapLanguageModel,
 } from "ai";
 import { devToolsMiddleware } from "@ai-sdk/devtools";
@@ -308,8 +309,10 @@ const SECTION_MERGE_CANDIDATE_LIMIT = envInt(
 );
 const ERROR_CHAIN_LIMIT = 8;
 const LOG_VALUE_PREVIEW_CHARS = 3000;
+const GATEWAY_RESPONSE_LOG_CHARS = 12_000;
 const LOG_OBJECT_KEY_LIMIT = 30;
 const LOG_ARRAY_ITEM_LIMIT = 10;
+const LAST_AI_ERROR_LOG = path.join(".rag-cache", "last-ai-error.json");
 
 function getDefaultSeniorNotesDirs() {
   return [DEFAULT_COMMON_SENIOR_NOTES_DIR];
@@ -819,6 +822,167 @@ function isRecord(value) {
   return typeof value === "object" && value !== null;
 }
 
+function isGatewayLikeError(error) {
+  return (
+    error instanceof Error &&
+    typeof error.name === "string" &&
+    error.name.startsWith("Gateway") &&
+    typeof error.type === "string" &&
+    typeof error.statusCode === "number"
+  );
+}
+
+function serializeForErrorLog(value, maxChars = GATEWAY_RESPONSE_LOG_CHARS) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return truncateForLogs(value, maxChars);
+  }
+
+  try {
+    return truncateForLogs(JSON.stringify(value, null, 2), maxChars);
+  } catch {
+    return truncateForLogs(String(value), maxChars);
+  }
+}
+
+function extractGatewayLikeErrorDetails(error) {
+  if (!isGatewayLikeError(error)) {
+    return null;
+  }
+
+  const details = {
+    name: error.name,
+    type: error.type,
+    statusCode: error.statusCode,
+    generationId: error.generationId,
+    isRetryable: error.isRetryable,
+  };
+
+  if ("response" in error && error.response !== undefined) {
+    details.response = serializeForErrorLog(error.response);
+  }
+
+  if ("validationError" in error && error.validationError !== undefined) {
+    details.validationError = serializeForErrorLog(error.validationError);
+  }
+
+  return details;
+}
+
+function buildErrorDiagnosticLines(error, depth = 0, seen = new Set()) {
+  if (depth >= ERROR_CHAIN_LIMIT || error === undefined || error === null) {
+    return [];
+  }
+
+  if (isRecord(error) && seen.has(error)) {
+    return ["(circular error reference)"];
+  }
+
+  if (isRecord(error)) {
+    seen.add(error);
+  }
+
+  const lines = [];
+
+  if (isGatewayLikeError(error)) {
+    lines.push(
+      `Gateway ${error.name}: type=${error.type}, status=${error.statusCode}, retryable=${error.isRetryable}`,
+    );
+    if (error.generationId) {
+      lines.push(`generationId: ${error.generationId}`);
+    }
+    if ("response" in error && error.response !== undefined) {
+      const responseText = serializeForErrorLog(error.response);
+      if (responseText) {
+        lines.push(`Gateway raw response:\n${responseText}`);
+      }
+    }
+    if ("validationError" in error && error.validationError !== undefined) {
+      const validationText = serializeForErrorLog(error.validationError);
+      if (validationText) {
+        lines.push(`Gateway response validation:\n${validationText}`);
+      }
+    }
+  }
+
+  if (APICallError.isInstance(error)) {
+    lines.push(
+      `Upstream API call: ${error.url ?? "(unknown url)"} status=${error.statusCode ?? "?"}`,
+    );
+    if (error.responseBody) {
+      lines.push(
+        `Upstream response body:\n${serializeForErrorLog(error.responseBody)}`,
+      );
+    } else if (error.data !== undefined) {
+      lines.push(`Upstream response data:\n${serializeForErrorLog(error.data)}`);
+    }
+    const requestId = findHeaderValue(error.responseHeaders, "x-vercel-id");
+    if (requestId) {
+      lines.push(`x-vercel-id: ${requestId}`);
+    }
+  }
+
+  if (error instanceof Error && "code" in error && typeof error.code === "string") {
+    lines.push(`Error code: ${error.code}`);
+  }
+
+  const next = getNextLinkedError(error);
+  if (next !== undefined) {
+    lines.push("--- caused by ---");
+    lines.push(...buildErrorDiagnosticLines(next, depth + 1, seen));
+  }
+
+  return lines;
+}
+
+function formatErrorSummary(error) {
+  const base =
+    error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  const diagnostics = buildErrorDiagnosticLines(error);
+  if (diagnostics.length === 0) {
+    return base;
+  }
+
+  return `${base}\n${diagnostics.join("\n")}`;
+}
+
+function enrichErrorForThrow(error, context) {
+  const diagnostics = buildErrorDiagnosticLines(error);
+  if (diagnostics.length === 0) {
+    return error;
+  }
+
+  const baseMessage =
+    error instanceof Error ? error.message : String(error ?? "Unknown error");
+  const message = `[${context}] ${baseMessage}\n\n--- Diagnostic details ---\n${diagnostics.join("\n")}`;
+
+  if (error instanceof Error) {
+    const enriched = new Error(message, { cause: error });
+    enriched.name = error.name;
+    return enriched;
+  }
+
+  return new Error(message);
+}
+
+async function persistLastAiError(report) {
+  try {
+    const absolutePath = path.join(process.cwd(), LAST_AI_ERROR_LOG);
+    await mkdir(path.dirname(absolutePath), { recursive: true });
+    await writeFile(absolutePath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    console.error(`[error-log] Wrote full report to ${LAST_AI_ERROR_LOG}`);
+  } catch (writeError) {
+    console.error(
+      `[error-log] Could not write ${LAST_AI_ERROR_LOG}: ${
+        writeError instanceof Error ? writeError.message : String(writeError)
+      }`,
+    );
+  }
+}
+
 function truncateForLogs(value, maxChars = LOG_VALUE_PREVIEW_CHARS) {
   if (typeof value !== "string") {
     return value;
@@ -832,13 +996,13 @@ function truncateForLogs(value, maxChars = LOG_VALUE_PREVIEW_CHARS) {
   return `${value.slice(0, maxChars)}\n...[truncated ${omitted} chars]`;
 }
 
-function sanitizeForLogs(value, depth = 0) {
+function sanitizeForLogs(value, depth = 0, maxChars = LOG_VALUE_PREVIEW_CHARS) {
   if (value === null || value === undefined) {
     return value;
   }
 
   if (typeof value === "string") {
-    return truncateForLogs(value);
+    return truncateForLogs(value, maxChars);
   }
 
   if (
@@ -864,7 +1028,7 @@ function sanitizeForLogs(value, depth = 0) {
   if (Array.isArray(value)) {
     const items = value
       .slice(0, LOG_ARRAY_ITEM_LIMIT)
-      .map((item) => sanitizeForLogs(item, depth + 1));
+      .map((item) => sanitizeForLogs(item, depth + 1, maxChars));
     if (value.length > LOG_ARRAY_ITEM_LIMIT) {
       items.push(`[+${value.length - LOG_ARRAY_ITEM_LIMIT} more items]`);
     }
@@ -885,7 +1049,7 @@ function sanitizeForLogs(value, depth = 0) {
   const entries = Object.entries(value);
   const sanitized = {};
   for (const [key, item] of entries.slice(0, LOG_OBJECT_KEY_LIMIT)) {
-    sanitized[key] = sanitizeForLogs(item, depth + 1);
+    sanitized[key] = sanitizeForLogs(item, depth + 1, maxChars);
   }
   if (entries.length > LOG_OBJECT_KEY_LIMIT) {
     sanitized.__truncatedKeys = entries.length - LOG_OBJECT_KEY_LIMIT;
@@ -971,8 +1135,12 @@ function describeErrorNode(error) {
       statusCode: error.statusCode,
       isRetryable: error.isRetryable,
       responseHeaders: sanitizeForLogs(error.responseHeaders),
-      responseBody: sanitizeForLogs(error.responseBody),
-      data: sanitizeForLogs(error.data),
+      responseBody: sanitizeForLogs(
+        error.responseBody,
+        0,
+        GATEWAY_RESPONSE_LOG_CHARS,
+      ),
+      data: sanitizeForLogs(error.data, 0, GATEWAY_RESPONSE_LOG_CHARS),
       requestBodySummary: summarizeRequestBodyValues(error.requestBodyValues),
       generationIdFromHeaders: findHeaderValue(
         error.responseHeaders,
@@ -983,6 +1151,25 @@ function describeErrorNode(error) {
         "x-vercel-id",
       ),
     };
+  }
+
+  const gateway = extractGatewayLikeErrorDetails(error);
+  if (gateway) {
+    node.gateway = gateway;
+  }
+
+  if (
+    isRecord(error) &&
+    Array.isArray(error.errors) &&
+    error.errors.length > 0
+  ) {
+    node.retryAttempts = error.errors.map((attempt, index) => ({
+      attempt: index + 1,
+      summary:
+        attempt instanceof Error
+          ? `${attempt.name}: ${truncateForLogs(attempt.message, 600)}`
+          : truncateForLogs(String(attempt), 600),
+    }));
   }
 
   if (isRecord(error)) {
@@ -1006,6 +1193,30 @@ function describeErrorNode(error) {
   return node;
 }
 
+function getNextLinkedError(error) {
+  if (!isRecord(error)) {
+    return undefined;
+  }
+
+  if ("cause" in error && error.cause !== undefined && error.cause !== null) {
+    return error.cause;
+  }
+
+  if (
+    "lastError" in error &&
+    error.lastError !== undefined &&
+    error.lastError !== null
+  ) {
+    return error.lastError;
+  }
+
+  if (Array.isArray(error.errors) && error.errors.length > 0) {
+    return error.errors[error.errors.length - 1];
+  }
+
+  return undefined;
+}
+
 function collectErrorChain(error) {
   const chain = [];
   const seen = new Set();
@@ -1017,7 +1228,7 @@ function collectErrorChain(error) {
     chain.length < ERROR_CHAIN_LIMIT
   ) {
     if (isRecord(current) && seen.has(current)) {
-      chain.push({ kind: "circular", value: "Cause chain is circular." });
+      chain.push({ kind: "circular", value: "Error chain is circular." });
       break;
     }
 
@@ -1027,12 +1238,11 @@ function collectErrorChain(error) {
 
     chain.push(describeErrorNode(current));
 
-    if (isRecord(current) && "cause" in current) {
-      current = current.cause;
-      continue;
+    const next = getNextLinkedError(current);
+    if (next === undefined) {
+      break;
     }
-
-    break;
+    current = next;
   }
 
   return chain;
@@ -1042,11 +1252,19 @@ function logDetailedError(context, error) {
   const report = {
     context,
     at: new Date().toISOString(),
+    summary: formatErrorSummary(error),
     chain: collectErrorChain(error),
   };
 
-  console.error(`[${context}] Error details:`);
+  console.error(`[${context}] Error summary:\n${report.summary}`);
+  console.error(`[${context}] Full error chain (JSON):`);
   console.error(JSON.stringify(report, null, 2));
+  void persistLastAiError(report);
+}
+
+function throwLoggedAiError(context, error) {
+  logDetailedError(context, error);
+  throw enrichErrorForThrow(error, context);
 }
 
 function slugify(value) {
@@ -1258,7 +1476,6 @@ async function selectChunkIdsWithScout({
       model: selectionModel,
       output: Output.object({ schema: CHUNK_SELECTION_SCHEMA }),
       prompt,
-      maxOutputTokens: 1200,
     });
 
     const selectedChunkIds = [];
@@ -1742,7 +1959,6 @@ async function selectMergedChunkIdsWithScout({
       model: selectionModel,
       output: Output.object({ schema: CHUNK_SELECTION_SCHEMA }),
       prompt,
-      maxOutputTokens: 1200,
     });
 
     const selectedChunkIds = [];
@@ -2449,26 +2665,46 @@ async function generateSingleSection({
 }) {
   messages.push({ role: "user", content: prompt });
 
-  console.log(`[${topic}] Generating ${sectionName}...`);
+  console.log(`[${topic}] Generating ${sectionName} (streaming)...`);
 
+  let streamErrorRef = null;
   let result;
   try {
-    result = await generateText({
+    result = streamText({
       model,
       messages,
+      onError({ error }) {
+        streamErrorRef = error;
+      },
     });
+
+    let chars = 0;
+    let nextDotAt = 1024;
+    process.stdout.write(`[${topic}] ${sectionName}: `);
+    for await (const delta of result.textStream) {
+      chars += delta.length;
+      while (chars >= nextDotAt) {
+        process.stdout.write(".");
+        nextDotAt += 1024;
+      }
+    }
+    process.stdout.write(` (${chars} chars)\n`);
+
+    if (streamErrorRef) {
+      throw streamErrorRef;
+    }
   } catch (error) {
-    logDetailedError(`${topic}:${sectionName}`, error);
-    throw error;
+    throwLoggedAiError(`${topic}:${sectionName}`, error);
   }
 
-  const text = result.text?.trim();
+  const text = (await result.text)?.trim();
   if (!text) {
     throw new Error(`Model returned empty text for section: ${sectionName}`);
   }
 
-  if (result.response?.messages?.length) {
-    messages.push(...result.response.messages);
+  const response = await result.response;
+  if (response?.messages?.length) {
+    messages.push(...response.messages);
   } else {
     messages.push({ role: "assistant", content: text });
   }
@@ -2783,7 +3019,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
   logDetailedError("generate-notes", error);
   process.exitCode = 1;
 });
