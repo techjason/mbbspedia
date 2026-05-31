@@ -280,6 +280,7 @@ const RYANHO_FUNDAMENTALS_NOTE = {
 };
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
+const DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY = "obstetrics-and-gynecology";
 const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
 const DEFAULT_COMMON_SENIOR_NOTES_DIR = getCommonSeniorNotesDir();
 const DEFAULT_CACHE_ROOT = ".cache/rag";
@@ -371,6 +372,12 @@ Options:
   -paediatrics, --paediatrics   Shortcut preset:
                                specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
                                slides-dir=${getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY)}
+  -obstetrics-and-gynecology, --obstetrics-and-gynecology, --obgyn
+                               Shortcut preset:
+                               specialty=${DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY}
+                               slides-dir=${getSpecialtySourcePdfDir(
+                                 DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY,
+                               )}
   --model "<provider/model>"   Generation model. Default: anthropic/claude-opus-4.6
   --selection-model "<provider/model>" Selection model for scouts/slides. Default: anthropic/claude-opus-4.6
   --specialty "<folder-name>"  Default: ${DEFAULT_SPECIALTY}
@@ -407,6 +414,7 @@ Examples:
   npm run generate:notes -- --psychiatry "major depressive disorder"
   npm run generate:notes -- --family-medicine "hypertension"
   npm run generate:notes -- --paediatrics "paediatric asthma"
+  npm run generate:notes -- --obstetrics-and-gynecology "pre-eclampsia"
   npm run generate:notes -- --specialty psychiatry --senior-note "/path/to/senior.md" "major depressive disorder"
   npm run generate:notes -- --history-taking "chest pain"
   npm run generate:notes -- --physical-exam "varicose veins"
@@ -587,6 +595,23 @@ function parseArgs(argv) {
       options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.seniorNotesExplicit = false;
       options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
+      options.slidesDirExplicit = false;
+      continue;
+    }
+
+    if (
+      arg === "-obstetrics-and-gynecology" ||
+      arg === "--obstetrics-and-gynecology" ||
+      arg === "--obgyn" ||
+      arg === "-obgyn"
+    ) {
+      options.specialty = DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY;
+      options.seniorNotes = [];
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
+      options.seniorNotesExplicit = false;
+      options.slidesDir = getSpecialtySourcePdfDir(
+        DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY,
+      );
       options.slidesDirExplicit = false;
       continue;
     }

@@ -42,6 +42,7 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_SPECIALTY = "general-surgery";
 const DEFAULT_FAMILY_MEDICINE_SPECIALTY = "family-medicine";
 const DEFAULT_PAEDIATRICS_SPECIALTY = "paediatrics";
+const DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY = "obstetrics-and-gynecology";
 const DEFAULT_SOURCE_PDF_DIR = getSpecialtySourcePdfDir(DEFAULT_SPECIALTY);
 const DEFAULT_COMMON_SENIOR_NOTES_DIR = getCommonSeniorNotesDir();
 const DEFAULT_CACHE_ROOT = ".cache/rag";
@@ -79,6 +80,12 @@ Options:
   --paediatrics                Shortcut preset:
                                specialty=${DEFAULT_PAEDIATRICS_SPECIALTY}
                                slides-dir=${getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY)}
+  --obstetrics-and-gynecology, --obgyn
+                               Shortcut preset:
+                               specialty=${DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY}
+                               slides-dir=${getSpecialtySourcePdfDir(
+                                 DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY,
+                               )}
   --slides-dir "<path>"         Override source PDF directory.
                                Default: ${SOURCE_PDFS_ROOT}/<specialty>
   --embedding-model "<id>"      Default: ${DEFAULT_EMBEDDING_MODEL}
@@ -93,6 +100,7 @@ Examples:
   npm run index:rag -- --psychiatry
   npm run index:rag -- --family-medicine
   npm run index:rag -- --paediatrics
+  npm run index:rag -- --obstetrics-and-gynecology
   npm run index:rag -- --specialty psychiatry --senior-note "/path/to/psychiatry-senior.md"
   npm run index:rag -- --force --ocr-policy always
 `);
@@ -234,6 +242,23 @@ function parseArgs(argv) {
       options.seniorNotesExplicit = false;
       options.seniorNotesDirs = getDefaultSeniorNotesDirs();
       options.slidesDir = getSpecialtySourcePdfDir(DEFAULT_PAEDIATRICS_SPECIALTY);
+      options.slidesDirExplicit = false;
+      continue;
+    }
+
+    if (
+      arg === "--obstetrics-and-gynecology" ||
+      arg === "-obstetrics-and-gynecology" ||
+      arg === "--obgyn" ||
+      arg === "-obgyn"
+    ) {
+      options.specialty = DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY;
+      options.seniorNotes = [];
+      options.seniorNotesExplicit = false;
+      options.seniorNotesDirs = getDefaultSeniorNotesDirs();
+      options.slidesDir = getSpecialtySourcePdfDir(
+        DEFAULT_OBSTETRICS_GYNECOLOGY_SPECIALTY,
+      );
       options.slidesDirExplicit = false;
       continue;
     }
