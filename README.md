@@ -4,7 +4,7 @@ MBBSPedia is a Next.js + Fumadocs medical knowledge base for MBBS revision.
 
 ## Purpose
 
-- Provide structured, searchable revision notes.
+- Provide structured revision notes.
 - Keep claims traceable through visible citations.
 - Publish only content derived from permitted public sources.
 - Use end-of-section `ActiveRecallQuestions` accordion prompts for self-testing (no AI grading).
@@ -31,8 +31,8 @@ This project is for education only. It is not medical advice, not a diagnostic t
 - `content/fragments/`: Reusable section content rendered inside topic tabs.
 - `components/mdx/`: Custom MDX components, including citations.
 - `lib/mdx/remark-citations.ts`: Citation and references transform plugin.
-- `scripts/`: Content-generation and retrieval tooling.
-- `source-pdfs/`: Local ignored PDF drop folder for RAG and note generation.
+- `scripts/`: Content-generation tooling.
+- `source-pdfs/`: Local ignored PDF drop folder for note generation.
 
 ## Development
 
@@ -57,10 +57,10 @@ npm run build
 npm run start
 ```
 
-### Source PDFs for RAG
+### Source PDFs for note generation
 
 Use `source-pdfs/<specialty>/` as the local lecture-slide PDF drop folder for
-RAG indexing and AI-assisted note generation. Put common senior notes in
+AI-assisted note generation. Put common senior notes in
 `source-pdfs/senior-notes/`; those notes are automatically included for every
 specialty. For example:
 
@@ -76,44 +76,16 @@ PDFs in `source-pdfs/` are ignored by git. Senior notes may be `.pdf`, `.md`,
 `.mdx`, or `.txt`. Keep restricted or private source material local, and verify
 generated public content against permitted sources before publication.
 
-To index and generate from a specialty folder:
+To generate notes from a specialty folder:
 
 ```bash
-npm run index:rag -- --specialty medicine
 npm run generate:notes -- --specialty medicine "atrial fibrillation"
 ```
 
-The specialty shortcuts use the same folders, e.g. `npm run index:rag:psychiatry`
+The specialty shortcuts use the same folders, e.g. `npm run generate:notes:psychiatry`
 reads from `source-pdfs/psychiatry/` plus `source-pdfs/senior-notes/`. Explicit
 `--slides-dir`, `--senior-note`, and `--senior-notes-dir` flags still work for
 one-off additions.
-
-### Mixedbread Search
-
-Search is configured to use Mixedbread when the following environment
-variables are available:
-
-- `MIXEDBREAD_API_KEY`
-- `MIXEDBREAD_STORE_IDENTIFIER`
-- `MIXEDBREAD_BASE_URL` (optional)
-
-The UI calls `/api/search`, and the server route queries Mixedbread to avoid
-browser CORS issues and keep API keys server-side.
-
-If you want the GitHub Actions sync workflow to upload content automatically,
-add these repository secrets under Settings > Secrets and variables > Actions:
-
-- `MIXEDBREAD_API_KEY`
-- `MIXEDBREAD_STORE_IDENTIFIER` (optional; defaults to `mbbspedia`)
-
-Without `MIXEDBREAD_API_KEY`, the `Mixedbread Content Sync` workflow now exits
-cleanly with a skip notice instead of failing the whole run.
-
-To upload docs and fragments from repo root:
-
-```bash
-npx mxbai store upload "mbbspedia" "content/**/*.mdx" --strategy high_quality
-```
 
 ### Lint
 

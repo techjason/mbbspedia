@@ -32,14 +32,6 @@ export interface BaseLayoutProps {
     mode?: 'light-dark' | 'light-dark-system';
   };
 
-  searchToggle?: Partial<{
-    enabled: boolean;
-    components: Partial<{
-      sm: ReactNode;
-      lg: ReactNode;
-    }>;
-  }>;
-
   /**
    * I18n options
    *

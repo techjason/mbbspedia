@@ -24,7 +24,6 @@ import {
   LayoutHeaderTabs,
   NavbarLinkItem,
 } from './client';
-import { LargeSearchToggle, SearchToggle } from '../search-toggle';
 import { LinkItem, type LinkItemType } from '../link-item';
 import type { SidebarPageTreeComponents } from '../sidebar/page-tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '../sidebar/tabs';
@@ -268,7 +267,6 @@ function DocsNavbar({
   tabs,
   tabMode = 'sidebar',
   sidebar: { collapsible: sidebarCollapsible = true } = {},
-  searchToggle = {},
   themeSwitch = {},
   nav = {},
   i18n,
@@ -316,25 +314,6 @@ function DocsNavbar({
           })}
           {nav.children}
         </div>
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.lg ? (
-            <div
-              className={cn(
-                'w-full my-auto max-md:hidden',
-                navMode === 'top' ? 'rounded-xl max-w-sm' : 'max-w-[240px]',
-              )}
-            >
-              {searchToggle.components.lg}
-            </div>
-          ) : (
-            <LargeSearchToggle
-              hideIfDisabled
-              className={cn(
-                'w-full my-auto max-md:hidden',
-                navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
-              )}
-            />
-          ))}
         <div className="flex flex-1 items-center justify-end md:gap-2">
           <div className="flex items-center gap-6 empty:hidden max-lg:hidden">
             {links
@@ -360,8 +339,6 @@ function DocsNavbar({
             ))}
 
           <div className="flex items-center md:hidden">
-            {searchToggle.enabled !== false &&
-              (searchToggle.components?.sm ?? <SearchToggle hideIfDisabled className="p-2" />)}
             <SidebarTrigger
               className={cn(
                 buttonVariants({
